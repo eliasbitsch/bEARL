@@ -1,0 +1,120 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 1
+      Plane Cell Count: 20
+      Reference Frame: map
+      Color: 160; 160; 164
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Map (accumulated scans)
+      Enabled: true
+      Topic:
+        Value: /demo/map
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Style: Points
+      Size (Pixels): 2
+      Color Transformer: AxisColor
+      Axis: Z
+      Decay Time: 0
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Current scan
+      Enabled: true
+      Topic:
+        Value: /glim_ros/aligned_points
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Style: Points
+      Size (Pixels): 3
+      Color Transformer: FlatColor
+      Color: 255; 255; 255
+      Decay Time: 0
+    - Class: rviz_default_plugins/Odometry
+      Name: GLIM trajectory
+      Enabled: true
+      Topic:
+        Value: /glim_ros/odom
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Keep: 3000
+      Position Tolerance: 0.05
+      Angle Tolerance: 0.2
+      Shape:
+        Value: Arrow
+        Color: 255; 85; 0
+        Shaft Length: 0.3
+        Shaft Radius: 0.03
+        Head Length: 0.1
+        Head Radius: 0.06
+      Covariance:
+        Value: false
+    - Class: rviz_default_plugins/Odometry
+      Name: Ground truth (mocap)
+      Enabled: true
+      Topic:
+        Value: /gt/odom
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Keep: 3000
+      Position Tolerance: 0.05
+      Angle Tolerance: 0.2
+      Shape:
+        Value: Arrow
+        Color: 0; 200; 0
+        Shaft Length: 0.3
+        Shaft Radius: 0.03
+        Head Length: 0.1
+        Head Radius: 0.06
+      Covariance:
+        Value: false
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Show Names: true
+      Marker Scale: 0.5
+    - Class: rviz_default_plugins/Image
+      Name: Camera
+      Enabled: true
+      Topic:
+        Value: /camera/color/image_raw/compressed
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+  Global Options:
+    Background Color: 30; 30; 36
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 18
+      Focal Point:
+        X: 2
+        Y: 0
+        Z: 0
+      Pitch: 0.9
+      Yaw: 3.9
+      Target Frame: map
+      Value: Orbit (rviz)
+Window Geometry:
+  Width: 1600
+  Height: 950

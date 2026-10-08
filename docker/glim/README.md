@@ -38,7 +38,26 @@ Output: `results/glim/<seq>/run_00/{trajectory_tum.txt, map.ply, glim.log, meta.
 GLIM's full dump is kept in `data/M3DGR/<seq>/glim_dumps/run_00/` and can be opened with
 `ros2 run glim_ros offline_viewer` (File > Open Map) for screenshots.
 
-## Config
+## Live demo in RViz (lab session 1: "dataset plays back in ROS + RViz")
+
+Bag playback -> GLIM (live) -> RViz: accumulated map (coloured by height), current scan (white),
+GLIM trajectory (orange), mocap ground truth (green), camera image. For showing only, not for results.
+
+```bash
+python docker/glim/demo/make_demo_bag.py --bag data/M3DGR/Varying-illu01.bag --sequence Varying-illu01
+bash docker/glim/demo/run_demo.sh Varying-illu01        # optional 2nd arg: playback rate, e.g. 0.5
+```
+
+- `make_demo_bag.py` writes `data/M3DGR/<seq>/glim_demo/` (LiDAR + IMU as for GLIM, camera, GT as
+  odometry at 10 Hz) and `glim_demo_tf.txt` (map -> world, SE(3) fit of GT to a previous pipeline run,
+  so needs `results`/`glim_dumps` run 0 first).
+- `run_demo.sh` builds `bearl/glim_demo` (GLIM image + RViz 2) on first use and opens RViz via WSLg
+  (Windows 11) or X11 (Linux). Close the RViz window to quit.
+- The map in RViz is grown by `accumulate_map.py` from GLIM's aligned scans (10 cm voxels), because
+  GLIM publishes `/glim_ros/map` only per finished submap, and in this small room the whole sequence
+  is one submap.
+- Under WSLg RViz renders in software (~3 fps); GLIM itself still runs on the GPU.
+
 
 `config/` is the complete default config of the GLIM version in the image (`2262aaf`, content checked
 identical to `/root/ros2_ws/src/glim/config` in the image). The only changes (all listed in
