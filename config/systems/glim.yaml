@@ -1,0 +1,26 @@
+# Configuration of one SLAM system. Copied by tools/register_system.py.
+slug: glim
+system: GLIM
+member: Philip Stix
+
+# Where the system comes from - pin an exact version for reproducibility.
+source:
+  repository: TODO            # e.g. https://github.com/<org>/<repo>
+  commit: TODO                # exact commit hash you used
+  container: TODO             # e.g. docker/glim/Dockerfile, or "none" for a pip install
+
+# Inputs taken from the shared sequences (subset of: lidar3d, imu, wheel_odom, rgb, depth)
+sensors: []
+
+# se3 for metric systems (LiDAR, RGB-D, stereo, visual-inertial), sim3 for monocular systems
+alignment: se3
+
+# Parameters: use the authors' defaults. Only calibration / topic names may be adapted.
+# Document EVERY deviation from the defaults here.
+parameter_file: TODO          # path to the config file you pass to the system
+deviations_from_defaults: []
+
+# How the system is executed (file-based offline run, or ROS bag replay)
+execution:
+  mode: offline               # offline | rosbag
+  rosbag_rate: 0.5            # only for mode: rosbag - slow enough that no message is dropped

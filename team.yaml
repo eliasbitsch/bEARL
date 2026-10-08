@@ -25,12 +25,12 @@ members:
     hardware: RTX 3080 Ti / H200 GPU cluster
 
   - name: Philip Stix
-    slug: null          # TODO: choose your system
-    system: null
-    paper: null
-    sensors: []
-    alignment: null
-    loop_closure: null
+    slug: glim
+    system: GLIM
+    paper: koide2024glim
+    sensors: [lidar3d, imu]
+    alignment: se3
+    loop_closure: true
     hardware: null
 
   - name: Viktoriia Ovdiienko
