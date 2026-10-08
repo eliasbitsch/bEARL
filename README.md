@@ -11,7 +11,7 @@ Each member evaluates **one SLAM system of their own choice**. Everything else i
 | Member | SLAM system | Sensors | Status |
 |---|---|---|---|
 | Elias Bitsch | MASt3R-SLAM | monocular RGB | runner in progress |
-| Philip Stix | *to be chosen* | | |
+| Philip Stix | GLIM | 3D LiDAR (Livox MID-360) + IMU | system chosen, runner to do |
 | Viktoriia Ovdiienko | *to be chosen* | | |
 | Jiayi Zhou | *to be chosen* | | |
 
