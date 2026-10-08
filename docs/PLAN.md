@@ -10,7 +10,7 @@ Status: 2026-10-08. Background research: [literature.md](literature.md), BibTeX:
 | Requirement | What it means for us |
 |---|---|
 | Each member evaluates at least 1 SLAM system, **one shared dataset** for all | 4 core systems, all on the same sequences |
-| Run the systems on a simulation or a dataset | Real dataset with ground truth; Gazebo as plan B |
+| Run the systems on a simulation or a dataset | Public real dataset with ground truth; Gazebo only as a private test sandbox |
 | Metrics: ATE, RPE, map overlays (PSNR / IoU for semantic SLAM) | Only established metrics, no self-invented ones (Section 5) |
 | ≥ 1 plot overlaying the trajectories of all systems, ≥ 1 map per system | Produced automatically by the pipeline |
 | Figures: serif font, ≥ body text size, ≥ 300 DPI, readable in grayscale | One shared Matplotlib style file for all plots |
@@ -43,7 +43,7 @@ The lecturer allows any setup per system: ROS 1, ROS 2 or no ROS, CPU or NVIDIA 
 | FusionPortableV2 (Wei et al., IJRR 2024) | Ackermann UGV | Ouster OS1-128, global-shutter stereo, STIM300 IMU, encoders | RTK-INS (6-DoF outdoor only) | n/a | Best sensors, but mostly outdoor, no RGB-D |
 | OpenLORIS-Scene (Shi et al., ICRA 2020) | Segway | D435i, T265, 2D Hokuyo, odometry | Mocap only in "office", elsewhere LiDAR SLAM (**biased** towards LiDAR methods) | small | Visual-only comparisons only |
 | TUM RGB-D fr2/pioneer (Sturm et al., IROS 2012) | Pioneer 3 | Kinect RGB-D | Mocap | 0.6–1.5 GB | Very well cited, but visual only |
-| Own Gazebo recording | Husky/Jackal or TurtleBot | freely configurable | perfect (simulator pose) | approx. 15–25 GB for 5–8 min | **Plan B**, see below |
+| Own Gazebo simulation | TurtleBot4 / TurtleBot3 | freely configurable | perfect (simulator pose) | – | Private sandbox for testing only (see below): not bit-identical across machines, so not used for results |
 
 Excluded: Newer College, Hilti, TUM-VI, ETH3D (handheld), GrandTour (legged), KITTI (car), Intel/FR079 logs and the Cartographer museum bag (no ground-truth trajectory).
 
@@ -66,15 +66,13 @@ Known pitfalls (resolve in week 1):
 - **Synchronisation:** Sensors are synchronised in software only, and the cameras are rolling shutter. Mention this as a limitation in the paper.
 - **Ground-truth frame:** The mocap marker frame is not the robot's `base_link`. Apply the extrinsics from `calibration.md`.
 
-### Plan B: our own Gazebo bag
+### Working principle: everyone works independently
 
-Use this if M3DGR cannot be made to work in week 1.
-- **Robot:** Clearpath Husky/Jackal (ROS 2 Jazzy + Gazebo Harmonic) or TurtleBot4.
-- **Sensors:** VLP-16, RGB-D, IMU and wheel odometry, all **with noise**. That means Gaussian noise in the SDF, IMU bias, and `WheelSlip`.
-- **Ground truth:** Publish it on a separate topic `/gt_odom` via the `OdometryPublisher` system, **not** on `/tf`.
-- **Route:** Drive it with Nav2 waypoints and include 2–3 loops.
-- **Recording:** Record it **once** on the strongest machine (MCAP bag). Everyone else only replays it.
-- **Drawback:** The sim-to-real gap has to be discussed (perfect sync, no rolling shutter, low-texture worlds).
+- **Results:** Everyone downloads the public M3DGR sequences and the ground truth themselves. Nobody has to wait for another member's data, recordings or machine.
+- **Evaluation:** The evaluation code in the repository is identical for everyone. Each member can compute their own numbers.
+- **Simulation (optional, private sandbox):** Anyone may run a local Gazebo simulation (TurtleBot4 or TurtleBot3, ROS 2 Jazzy) to debug their own runner without downloading M3DGR. Simulation output is **not** used for the paper.
+  - Reason: simulation runs are not bit-identical across machines (physics step timing, rendering, noise). Every member would effectively get a different dataset, and the results would not be comparable.
+- **Fallback if M3DGR fails in week 1:** switch the whole group to another **public** dataset with independent ground truth from Section 2, e.g. M2DGR or OpenLORIS-Scene office. Again, everyone downloads it themselves.
 
 ---
 
@@ -319,7 +317,7 @@ Each member writes the theory paragraph for **their** system (3–5 sentences) a
 
 ## 9. Open questions for the group
 
-1. **Dataset:** M3DGR as the main path (realistic, real ground truth) or Gazebo (perfect ground truth, more control, sim-to-real gap)? Recommendation: M3DGR, Gazebo only as plan B.
+1. **Dataset:** M3DGR as the shared, public dataset. Gazebo is only a private test sandbox. Everyone works independently.
 2. **OS:** Who has Ubuntu (native or WSL2) with ROS 2 Humble/Jazzy? On Windows only via WSL2 + Docker.
 3. **Hardware per system:** Who has which machine? MASt3R-SLAM runs on an RTX 3080 Ti and the H200 GPU cluster.
 4. **Dates:** Fill in the dates of lab sessions 2–5.
