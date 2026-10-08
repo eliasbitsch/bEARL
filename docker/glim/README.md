@@ -40,8 +40,8 @@ GLIM's full dump is kept in `data/M3DGR/<seq>/glim_dumps/run_00/` and can be ope
 
 ## Config
 
-`config/` is the complete default config of GLIM master `1a197c9` (2026-10-08); check it against the
-image version (`/opt/ros/*/share/glim/config`) after the pull. The only changes (all listed in
+`config/` is the complete default config of the GLIM version in the image (`2262aaf`, content checked
+identical to `/root/ros2_ws/src/glim/config` in the image). The only changes (all listed in
 `config/systems/glim.yaml` under `deviations_from_defaults`):
 
 - `config_ros.json`: topics `/livox/mid360/imu` and `/livox/mid360/lidar`, `acc_scale: 9.80665`
@@ -50,11 +50,19 @@ image version (`/opt/ros/*/share/glim/config`) after the pull. The only changes 
   gives `mid360 -> mid360_imu` as `p_imu = p_lidar + [-0.011, -0.02329, 0.04412]` (identity rotation);
   GLIM wants the inverse (`p_lidar = T_lidar_imu * p_imu`).
 
+## Verified on Varying-illu01 (2026-10-08, RTX 3050 Ti Laptop, Docker Desktop + WSL2)
+
+- Converter: 1541 scans + 30817 IMU msgs in ~1 min; Livox header stamp = `timebase`, per-point times 0-100 ms;
+  IMU |a| = 1 g at rest (so `acc_scale: 9.80665` is right). Jazzy reads the converted bag.
+- GLIM: GPU odometry, no per-point-time warnings, ~70 s for the 154 s sequence (~3x real time).
+- First ATE (evo, SE(3), t_max_diff 0.01): RMSE 0.138 m (`traj_imu.txt`), 0.125 m (`traj_lidar.txt`);
+  2D almost identical. Odometry = global trajectory here (only one submap, no loop closure triggered).
+
 ## Open points
 
-- Pin `source.commit` and the image digest in `config/systems/glim.yaml`.
-- Check on a real bag: the Livox header stamp vs. `timebase` (converter handles both), that the IMU
-  acceleration is really in g, and that GLIM's log shows no per-point-time warnings.
-- Trajectory frame (`traj_imu.txt` vs. `traj_lidar.txt`) vs. the mocap body frame, once
+- Trajectory frame (`traj_imu.txt` vs. `traj_lidar.txt`) vs. the mocap body frame
+  (`/vrpn_client_node/UGV/pose`): decide from the frame definition, not from the lower error, once
   `gt_to_base_extrinsic` in `config/sequences.yaml` is filled in.
+- The map is small (one submap, ~31k points after GLIM's voxel downsampling); check that it is good
+  enough for the map figure, otherwise export from the offline_viewer.
 - resources.csv does not see processes inside the container. Use `docker stats` if needed.

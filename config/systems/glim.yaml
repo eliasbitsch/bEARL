@@ -6,8 +6,8 @@ member: Philip Stix
 # Where the system comes from - pin an exact version for reproducibility.
 source:
   repository: https://github.com/koide3/glim   # ROS 2 wrapper: https://github.com/koide3/glim_ros2
-  commit: TODO                # GLIM version inside the image, see docker/glim/README.md
-  container: koide3/glim_ros2:jazzy_cuda13.1   # authors' image; pin the digest after the first pull
+  commit: 2262aafa2369acff6afab2268a7743aec7a7fa49   # glim inside the image (glim_ros2: 4d4ec524ccf1b02aa09b0af2af767ecc54343798)
+  container: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc
 
 # Inputs taken from the shared sequences (subset of: lidar3d, imu, wheel_odom, rgb, depth)
 sensors: [lidar3d, imu]
@@ -17,7 +17,7 @@ alignment: se3
 
 # Parameters: use the authors' defaults. Only calibration / topic names may be adapted.
 # Document EVERY deviation from the defaults here.
-parameter_file: docker/glim/config   # full GLIM config dir (defaults of GLIM 1a197c9 + changes below)
+parameter_file: docker/glim/config   # full GLIM config dir (defaults identical to the image's 2262aaf + changes below)
 deviations_from_defaults:
   - "config_ros.json: imu_topic / points_topic -> M3DGR MID-360 topics (topic names)"
   - "config_ros.json: acc_scale 0 (auto) -> 9.80665, Livox IMU reports g; value recommended by the GLIM docs for Livox"
@@ -32,7 +32,7 @@ execution:
 
 # Used by pipeline/runners/glim.py
 glim:
-  image: koide3/glim_ros2:jazzy_cuda13.1   # CPU fallback: koide3/glim_ros2:jazzy + *_cpu.json in config.json (document it!)
+  image: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc   # CPU fallback: koide3/glim_ros2:jazzy + *_cpu.json in config.json (document it!)
   gpus: true
   config_dir: docker/glim/config
   # TUM output in the IMU frame with loop closure. Check against the GT body frame once
