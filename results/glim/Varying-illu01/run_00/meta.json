@@ -1,0 +1,37 @@
+{
+  "system": "GLIM",
+  "slug": "glim",
+  "member": "Philip Stix",
+  "sequence": "Varying-illu01",
+  "run": 0,
+  "started": "2026-10-08T21:11:18",
+  "system_source": {
+    "repository": "https://github.com/koide3/glim",
+    "commit": "TODO",
+    "container": "koide3/glim_ros2:jazzy_cuda13.1"
+  },
+  "alignment": "se3",
+  "deviations_from_defaults": [
+    "config_ros.json: imu_topic / points_topic -> M3DGR MID-360 topics (topic names)",
+    "config_ros.json: acc_scale 0 (auto) -> 9.80665, Livox IMU reports g; value recommended by the GLIM docs for Livox",
+    "config_ros.json: extension_modules without standard_viewer / rviz_viewer (headless run, no effect on the estimate)",
+    "config_sensors.json: T_lidar_imu -> MID-360 LiDAR-IMU extrinsic from M3DGR calibration.md (calibration)",
+    "input: Livox CustomMsg converted to PointCloud2 with per-point times (tools/glim_prepare_bag.py), no points removed"
+  ],
+  "pipeline_commit": "bcc7960b2832328741ff318584050bb31c9e3456",
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cpu": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "cpu_cores_logical": 8,
+    "ram_gib": 31.8,
+    "gpu": "NVIDIA GeForce RTX 3050 Ti Laptop GPU, 4096 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 67.87729870000021,
+  "resources": {
+    "cpu_mean_percent": 8.468073394495413,
+    "ram_peak_mib": 65.0234375,
+    "gpu_mem_peak_mib": 217.0
+  }
+}
