@@ -1,0 +1,343 @@
+% References for the SLAM comparison paper.
+% Entries marked "TODO verify" must be checked before submission.
+% DOIs/pages of the dataset papers (M2DGR, OpenLORIS) were not checked online yet -- verify via doi.org.
+
+% ---------- Foundations ----------
+@article{cadena2016past,
+  author  = {Cadena, Cesar and Carlone, Luca and Carrillo, Henry and Latif, Yasir and Scaramuzza, Davide and Neira, Jos{\'e} and Reid, Ian and Leonard, John J.},
+  title   = {Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age},
+  journal = {IEEE Transactions on Robotics},
+  volume  = {32},
+  number  = {6},
+  pages   = {1309--1332},
+  year    = {2016},
+  doi     = {10.1109/TRO.2016.2624754}
+}
+
+@article{durrantwhyte2006slam,
+  author  = {Durrant-Whyte, Hugh and Bailey, Tim},
+  title   = {Simultaneous Localization and Mapping: Part {I}},
+  journal = {IEEE Robotics \& Automation Magazine},
+  volume  = {13},
+  number  = {2},
+  pages   = {99--110},
+  year    = {2006},
+  doi     = {10.1109/MRA.2006.1638022}
+}
+
+@article{bailey2006slam,
+  author  = {Bailey, Tim and Durrant-Whyte, Hugh},
+  title   = {Simultaneous Localization and Mapping ({SLAM}): Part {II}},
+  journal = {IEEE Robotics \& Automation Magazine},
+  volume  = {13},
+  number  = {3},
+  pages   = {108--117},
+  year    = {2006},
+  doi     = {10.1109/MRA.2006.1678144}
+}
+
+@article{grisetti2010tutorial,
+  author  = {Grisetti, Giorgio and K{\"u}mmerle, Rainer and Stachniss, Cyrill and Burgard, Wolfram},
+  title   = {A Tutorial on Graph-Based {SLAM}},
+  journal = {IEEE Intelligent Transportation Systems Magazine},
+  volume  = {2},
+  number  = {4},
+  pages   = {31--43},
+  year    = {2010},
+  doi     = {10.1109/MITS.2010.939925}
+}
+
+@book{thrun2005probabilistic,
+  author    = {Thrun, Sebastian and Burgard, Wolfram and Fox, Dieter},
+  title     = {Probabilistic Robotics},
+  publisher = {MIT Press},
+  address   = {Cambridge, MA},
+  year      = {2005}
+}
+
+@article{yue2024lidar,
+  author  = {Yue, Xiangdi and Zhang, Yihuan and He, Miaolei},
+  title   = {{LiDAR}-based {SLAM} for robotic mapping: state of the art and new frontiers},
+  journal = {Industrial Robot},
+  volume  = {51},
+  number  = {2},
+  pages   = {196--205},
+  year    = {2024},
+  doi     = {10.1108/IR-09-2023-0225}
+}
+
+@article{tourani2022visual,
+  author  = {Tourani, Ali and Bavle, Hriday and Sanchez-Lopez, Jose Luis and Voos, Holger},
+  title   = {Visual {SLAM}: What Are the Current Trends and What to Expect?},
+  journal = {Sensors},
+  volume  = {22},
+  number  = {23},
+  pages   = {9297},
+  year    = {2022},
+  doi     = {10.3390/s22239297}
+}
+
+% ---------- Evaluated systems (each member adds their own) ----------
+@article{campos2021orbslam3,
+  author  = {Campos, Carlos and Elvira, Richard and G{\'o}mez Rodr{\'i}guez, Juan J. and Montiel, Jos{\'e} M. M. and Tard{\'o}s, Juan D.},
+  title   = {{ORB-SLAM3}: An Accurate Open-Source Library for Visual, Visual-Inertial, and Multimap {SLAM}},
+  journal = {IEEE Transactions on Robotics},
+  volume  = {37},
+  number  = {6},
+  pages   = {1874--1890},
+  year    = {2021},
+  doi     = {10.1109/TRO.2021.3075644}
+}
+
+@inproceedings{lipson2024dpvslam,
+  author    = {Lipson, Lahav and Teed, Zachary and Deng, Jia},
+  title     = {Deep Patch Visual {SLAM}},
+  booktitle = {Proc. European Conf. on Computer Vision (ECCV)},
+  year      = {2024},
+  eprint    = {2408.01654},
+  archivePrefix = {arXiv},
+  note      = {TODO verify arXiv ID}
+}
+
+@inproceedings{teed2023dpvo,
+  author    = {Teed, Zachary and Lipson, Lahav and Deng, Jia},
+  title     = {Deep Patch Visual Odometry},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023}
+}
+
+@inproceedings{teed2021droid,
+  author    = {Teed, Zachary and Deng, Jia},
+  title     = {{DROID-SLAM}: Deep Visual {SLAM} for Monocular, Stereo, and {RGB-D} Cameras},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2021}
+}
+
+% ---------- RGB-only deep dive ----------
+@inproceedings{murai2025mast3rslam,
+  author    = {Murai, Riku and Dexheimer, Eric and Davison, Andrew J.},
+  title     = {{MASt3R-SLAM}: Real-Time Dense {SLAM} with {3D} Reconstruction Priors},
+  booktitle = {Proc. IEEE/CVF Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2025}
+}
+
+@inproceedings{leroy2024mast3r,
+  author    = {Leroy, Vincent and Cabon, Yohann and Revaud, J{\'e}r{\^o}me},
+  title     = {Grounding Image Matching in {3D} with {MASt3R}},
+  booktitle = {Proc. European Conf. on Computer Vision (ECCV)},
+  year      = {2024}
+}
+
+@inproceedings{wang2024dust3r,
+  author    = {Wang, Shuzhe and Leroy, Vincent and Cabon, Yohann and Chidlovskii, Boris and Revaud, J{\'e}r{\^o}me},
+  title     = {{DUSt3R}: Geometric {3D} Vision Made Easy},
+  booktitle = {Proc. IEEE/CVF Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2024}
+}
+
+@misc{korovko2025cuvslam,
+  author        = {Korovko, Alexander and Slepichev, Dmitry and Efitorov, Alexander and Dzhumamuratova, Aigul and Kuznetsov, Viktor and Rabeti, Hesam and Biswas, Joydeep and Pouya, Soha},
+  title         = {{cuVSLAM}: {CUDA} accelerated visual odometry and mapping},
+  year          = {2025},
+  eprint        = {2506.04359},
+  archivePrefix = {arXiv},
+  note          = {TODO verify first names}
+}
+
+@inproceedings{matsuki2024gaussian,
+  author    = {Matsuki, Hidenobu and Murai, Riku and Kelly, Paul H. J. and Davison, Andrew J.},
+  title     = {{G}aussian {S}platting {SLAM}},
+  booktitle = {Proc. IEEE/CVF Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2024}
+}
+
+@article{wang2004ssim,
+  author  = {Wang, Zhou and Bovik, Alan C. and Sheikh, Hamid R. and Simoncelli, Eero P.},
+  title   = {Image Quality Assessment: From Error Visibility to Structural Similarity},
+  journal = {IEEE Transactions on Image Processing},
+  volume  = {13},
+  number  = {4},
+  pages   = {600--612},
+  year    = {2004},
+  doi     = {10.1109/TIP.2003.819861}
+}
+
+@inproceedings{zhang2018lpips,
+  author    = {Zhang, Richard and Isola, Phillip and Efros, Alexei A. and Shechtman, Eli and Wang, Oliver},
+  title     = {The Unreasonable Effectiveness of Deep Features as a Perceptual Metric},
+  booktitle = {Proc. IEEE/CVF Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {586--595},
+  year      = {2018}
+}
+
+% ---------- Datasets ----------
+@inproceedings{zhang2025m3dgr,
+  author    = {Zhang, Deteng and others},
+  title     = {Towards Robust Sensor-Fusion Ground {SLAM}: A Comprehensive Benchmark and A Resilient Framework},
+  booktitle = {Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)},
+  year      = {2025},
+  eprint    = {2507.08364},
+  archivePrefix = {arXiv},
+  note      = {TODO verify author list}
+}
+
+@article{yin2022m2dgr,
+  author  = {Yin, Jie and Li, Ang and Li, Tao and Yu, Wenxian and Zou, Danping},
+  title   = {{M2DGR}: A Multi-Sensor and Multi-Scenario {SLAM} Dataset for Ground Robots},
+  journal = {IEEE Robotics and Automation Letters},
+  volume  = {7},
+  number  = {2},
+  pages   = {2266--2273},
+  year    = {2022},
+  doi     = {10.1109/LRA.2021.3138527}
+}
+
+@article{wei2024fusionportablev2,
+  author  = {Wei, Hexiang and Jiao, Jianhao and others},
+  title   = {{FusionPortableV2}: A Unified Multi-Sensor Dataset for Generalized {SLAM} Across Diverse Platforms and Scalable Environments},
+  journal = {The International Journal of Robotics Research},
+  year    = {2024},
+  eprint  = {2404.08563},
+  archivePrefix = {arXiv},
+  note    = {TODO verify volume/pages}
+}
+
+@inproceedings{shi2020openloris,
+  author    = {Shi, Xuesong and others},
+  title     = {Are We Ready for Service Robots? The {OpenLORIS-Scene} Datasets for Lifelong {SLAM}},
+  booktitle = {Proc. IEEE Int. Conf. on Robotics and Automation (ICRA)},
+  pages     = {3139--3145},
+  year      = {2020},
+  doi       = {10.1109/ICRA40945.2020.9196638}
+}
+
+% ---------- Metrics & evaluation ----------
+@inproceedings{sturm2012benchmark,
+  author    = {Sturm, J{\"u}rgen and Engelhard, Nikolas and Endres, Felix and Burgard, Wolfram and Cremers, Daniel},
+  title     = {A Benchmark for the Evaluation of {RGB-D} {SLAM} Systems},
+  booktitle = {Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)},
+  pages     = {573--580},
+  year      = {2012},
+  doi       = {10.1109/IROS.2012.6385773}
+}
+
+@inproceedings{zhang2018tutorial,
+  author    = {Zhang, Zichao and Scaramuzza, Davide},
+  title     = {A Tutorial on Quantitative Trajectory Evaluation for Visual(-Inertial) Odometry},
+  booktitle = {Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)},
+  pages     = {7244--7251},
+  year      = {2018},
+  doi       = {10.1109/IROS.2018.8593941}
+}
+
+@article{umeyama1991least,
+  author  = {Umeyama, Shinji},
+  title   = {Least-Squares Estimation of Transformation Parameters Between Two Point Patterns},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  volume  = {13},
+  number  = {4},
+  pages   = {376--380},
+  year    = {1991},
+  doi     = {10.1109/34.88573}
+}
+
+@misc{grupp2017evo,
+  author       = {Grupp, Michael},
+  title        = {evo: Python package for the evaluation of odometry and {SLAM}},
+  howpublished = {\url{https://github.com/MichaelGrupp/evo}},
+  year         = {2017}
+}
+
+@article{kuemmerle2009measuring,
+  author  = {K{\"u}mmerle, Rainer and Steder, Bastian and Dornhege, Christian and Ruhnke, Michael and Grisetti, Giorgio and Stachniss, Cyrill and Kleiner, Alexander},
+  title   = {On Measuring the Accuracy of {SLAM} Algorithms},
+  journal = {Autonomous Robots},
+  volume  = {27},
+  number  = {4},
+  pages   = {387--407},
+  year    = {2009},
+  doi     = {10.1007/s10514-009-9155-6}
+}
+
+@inproceedings{geiger2012kitti,
+  author    = {Geiger, Andreas and Lenz, Philip and Urtasun, Raquel},
+  title     = {Are we ready for autonomous driving? The {KITTI} vision benchmark suite},
+  booktitle = {Proc. IEEE Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {3354--3361},
+  year      = {2012},
+  doi       = {10.1109/CVPR.2012.6248074}
+}
+
+@article{knapitsch2017tanks,
+  author  = {Knapitsch, Arno and Park, Jaesik and Zhou, Qian-Yi and Koltun, Vladlen},
+  title   = {Tanks and Temples: Benchmarking Large-Scale Scene Reconstruction},
+  journal = {ACM Transactions on Graphics},
+  volume  = {36},
+  number  = {4},
+  year    = {2017},
+  doi     = {10.1145/3072959.3073599}
+}
+
+@inproceedings{santos2013evaluation,
+  author    = {Santos, Jo{\~a}o Machado and Portugal, David and Rocha, Rui P.},
+  title     = {An Evaluation of {2D} {SLAM} Techniques Available in {Robot Operating System}},
+  booktitle = {Proc. IEEE Int. Symp. on Safety, Security, and Rescue Robotics (SSRR)},
+  year      = {2013},
+  doi       = {10.1109/SSRR.2013.6719348}
+}
+
+% ---------- Reproducibility / comparison studies ----------
+@article{trejos2022slam,
+  author  = {Trejos, Kevin and Rinc{\'o}n, Laura and Bola{\~n}os, Miguel and Fallas, Jos{\'e} and Mar{\'i}n, Leonardo},
+  title   = {{2D} {SLAM} Algorithms Characterization, Calibration, and Comparison Considering Pose Error, Map Accuracy as Well as {CPU} and Memory Usage},
+  journal = {Sensors},
+  volume  = {22},
+  number  = {18},
+  pages   = {6903},
+  year    = {2022},
+  doi     = {10.3390/s22186903}
+}
+
+@inproceedings{bujanca2019slambench3,
+  author    = {Bujanca, Mihai and others},
+  title     = {{SLAMBench} 3.0: Systematic Automated Reproducible Evaluation of {SLAM} Systems for Robot Vision Challenges and Scene Understanding},
+  booktitle = {Proc. IEEE Int. Conf. on Robotics and Automation (ICRA)},
+  pages     = {6351--6358},
+  year      = {2019},
+  note      = {TODO verify DOI}
+}
+
+@inproceedings{radulov2024slamfuse,
+  author    = {Radulov, Nikola and Zhang, Yuhao and Bujanca, Mihai and Ye, Ruiqi and Luj{\'a}n, Mikel},
+  title     = {A Framework for Reproducible Benchmarking and Performance Diagnosis of {SLAM} Systems},
+  booktitle = {Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)},
+  year      = {2024},
+  eprint    = {2410.04242},
+  archivePrefix = {arXiv}
+}
+
+@misc{fontan2025vslamlab,
+  author        = {Fontan, Alejandro and Fischer, Tobias and Civera, Javier and Milford, Michael},
+  title         = {{VSLAM-LAB}: A Comprehensive Framework for Visual {SLAM} Methods and Datasets},
+  year          = {2025},
+  eprint        = {2504.04457},
+  archivePrefix = {arXiv}
+}
+
+@article{hamer2025resource,
+  author  = {Hamer, Erik and Albonico, Michel and Malavolta, Ivano},
+  title   = {Resource Utilization of {2D} {SLAM} Algorithms in {ROS}-Based Systems: an Empirical Evaluation},
+  journal = {Journal of the Brazilian Computer Society},
+  volume  = {31},
+  number  = {1},
+  year    = {2025},
+  doi     = {10.5753/jbcs.2025.4343}
+}
+
+@misc{prokhorov2019robustness,
+  author        = {Prokhorov, David and Zhukov, Dmitry and Barinova, Olga and Vorontsova, Anna and Konushin, Anton},
+  title         = {Measuring Robustness of Visual {SLAM}},
+  year          = {2019},
+  eprint        = {1910.04755},
+  archivePrefix = {arXiv}
+}

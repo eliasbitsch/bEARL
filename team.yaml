@@ -1,0 +1,63 @@
+# Single source of truth for who evaluates which SLAM system.
+#
+# To register your system, run (from the repo root):
+#   python tools/register_system.py --member "Your Name" --system "System Name" --slug system_name
+# This fills in your entry below and creates config/systems/<slug>.yaml and
+# pipeline/runners/<slug>.py from the templates. Then complete the TODOs in those two files.
+#
+# Fields:
+#   slug        short lowercase id, used for folder names (results/<slug>/...)
+#   system      official name of the SLAM system
+#   paper       BibTeX key of the system's paper in docs/references.bib
+#   sensors     subset of: lidar3d, imu, wheel_odom, rgb, depth
+#   alignment   se3 for metric systems, sim3 for monocular (scale-ambiguous) systems
+#   loop_closure true / false
+#   hardware    the machine the runs were done on (filled in automatically per run as well)
+
+members:
+  - name: Elias Bitsch
+    slug: mast3r_slam
+    system: MASt3R-SLAM
+    paper: murai2025mast3rslam
+    sensors: [rgb]
+    alignment: sim3
+    loop_closure: true
+    hardware: RTX 3080 Ti / H200 GPU cluster
+
+  - name: Philip Stix
+    slug: null          # TODO: choose your system
+    system: null
+    paper: null
+    sensors: []
+    alignment: null
+    loop_closure: null
+    hardware: null
+
+  - name: Viktoriia Ovdiienko
+    slug: null          # TODO: choose your system
+    system: null
+    paper: null
+    sensors: []
+    alignment: null
+    loop_closure: null
+    hardware: null
+
+  - name: Jiayi Zhou
+    slug: null          # TODO: choose your system
+    system: null
+    paper: null
+    sensors: []
+    alignment: null
+    loop_closure: null
+    hardware: null
+
+# Optional extra systems (e.g. the RGB-only deep dive). Same fields, plus "owner".
+extras: []
+#  - owner: Elias Bitsch
+#    slug: cuvslam_mono
+#    system: cuVSLAM (monocular)
+#    paper: korovko2025cuvslam
+#    sensors: [rgb]
+#    alignment: sim3
+#    loop_closure: true
+#    hardware: H200 GPU cluster

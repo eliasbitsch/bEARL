@@ -1,0 +1,31 @@
+# Shared Matplotlib style for all paper figures (IEEE two-column, course figure rules).
+# Use: plt.style.use("paper/ieee.mplstyle")
+# Column width 3.5 in, double column 7.16 in. Body text of IEEEtran is 10 pt.
+
+figure.figsize      : 3.5, 2.6
+figure.dpi          : 150
+savefig.dpi         : 300
+savefig.format      : pdf
+savefig.bbox        : tight
+savefig.pad_inches  : 0.02
+
+font.family         : serif
+font.serif          : Times New Roman, Times, Nimbus Roman, DejaVu Serif
+mathtext.fontset    : stix
+font.size           : 10
+axes.titlesize      : 10
+axes.labelsize      : 10
+legend.fontsize     : 9
+xtick.labelsize     : 9
+ytick.labelsize     : 9
+
+axes.grid           : True
+grid.linewidth      : 0.4
+grid.alpha          : 0.5
+axes.linewidth      : 0.6
+lines.linewidth     : 1.2
+lines.markersize    : 4
+
+# Grayscale-safe: distinguish series by line style + marker, not only by colour
+axes.prop_cycle     : cycler('color', ['0072B2', 'D55E00', '009E73', 'CC79A7', '000000', '56B4E9']) + cycler('linestyle', ['-', '--', '-.', ':', '-', '--']) + cycler('marker', ['o', 's', '^', 'v', 'D', 'x'])
+legend.frameon      : False

@@ -1,0 +1,15 @@
+# Evaluation / analysis environment (shared by everyone).
+# SLAM systems bring their own dependencies (pip package, container, ROS).
+evo>=1.28
+rosbags>=0.10
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+pyyaml
+psutil
+opencv-python-headless
+open3d
+jupyterlab
+nbformat

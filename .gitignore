@@ -1,0 +1,35 @@
+# Datasets (download separately, see README)
+data/
+third_party/
+
+# Course material from Moodle (not ours to redistribute)
+moodle/
+
+# Large maps - share via release / cloud instead
+results/**/map.*
+results/**/*.bag
+results/**/*.mcap
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# LaTeX build
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+~$*

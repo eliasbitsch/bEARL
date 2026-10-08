@@ -1,0 +1,20 @@
+# Configuration of one SLAM system. Copied by tools/register_system.py.
+slug: mast3r_slam
+system: MASt3R-SLAM
+member: Elias Bitsch
+
+source:
+  repository: https://github.com/rmurai0610/MASt3R-SLAM
+  commit: TODO
+  container: docker/mast3r_slam/Dockerfile
+
+sensors: [rgb]
+
+# Monocular -> scale is unobservable -> Sim(3) alignment (Zhang & Scaramuzza 2018)
+alignment: sim3
+
+parameter_file: TODO          # config/base.yaml of the upstream repo + intrinsics from M3DGR calibration.md
+deviations_from_defaults: []
+
+execution:
+  mode: offline               # reads the extracted RGB image folder

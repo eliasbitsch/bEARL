@@ -1,0 +1,37 @@
+# Shared, fixed evaluation sequences. Identical for every system - do not change per system.
+# Dataset: M3DGR (Zhang et al., IROS 2025), https://github.com/sjtuyinjie/M3DGR
+# TODO (data owner): confirm names, durations and that GT is motion capture before downloading.
+
+dataset: M3DGR
+data_root: data/M3DGR          # git-ignored, see README "Data"
+
+sequences:
+  - name: Varying-illu01
+    difficulty: easy
+    ground_truth: data/M3DGR/Varying-illu01/gt_tum.txt
+  - name: Dynamic01
+    difficulty: medium
+    ground_truth: data/M3DGR/Dynamic01/gt_tum.txt
+  - name: Dark03                # alternative: Sha-turn01
+    difficulty: hard
+    ground_truth: data/M3DGR/Dark03/gt_tum.txt
+
+# Topics in the original bags (ROS 1). Extracted/converted data lives next to each bag.
+topics:
+  lidar3d: /livox/mid360/lidar          # livox CustomMsg -> converted to PointCloud2 by prepare_data.py
+  imu: /livox/mid360/imu
+  wheel_odom: /odom
+  rgb: /camera/color/image_raw/compressed
+  depth: /camera/aligned_depth_to_color/image_raw/compressedDepth
+  camera_imu: /camera/imu
+
+# Ground-truth body frame -> robot base frame. Fill from the dataset's calibration.md.
+gt_to_base_extrinsic:
+  translation: [0.0, 0.0, 0.0]          # TODO
+  rotation_xyzw: [0.0, 0.0, 0.0, 1.0]   # TODO
+
+evaluation:
+  runs_per_system: 5          # N repetitions per system and sequence (10 if time allows)
+  t_max_diff: 0.01            # [s] timestamp association tolerance (evo default)
+  rpe_delta: 1.0              # RPE step
+  rpe_delta_unit: m           # per metre of travelled distance
