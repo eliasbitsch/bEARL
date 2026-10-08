@@ -7,7 +7,7 @@ install:
 run:            ## all systems x sequences x N runs (slow; skips finished runs)
 	python -m pipeline.run_all
 
-eval:           ## ATE / RPE / robustness -> results/metrics.csv, results/summary.csv
+eval:           ## ATE / robustness -> results/metrics.csv, results/summary.csv
 	python -m pipeline.evaluate
 
 figures:        ## execute the notebooks -> paper/figures, paper/tables

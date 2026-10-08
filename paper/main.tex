@@ -31,7 +31,7 @@
 
 \begin{abstract}
 % No citations, symbols, maths or footnotes. Must state: motivation, contribution, verifiability.
-\todo{Motivation (indoor service robots, changing light, people). Contribution: reproducible comparison of four SLAM systems with different sensor modalities on identical M3DGR sequences, using standard metrics (ATE, RPE). Main finding in one sentence. Code and results are publicly available (repository link).}
+\todo{Motivation (indoor service robots, changing light, people). Contribution: reproducible comparison of four SLAM systems with different sensor modalities on identical M3DGR sequences, using a standard metric (ATE). Main finding in one sentence. Code and results are publicly available (repository link).}
 \end{abstract}
 
 \section{Introduction}
@@ -57,9 +57,9 @@ SLAM is commonly formulated as maximum-a-posteriori estimation over a factor gra
 \todo{Table: system, sensors, paradigm, loop closure, alignment, hardware. Default parameters only.}
 
 \subsection{Evaluation Metrics}
-We report the absolute trajectory error (ATE) and the relative pose error (RPE)~\cite{sturm2012benchmark,kuemmerle2009measuring}, computed with evo~\cite{grupp2017evo}.
+We report the absolute trajectory error (ATE)~\cite{sturm2012benchmark}, computed with evo~\cite{grupp2017evo}.
 Trajectories are aligned with the Umeyama method~\cite{umeyama1991least}: SE(3) for metric systems and Sim(3) for monocular systems, whose scale is unobservable~\cite{zhang2018tutorial}.
-\todo{N runs per system and sequence, median and IQR, success rate, tracked fraction~\cite{campos2021orbslam3}. RPE delta = 1\,m.}
+\todo{N runs per system and sequence, median and IQR, success rate, tracked fraction~\cite{campos2021orbslam3}.}
 
 \section{Experimental Results}
 % ~0.8 pages. Required: trajectory overlay of ALL systems, >= one map per system.

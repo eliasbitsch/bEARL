@@ -5,7 +5,7 @@ Group project for the course *Einsatz Autonomer Robotersysteme Lab* (FH Techniku
 Each member evaluates **one SLAM system of their own choice**. Everything else is fixed and identical for everyone, so the results are scientifically comparable:
 
 - **Same dataset and sequences:** M3DGR, 3 indoor sequences with motion-capture ground truth.
-- **Same metrics:** ATE and RPE via evo, with standard alignment rules; no self-invented metrics.
+- **Same metrics:** ATE via evo, with standard alignment rules; no self-invented metrics.
 - **Same result format and one central evaluation pipeline.**
 
 | Member | SLAM system | Sensors | Status |
@@ -109,7 +109,7 @@ make install && make run && make eval && make figures && make paper
 
 ## Rules we agreed on
 - **Defaults only:** use the authors' default parameters. Only calibration and topic names may be adapted, and every deviation is documented in `config/systems/<slug>.yaml`.
-- **Standard metrics only:** ATE and RPE (Sturm et al. 2012), Umeyama alignment, SE(3) for metric systems and Sim(3) for monocular ones (Zhang & Scaramuzza 2018).
+- **Standard metrics only:** ATE (Sturm et al. 2012), Umeyama alignment, SE(3) for metric systems and Sim(3) for monocular ones (Zhang & Scaramuzza 2018).
 - **Repeated runs:** N runs per system and sequence; we report the median and IQR.
 - **Report failures:** failed runs are reported, never removed.
 - **Resources are context only:** CPU, RAM and GPU numbers are always reported together with the hardware and never used for ranking.

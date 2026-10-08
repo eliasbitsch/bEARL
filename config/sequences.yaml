@@ -33,5 +33,3 @@ gt_to_base_extrinsic:
 evaluation:
   runs_per_system: 5          # N repetitions per system and sequence (10 if time allows)
   t_max_diff: 0.01            # [s] timestamp association tolerance (evo default)
-  rpe_delta: 1.0              # RPE step
-  rpe_delta_unit: m           # per metre of travelled distance

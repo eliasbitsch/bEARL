@@ -85,7 +85,7 @@ Each member adds the paper(s) for their own chosen system here and to `paper/ref
 
 ## Key takeaways for the methodology
 
-1. **ATE vs. RPE:** ATE measures global consistency, RPE measures local drift. Kümmerle et al. show that ATE over-weights early errors, so we report both.
+1. **ATE:** ATE measures the global consistency of the trajectory. The relative pose error (RPE) was dropped after feedback from the lecturer. Kümmerle et al. 2009 point out that ATE over-weights early errors; mention this as a limitation.
 2. **Alignment:** The alignment follows what the sensor cannot observe (Zhang & Scaramuzza).
    - LiDAR and RGB-D are metric, so they get SE(3).
    - A monocular RGB camera cannot observe scale, so it gets Sim(3), and the scale factor is reported.

@@ -2,8 +2,6 @@
 
 Metrics (no self-invented metrics - see docs/PLAN.md, Section 5):
   * ATE  - absolute trajectory error, translational RMSE etc.        (Sturm et al. 2012)
-  * RPE  - relative pose error, translation [m] and rotation [deg],
-           delta = 1 m of travelled distance                         (Sturm et al. 2012; Kuemmerle et al. 2009)
   * Alignment: Umeyama (1991); SE(3) for metric systems, Sim(3) for monocular systems
     (Zhang & Scaramuzza 2018). Every run is ALSO evaluated with Sim(3) as a transparency check.
   * Robustness: success flag and fraction of the GT duration covered by the estimate
@@ -21,7 +19,6 @@ import numpy as np
 import pandas as pd
 from evo.core import metrics, sync
 from evo.core.trajectory import PoseTrajectory3D
-from evo.core.units import Unit
 from evo.tools import file_interface
 
 from pipeline.common import RESULTS_DIR, ROOT, load_sequences, load_system_config, load_systems
@@ -35,24 +32,14 @@ def _ape(ref: PoseTrajectory3D, est: PoseTrajectory3D, correct_scale: bool) -> t
     return ape.get_all_statistics(), float(scale)
 
 
-def _rpe(ref, est, relation, delta: float, unit: Unit, correct_scale: bool) -> dict:
-    est = copy.deepcopy(est)
-    est.align(ref, correct_scale=correct_scale)
-    rpe = metrics.RPE(relation, delta=delta, delta_unit=unit, all_pairs=False)
-    rpe.process_data((ref, est))
-    return rpe.get_all_statistics()
-
 
 def evaluate_run(gt: PoseTrajectory3D, est_file: Path, alignment: str, ev: dict) -> dict:
     est = file_interface.read_tum_trajectory_file(str(est_file))
     ref, est = sync.associate_trajectories(gt, est, max_diff=ev["t_max_diff"])
     sim3 = alignment == "sim3"
-    unit = Unit.meters if ev["rpe_delta_unit"] == "m" else Unit.frames
 
     ate, scale = _ape(ref, est, correct_scale=sim3)
     ate_sim3, scale_sim3 = _ape(ref, est, correct_scale=True)
-    rpe_t = _rpe(ref, est, metrics.PoseRelation.translation_part, ev["rpe_delta"], unit, sim3)
-    rpe_r = _rpe(ref, est, metrics.PoseRelation.rotation_angle_deg, ev["rpe_delta"], unit, sim3)
 
     gt_duration = gt.timestamps[-1] - gt.timestamps[0]
     tracked = (ref.timestamps[-1] - ref.timestamps[0]) / gt_duration if ref.num_poses > 1 else 0.0
@@ -61,7 +48,6 @@ def evaluate_run(gt: PoseTrajectory3D, est_file: Path, alignment: str, ev: dict)
         "tracked_fraction": float(np.clip(tracked, 0.0, 1.0)),
         "ate_rmse_m": ate["rmse"], "ate_mean_m": ate["mean"], "ate_median_m": ate["median"],
         "ate_std_m": ate["std"], "ate_max_m": ate["max"],
-        "rpe_trans_rmse_m": rpe_t["rmse"], "rpe_rot_rmse_deg": rpe_r["rmse"],
         "scale": scale,                                   # 1.0 for SE(3)
         "ate_rmse_sim3_m": ate_sim3["rmse"], "scale_sim3": scale_sim3,   # transparency check
     }
@@ -106,7 +92,6 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
     ok = df[df["success"]]
     agg = ok.groupby(["system", "sequence"]).agg(
         ate_rmse_median_m=("ate_rmse_m", "median"), ate_rmse_iqr_m=("ate_rmse_m", iqr),
-        rpe_trans_median_m=("rpe_trans_rmse_m", "median"), rpe_rot_median_deg=("rpe_rot_rmse_deg", "median"),
         tracked_fraction_median=("tracked_fraction", "median"), scale_median=("scale", "median"),
     )
     counts = df.groupby(["system", "sequence"])["success"].agg(successes="sum", runs="count")

@@ -11,7 +11,7 @@ Status: 2026-10-08. Background research: [literature.md](literature.md), BibTeX:
 |---|---|
 | Each member evaluates at least 1 SLAM system, **one shared dataset** for all | 4 core systems, all on the same sequences |
 | Run the systems on a simulation or a dataset | Public real dataset with ground truth; Gazebo only as a private test sandbox |
-| Metrics: ATE, RPE, map overlays (PSNR / IoU for semantic SLAM) | Only established metrics, no self-invented ones (Section 5) |
+| Metrics: ATE, RPE, map overlays (PSNR / IoU for semantic SLAM); RPE dropped after feedback from the lecturer | Only established metrics, no self-invented ones (Section 5) |
 | ≥ 1 plot overlaying the trajectories of all systems, ≥ 1 map per system | Produced automatically by the pipeline |
 | Figures: serif font, ≥ body text size, ≥ 300 DPI, readable in grayscale | One shared Matplotlib style file for all plots |
 | Paper: exactly 3 pages, IEEE template, IMRAD, English | Page budget in Section 8 |
@@ -156,7 +156,6 @@ Principle: **we do not invent metrics.** Every number has an original reference 
 | Metric | Definition / reference | Tool | Setting |
 |---|---|---|---|
 | **ATE** (Absolute Trajectory Error), translational RMSE | Sturm et al. 2012 | `evo_ape` | Umeyama (1991) alignment over all poses |
-| **RPE** translation [m] and rotation [°] | Sturm et al. 2012; Kümmerle et al. 2009 | `evo_rpe` | Δ = 1 m (`--delta 1 --delta_unit m`) |
 | Drift in % per distance *(optional)* | Geiger et al. 2012 (KITTI) | KITTI definition | only if sequences are long enough |
 
 **Alignment.** The alignment follows what each sensor can observe (Zhang & Scaramuzza 2018):
@@ -206,7 +205,7 @@ These are measurements, not metrics, following the practice in SLAMBench and Tre
 2. **One map per system** side by side, same scale *(required)*
 3. **Box plot of ATE RMSE** over N runs per system, individual runs as dots, failures annotated
 4. **APE over time** (shows drift and loop-closure jumps), optional
-5. **Main table:** system × {ATE RMSE (median, IQR), RPE trans/rot, success k/N, % tracked, hardware, runtime}
+5. **Main table:** system × {ATE RMSE (median, IQR), success k/N, % tracked, hardware, runtime}
 
 All plots share one style file:
 - Serif font (Times / Latin Modern) at body-text size.
@@ -247,7 +246,7 @@ bEARL/
 │   ├── runners/<system>.py    # common function run(seq, out_dir) -> result files
 │   ├── run_all.py             # systems × sequences × N runs, with resource logging
 │   ├── resources.py           # psutil / nvidia-smi sampler
-│   └── evaluate.py            # ATE / RPE / robustness -> metrics.csv
+│   └── evaluate.py            # ATE / robustness -> metrics.csv
 ├── cluster/                   # Slurm job scripts for batch runs on the GPU cluster
 ├── notebooks/
 │   ├── 01_dataset.ipynb       # sensor overview, GT plot, timestamp checks
@@ -280,7 +279,7 @@ bEARL/
 |---|---|---|---|
 | 0 | now | GitHub repo, structure, roles agreed, dataset decision | all |
 | 1 | **lab session 1** | M3DGR sequence plays back in ROS 2 (playback + RViz), GT as TUM file, list of SLAM candidates + metrics (required by the slides) | data owner + all |
-| 2 | lab session 2 | every runner produces a TUM trajectory + map for 1 sequence; `evaluate.py` gives first ATE/RPE | each member for their system |
+| 2 | lab session 2 | every runner produces a TUM trajectory + map for 1 sequence; `evaluate.py` gives first ATE | each member for their system |
 | 3 | lab session 3 | every member: N runs × 3 sequences on their own machine or the cluster, results in the repo; all notebooks produce figures | pipeline + evaluation |
 | 4 | lab session 4 | full paper draft (3 pages), final figures, discussion of failure modes | all, paper lead coordinates |
 | 5 | final presentation | 8–10 min slides, paper PDF uploaded to Moodle by **midnight**, repo link submitted | all |
@@ -307,7 +306,7 @@ Each member writes the theory paragraph for **their** system (3–5 sentences) a
 | Abstract | 8–10 lines | motivation, contribution, verifiability (repo link) |
 | I. Introduction | 0.3 p. | why SLAM on ground robots, why compare modalities, contribution in 2–3 points |
 | II. State of the Art | 0.5 p. | SLAM formulation (Cadena 2016, Grisetti 2010), the 4 chosen systems briefly, existing comparisons (Trejos 2022, M3DGR benchmark), recent learned monocular SLAM, *so what* → our gap |
-| III. Materials and Methods | 0.7 p. | dataset + sequences, systems + configuration, metrics (ATE/RPE/alignment/N runs), hardware, pipeline |
+| III. Materials and Methods | 0.7 p. | dataset + sequences, systems + configuration, metrics (ATE/alignment/N runs), hardware, pipeline |
 | IV. Experimental Results | 0.8 p. | overlay plot, maps, box plot, main table |
 | V. Summary and Outlook | 0.5 p. | failure modes ↔ theory, limitations (software sync, default parameters, small N, different hardware, possibly no reference map), outlook |
 | References | 0.2 p. | approx. 12–18 entries |
