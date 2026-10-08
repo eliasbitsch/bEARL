@@ -1,38 +1,78 @@
 """Runner for GLIM (Philip Stix).
 
-Copied by tools/register_system.py. Every runner has the same interface, so the
-pipeline does not need to know anything about the individual SLAM system.
+GLIM (Koide et al., RAS 2024) runs in the authors' Docker image on the ROS 2 bag written by
+tools/glim_prepare_bag.py (Livox CustomMsg -> PointCloud2, original timestamps):
+    ros2 run glim_ros glim_rosbag <bag> --ros-args -p config_path:=... -p auto_quit:=true -p dump_path:=...
+glim_rosbag throttles playback itself so that no scan is dropped (offline run).
 
-Contract - after run() returns, `out_dir` must contain:
-    trajectory_tum.txt   estimated trajectory, TUM format: "t x y z qx qy qz qw" (t in seconds,
-                         same clock as the ground truth), pose of the robot/camera in the map frame
-    map.<ext>            the map / reconstruction: .ply or .pcd (point cloud), .pgm + .yaml (grid)
-Raise an exception if the system fails (lost tracking, crash). The failure is then recorded
-as an unsuccessful run - never silently retry or drop failed runs.
+GLIM writes its result to the dump directory (kept under data/, git-ignored, for the offline_viewer):
+    traj_imu.txt / traj_lidar.txt    TUM trajectory with loop closure (IMU / LiDAR frame)
+    odom_imu.txt / odom_lidar.txt    same without loop closure (odometry only)
+    000000/ 000001/ ...              submaps: data.txt (T_world_origin) + points_compact.bin (float32 xyz)
+The runner copies the configured trajectory to trajectory_tum.txt and merges the submaps into map.ply.
 
-You may run the system any way you like (pip package, Docker, ROS 1/2, CUDA). Run it
-OFFLINE so that every frame is processed (accuracy must not depend on machine speed).
+Note: GLIM runs inside the container, so resources.csv only sees the docker CLI process.
 """
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
+import numpy as np
+
+from pipeline.common import ROOT
+
 
 def run(sequence: dict, out_dir: Path, run_idx: int, cfg: dict, data_root: Path) -> None:
-    """Run GLIM once on one sequence.
+    """Run GLIM once on one sequence (GLIM has no random seed; run_idx only names the dump)."""
+    g = cfg["glim"]
+    bag = (data_root / sequence["name"] / "glim_ros2").resolve()
+    if not (bag / "metadata.yaml").exists():
+        raise FileNotFoundError(f"{bag} missing - run tools/glim_prepare_bag.py first")
+    config_dir = (ROOT / g["config_dir"]).resolve()
+    dump = (data_root / sequence["name"] / "glim_dumps" / f"run_{run_idx:02d}").resolve()
+    if dump.exists():
+        shutil.rmtree(dump)
+    dump.parent.mkdir(parents=True, exist_ok=True)
 
-    sequence:  entry from config/sequences.yaml (name, difficulty, ground_truth)
-    out_dir:   results/<slug>/<sequence>/run_<k>/ (already created)
-    run_idx:   repetition index (0..N-1); use it as a random seed if the system has one
-    cfg:       config/systems/<slug>.yaml
-    data_root: folder with the prepared data of all sequences
-    """
-    seq_dir = data_root / sequence["name"]
+    cmd = ["docker", "run", "--rm",
+           "-v", f"{bag}:/data/bag:ro", "-v", f"{config_dir}:/glim/config:ro",
+           "-v", f"{dump.parent}:/dumps"]
+    if g.get("gpus", False):
+        cmd += ["--gpus", "all"]
+    cmd += [g["image"], "ros2", "run", "glim_ros", "glim_rosbag", "/data/bag", "--ros-args",
+            "-p", "config_path:=/glim/config", "-p", "auto_quit:=true",
+            "-p", f"dump_path:=/dumps/{dump.name}"]
+    with open(out_dir / "glim.log", "w", encoding="utf-8") as log:
+        subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, check=True)
 
-    # TODO: call your SLAM system here, e.g.
-    # subprocess.run(["docker", "run", "--rm", "-v", f"{seq_dir}:/data", "-v", f"{out_dir}:/out",
-    #                 "my-slam-image", "/data", "/out"], check=True)
-    raise NotImplementedError("Implement the runner for GLIM")
+    traj = dump / g["trajectory"]
+    if not traj.exists() or not traj.read_text().strip():
+        raise RuntimeError(f"GLIM wrote no trajectory ({traj}) - see glim.log")
+    shutil.copy(traj, out_dir / "trajectory_tum.txt")
+    write_map_ply(dump, out_dir / "map.ply")
 
-    # TODO: convert the system's output to out_dir / "trajectory_tum.txt" and out_dir / "map.<ext>"
+
+def write_map_ply(dump: Path, out_file: Path) -> int:
+    """Merge all submaps of a GLIM dump into one point cloud in the map frame (binary PLY)."""
+    clouds = []
+    for sub in sorted(p for p in dump.iterdir() if p.is_dir() and p.name.isdigit()):
+        T = _read_T_world_origin(sub / "data.txt")
+        pts = np.fromfile(sub / "points_compact.bin", dtype="<f4").reshape(-1, 3).astype(np.float64)
+        clouds.append(pts @ T[:3, :3].T + T[:3, 3])
+    if not clouds:
+        raise RuntimeError(f"no submaps in {dump}")
+    pts = np.concatenate(clouds).astype("<f4")
+    header = ("ply\nformat binary_little_endian 1.0\n"
+              f"element vertex {len(pts)}\nproperty float x\nproperty float y\nproperty float z\nend_header\n")
+    with open(out_file, "wb") as f:
+        f.write(header.encode("ascii"))
+        f.write(pts.tobytes())
+    return len(pts)
+
+
+def _read_T_world_origin(data_txt: Path) -> np.ndarray:
+    lines = [line.strip() for line in data_txt.read_text().splitlines()]
+    i = lines.index("T_world_origin:")
+    return np.array([[float(v) for v in line.split()] for line in lines[i + 1:i + 5]])
