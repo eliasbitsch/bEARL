@@ -34,13 +34,13 @@ members:
     hardware: null
 
   - name: Viktoriia Ovdiienko
-    slug: null          # TODO: choose your system
-    system: null
-    paper: null
-    sensors: []
-    alignment: null
-    loop_closure: null
-    hardware: null
+    slug: orb_slam3
+    system: ORB-SLAM3 (visual-inertial)
+    paper: campos2021orbslam3
+    sensors: [rgb, imu]
+    alignment: se3
+    loop_closure: true
+    hardware: Intel i5-1155G7, 8 GB RAM, no GPU (WSL2 Ubuntu 24.04)
 
   - name: Jiayi Zhou
     slug: null          # TODO: choose your system
