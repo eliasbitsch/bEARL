@@ -98,7 +98,7 @@ Known pitfalls (resolve in week 1):
 |---|---|---|---|---|---|
 | Elias Bitsch | **MASt3R-SLAM** (Murai et al., CVPR 2025) | monocular RGB | 3D foundation model + dense SLAM | yes | RTX 3080 Ti / GPU cluster |
 | Philip Stix | *your choice* | | | | |
-| Viktoriia Ovdiienko | *your choice* | | | | |
+| Viktoriia Ovdiienko | **ORB-SLAM3** (Campos et al., T-RO 2021) | RGB camera (RealSense D435i) + IMU | feature-based visual-inertial, keyframe graph optimisation | yes | Intel i5-1155G7, 8 GB RAM, no GPU |
 | Jiayi Zhou | *your choice* | | | | |
 
 ### 3.2 RGB-only deep dive (Elias, optional extension)

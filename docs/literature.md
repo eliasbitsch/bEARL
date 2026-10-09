@@ -27,7 +27,7 @@ Each member adds the paper(s) for their own chosen system here and to `paper/ref
 | Leroy, Cabon, Revaud, *Grounding Image Matching in 3D with MASt3R*, ECCV 2024 (`leroy2024mast3r`) | The foundation model behind MASt3R-SLAM |
 | Wang et al., *DUSt3R: Geometric 3D Vision Made Easy*, CVPR 2024 (`wang2024dust3r`) | Predecessor of MASt3R |
 | *(system chosen by Philip Stix)* | |
-| *(system chosen by Viktoriia Ovdiienko)* | |
+| Campos et al., *ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial, and Multimap SLAM*, IEEE T-RO 37(6), 2021 (`campos2021orbslam3`) | RGB camera + IMU, feature-based visual-inertial SLAM with loop closure (Viktoriia) |
 | *(system chosen by Jiayi Zhou)* | |
 
 ## C. RGB-only deep dive (appendix)
