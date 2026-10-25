@@ -1,19 +1,28 @@
 # Shared, fixed evaluation sequences. Identical for every system - do not change per system.
 # Dataset: M3DGR (Zhang et al., IROS 2025), https://github.com/sjtuyinjie/M3DGR
-# TODO (data owner): confirm names, durations and that GT is motion capture before downloading.
+# Checked 2026-10-25: all are indoor OptiTrack sequences (~300 Hz GT, same room approx. 6.5 m x 3 m,
+# GT height constant 0.84 m), checksums match M3DGR checksums.txt.
+# Selection: two well-lit sequences (normal operation) + one with the light switched on and off
+# (stress test for cameras). Mean image brightness (0-255) / share of near-black frames:
+#   Dynamic01 126 / 2 %, Sha-turn01 129 / 2 %, Varying-illu01 ~70 / ~45 % (black phases up to 10 s).
 
 dataset: M3DGR
 data_root: data/M3DGR          # git-ignored, see README "Data"
 
 sequences:
-  - name: Varying-illu01
-    difficulty: easy
-    ground_truth: data/M3DGR/Varying-illu01/gt_tum.txt
-  - name: Dynamic01
-    difficulty: medium
+  - name: Dynamic01             # 175 s, 71 m, well lit, people walking through the scene
+    difficulty: nominal
     ground_truth: data/M3DGR/Dynamic01/gt_tum.txt
-  - name: Dark03                # alternative: Sha-turn01
-    difficulty: hard
+  - name: Sha-turn01            # 139 s, 98 m, well lit, sharp turns (wheel slip, fast rotation)
+    difficulty: motion
+    ground_truth: data/M3DGR/Sha-turn01/gt_tum.txt
+  - name: Varying-illu01        # 154 s, 72 m, light switched on and off
+    difficulty: illumination
+    ground_truth: data/M3DGR/Varying-illu01/gt_tum.txt
+
+# Not part of the evaluation, kept as a checked reserve (e.g. outlook / appendix):
+reserve_sequences:
+  - name: Dark03                # 170 s, 66 m, 94 % of frames near-black; cameras see almost nothing
     ground_truth: data/M3DGR/Dark03/gt_tum.txt
 
 # Topics in the original bags (ROS 1). Extracted/converted data lives next to each bag.
@@ -25,10 +34,13 @@ topics:
   depth: /camera/aligned_depth_to_color/image_raw/compressedDepth
   camera_imu: /camera/imu
 
-# Ground-truth body frame -> robot base frame. Fill from the dataset's calibration.md.
+# Ground-truth body frame -> robot base frame. calibration.md gives no mocap -> sensor transform,
+# and M3DGR evaluates directly against the GT file with evo (README, Section 6), so we do the same:
+# identity, alignment absorbs the constant offset. Limitation for the paper: the lever arm between
+# mocap body and sensor frame is not compensated.
 gt_to_base_extrinsic:
-  translation: [0.0, 0.0, 0.0]          # TODO
-  rotation_xyzw: [0.0, 0.0, 0.0, 1.0]   # TODO
+  translation: [0.0, 0.0, 0.0]
+  rotation_xyzw: [0.0, 0.0, 0.0, 1.0]
 
 evaluation:
   runs_per_system: 5          # N repetitions per system and sequence (10 if time allows)

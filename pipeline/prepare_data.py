@@ -1,12 +1,12 @@
 """Prepare the shared M3DGR sequences once, so every system reads identical inputs.
 
-    python -m pipeline.prepare_data --bag data/M3DGR/Dark03.bag --sequence Dark03
+    python -m pipeline.prepare_data --bag data/M3DGR/Dynamic01.bag --sequence Dynamic01
 
 Steps:
-  1. extract_rgb       compressed RGB images -> data/M3DGR/<seq>/rgb/<t>.png + rgb.txt
+  1. extract_rgb       compressed RGB images -> data/M3DGR/<seq>/rgb/<t>.jpg + rgb.txt
   2. extract_depth     compressedDepth       -> data/M3DGR/<seq>/depth/<t>.png + depth.txt   (TODO)
   3. convert_livox     Livox CustomMsg       -> sensor_msgs/PointCloud2 bag                 (TODO)
-  4. ground truth      dataset GT            -> data/M3DGR/<seq>/gt_tum.txt (TUM format, base frame)
+  4. ground truth      GT<seq>.txt next to the bag -> data/M3DGR/<seq>/gt_tum.txt (already TUM)
   5. ROS 2 copy        `rosbags-convert --src <bag> --dst <bag>_ros2` for ROS 2 based systems
 
 Owner: data role (see docs/PLAN.md, Section 7).
@@ -24,7 +24,11 @@ from pipeline.common import ROOT, load_sequences
 
 
 def extract_rgb(bag: Path, out_dir: Path, topic: str) -> int:
-    """Write every compressed RGB frame as PNG, plus a TUM-style rgb.txt index."""
+    """Write every compressed RGB frame, plus a TUM-style rgb.txt index.
+
+    JPEG frames are written byte for byte as they are stored in the bag (no re-encoding,
+    ~5x smaller than PNG). Any other format is decoded and written as PNG.
+    """
     img_dir = out_dir / "rgb"
     img_dir.mkdir(parents=True, exist_ok=True)
     index = ["# timestamp filename"]
@@ -35,12 +39,29 @@ def extract_rgb(bag: Path, out_dir: Path, topic: str) -> int:
         for conn, _, raw in reader.messages(connections=conns):
             msg = reader.deserialize(raw, conn.msgtype)
             stamp = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
-            img = cv2.imdecode(np.frombuffer(msg.data, np.uint8), cv2.IMREAD_COLOR)
-            name = f"rgb/{stamp:.6f}.png"
-            cv2.imwrite(str(out_dir / name), img)
+            data = bytes(msg.data)
+            if data[:3] == b"\xff\xd8\xff":
+                name = f"rgb/{stamp:.6f}.jpg"
+                (out_dir / name).write_bytes(data)
+            else:
+                name = f"rgb/{stamp:.6f}.png"
+                cv2.imwrite(str(out_dir / name), cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR))
             index.append(f"{stamp:.6f} {name}")
     (out_dir / "rgb.txt").write_text("\n".join(index) + "\n")
     return len(index) - 1
+
+
+def prepare_ground_truth(src: Path, dst: Path) -> int:
+    """Copy the M3DGR mocap GT (already TUM: t x y z qx qy qz qw) to <seq>/gt_tum.txt, sorted by time.
+
+    M3DGR evaluates directly against this file (README, Section 6: `evo_ape tum GT<seq>.txt est.txt`),
+    so no marker -> base transform is applied; calibration.md does not provide one.
+    """
+    gt = np.loadtxt(src, comments="#")
+    gt = gt[np.argsort(gt[:, 0], kind="stable")]
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    np.savetxt(dst, gt, fmt="%.6f", header="timestamp tx ty tz qx qy qz qw")
+    return len(gt)
 
 
 def extract_depth(bag: Path, out_dir: Path, topic: str) -> int:
@@ -62,6 +83,12 @@ def main() -> None:
 
     cfg = load_sequences()
     out_dir = ROOT / cfg["data_root"] / args.sequence
+    gt_src = args.bag.parent / f"GT{args.sequence}.txt"
+    if gt_src.exists():
+        n = prepare_ground_truth(gt_src, out_dir / "gt_tum.txt")
+        print(f"{args.sequence}: {n} GT poses -> {out_dir / 'gt_tum.txt'}")
+    else:
+        print(f"{args.sequence}: {gt_src.name} not found next to the bag, GT skipped")
     n = extract_rgb(args.bag, out_dir, cfg["topics"]["rgb"])
     print(f"{args.sequence}: {n} RGB frames -> {out_dir / 'rgb'}")
 

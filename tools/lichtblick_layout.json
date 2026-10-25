@@ -1,0 +1,92 @@
+{
+  "configById": {
+    "3D!traj": {
+      "followTf": "map",
+      "followMode": "follow-none",
+      "scene": { "transforms": { "showLabel": true, "axisScale": 0.6 } },
+      "cameraState": {
+        "perspective": true,
+        "distance": 14,
+        "phi": 45,
+        "thetaOffset": 0,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "transforms": {
+        "frame:gt_body": { "visible": true },
+        "frame:est_body": { "visible": true }
+      },
+      "topics": {
+        "/gt/path": { "visible": true, "lineWidth": 0.03, "gradient": ["#2b7bbaff", "#2b7bbaff"], "type": "line" },
+        "/est/path": { "visible": true, "lineWidth": 0.03, "gradient": ["#e8742aff", "#e8742aff"], "type": "line" },
+        "/gt/pose": { "visible": true, "type": "arrow", "arrowScale": [0.4, 0.06, 0.06], "color": "#2b7bbaff" },
+        "/est/pose": { "visible": true, "type": "arrow", "arrowScale": [0.4, 0.06, 0.06], "color": "#e8742aff" },
+        "/est/error_line": { "visible": true },
+        "/est/map": { "visible": true, "pointSize": 2 }
+      },
+      "layers": {
+        "grid": { "visible": true, "layerId": "foxglove.Grid", "frameId": "map", "size": 10, "divisions": 10, "lineWidth": 1, "color": "#80808080", "position": [0, 0, 0], "rotation": [0, 0, 0], "order": 1 }
+      },
+      "publish": { "type": "point", "poseTopic": "/move_base_simple/goal", "pointTopic": "/clicked_point", "poseEstimateTopic": "/initialpose", "poseEstimateXDeviation": 0.5, "poseEstimateYDeviation": 0.5, "poseEstimateThetaDeviation": 0.26 },
+      "imageMode": {}
+    },
+    "Image!cam": {
+      "cameraState": { "distance": 20, "perspective": true, "phi": 60, "target": [0, 0, 0], "targetOffset": [0, 0, 0], "targetOrientation": [0, 0, 0, 1], "thetaOffset": 45, "fovy": 45, "near": 0.5, "far": 5000 },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": { "type": "point", "poseTopic": "/move_base_simple/goal", "pointTopic": "/clicked_point", "poseEstimateTopic": "/initialpose", "poseEstimateXDeviation": 0.5, "poseEstimateYDeviation": 0.5, "poseEstimateThetaDeviation": 0.26 },
+      "imageMode": { "imageTopic": "/camera/image/compressed" }
+    },
+    "Plot!light": {
+      "title": "Image brightness [0-255]",
+      "paths": [
+        { "value": "/camera/brightness.data", "enabled": true, "timestampMethod": "receiveTime", "label": "brightness [0-255]" }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": false,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "minYValue": 0,
+      "maxYValue": 255,
+      "sidebarDimension": 240
+    },
+    "Plot!err": {
+      "title": "Position error after alignment [m]",
+      "paths": [
+        { "value": "/est/position_error.data", "enabled": true, "timestampMethod": "receiveTime", "label": "position error [m]" }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": { "speed": 1 },
+  "layout": {
+    "first": "3D!traj",
+    "second": {
+      "first": "Image!cam",
+      "second": { "first": "Plot!err", "second": "Plot!light", "direction": "column", "splitPercentage": 55 },
+      "direction": "column",
+      "splitPercentage": 50
+    },
+    "direction": "row",
+    "splitPercentage": 62
+  }
+}

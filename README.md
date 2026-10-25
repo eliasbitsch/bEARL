@@ -10,7 +10,7 @@ Each member evaluates **one SLAM system of their own choice**. Everything else i
 
 | Member | SLAM system | Sensors | Status |
 |---|---|---|---|
-| Elias Bitsch | MASt3R-SLAM | monocular RGB | runner in progress |
+| Elias Bitsch | VGGT-Long (backup: FAST-LIO2) | monocular RGB | system chosen, runner to do |
 | Philip Stix | GLIM | 3D LiDAR (Livox MID-360) + IMU | system chosen, runner to do |
 | Viktoriia Ovdiienko | *to be chosen* | | |
 | Jiayi Zhou | *to be chosen* | | |
@@ -74,13 +74,13 @@ Tested with Python 3.10–3.12. ROS is **not** required for the evaluation. It i
 
 ## Data
 
-1. Download the three sequences listed in [config/sequences.yaml](config/sequences.yaml) from the [M3DGR repository](https://github.com/sjtuyinjie/M3DGR) into `data/M3DGR/` (git-ignored).
+1. Download the three sequences listed in [config/sequences.yaml](config/sequences.yaml) **and their GT files** from the [M3DGR repository](https://github.com/sjtuyinjie/M3DGR) (Section 5, OneDrive) into `data/M3DGR/` (git-ignored). Name them `<seq>.bag` and `GT<seq>.txt`, e.g. `Dynamic01.bag` and `GTDynamic01.txt` (about 2 GB per bag, ~4 MB per GT file). Check the bags against `checksums.txt` from the M3DGR repo.
+   - Viewing: [Foxglove](https://foxglove.dev) or [Lichtblick](https://github.com/lichtblick-suite/lichtblick) open the ROS 1 bags directly, no ROS installation needed. The Livox topics (`CustomMsg`) are not shown as point clouds until converted.
 2. Prepare them once:
    ```bash
-   python -m pipeline.prepare_data --bag data/M3DGR/Dark03.bag --sequence Dark03
+   python -m pipeline.prepare_data --bag data/M3DGR/Dynamic01.bag --sequence Dynamic01
    ```
-   This currently extracts the RGB images. Still to be implemented by the data role:
-   - ground truth to TUM format;
+   This copies the GT to `data/M3DGR/<seq>/gt_tum.txt` and extracts the RGB images (JPEG, unchanged from the bag). Still to be implemented by the data role:
    - depth images;
    - Livox to `PointCloud2` conversion;
    - ROS 2 copies of the bags.

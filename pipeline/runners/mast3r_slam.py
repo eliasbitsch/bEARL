@@ -5,7 +5,7 @@ MASt3R-SLAM (Murai et al., CVPR 2025) runs on a folder of monocular RGB images:
 Set MAST3R_SLAM_DIR to the cloned upstream repository (pinned commit, see config/systems/mast3r_slam.yaml).
 
 Input prepared by pipeline/prepare_data.py:
-    <data_root>/<sequence>/rgb/<timestamp>.png   (one file per frame)
+    <data_root>/<sequence>/rgb/<timestamp>.jpg   (one file per frame)
     <data_root>/<sequence>/rgb.txt               ("timestamp filename" per line, TUM RGB-D style)
 """
 from __future__ import annotations

@@ -49,22 +49,22 @@ Excluded: Newer College, Hilti, TUM-VI, ETH3D (handheld), GrandTour (legged), KI
 
 ### Recommendation: M3DGR, 3 indoor sequences with motion capture
 
-Proposal (check in the README that GT really is mocap before downloading):
+**Fixed selection (2026-10-25).** All three are indoor sequences in the same room with OptiTrack ground truth (checked: GT folder `Indoor`, ~300 Hz, checksums OK).
 
-| Role | Sequence | Duration | What it tests |
-|---|---|---|---|
-| easy | `Varying-illu01` | approx. 154 s | nominal case |
-| medium | `Dynamic01` | approx. 175 s | moving people/objects |
-| hard | `Dark03` or `Sha-turn01` | approx. 140–170 s | darkness (bad for cameras) or sharp turns / wheel slip (bad for odometry) |
+| Role | Sequence | Duration / path | Light (mean brightness, near-black frames) | What it tests |
+|---|---|---|---|---|
+| nominal | `Dynamic01` | 175 s / 71 m | well lit (126/255, 2 %) | normal operation, people walking through the scene |
+| motion | `Sha-turn01` | 139 s / 98 m | well lit (129/255, 2 %) | sharp turns: wheel slip (odometry), fast rotation and motion blur (cameras) |
+| illumination | `Varying-illu01` | 154 s / 72 m | light switched on and off (≈ 45 % near-black, black phases up to 10 s) | cameras without light; does tracking recover when the light returns? |
 
-The "hard" sequences are chosen so that each sensor modality struggles **differently**. This drives the discussion in the paper: cameras need texture and light, LiDAR needs geometry, odometry needs traction.
+Why this selection: a robot mostly operates in normal light, so two of three sequences are well lit; darkness is included **once** as a targeted stress test. `Varying-illu01` was preferred over `Dark03` (94 % near-black frames), because a camera system's failure on `Dark03` is predictable, whereas the on/off pattern shows whether a system loses and regains tracking. `Dark03` is downloaded and checked as a reserve (`reserve_sequences` in `config/sequences.yaml`). The sequences still stress each modality differently: cameras need light and texture, odometry needs traction, LiDAR is unaffected by light (all three are in the same room, so LiDAR geometry is similar throughout).
 
 Known pitfalls (resolve in week 1):
 - **LiDAR format:** The LiDAR is stored as **Livox CustomMsg**, not `PointCloud2`. Some LiDAR systems read it natively; others need a small Python conversion script (`rosbags`).
 - **ROS version:** The bags are ROS 1. Convert to ROS 2 with `rosbags-convert` as described in the README, passing the Livox message definitions.
 - **Image compression:** Images are compressed (`compressed`, `compressedDepth`). Extract them once into image folders, which the RGB-only systems need anyway.
 - **Synchronisation:** Sensors are synchronised in software only, and the cameras are rolling shutter. Mention this as a limitation in the paper.
-- **Ground-truth frame:** The mocap marker frame is not the robot's `base_link`. Apply the extrinsics from `calibration.md`.
+- **Ground-truth frame:** The mocap body frame is not the robot's `base_link`, and `calibration.md` gives no mocap-to-sensor transform. As in the M3DGR evaluation, we evaluate directly against the GT file; the lever arm is a limitation for the paper.
 
 ### Working principle: everyone works independently
 
@@ -96,10 +96,14 @@ Known pitfalls (resolve in week 1):
 
 | Member | System | Sensors | Paradigm | Loop closure | Hardware |
 |---|---|---|---|---|---|
-| Elias Bitsch | **MASt3R-SLAM** (Murai et al., CVPR 2025) | monocular RGB | 3D foundation model + dense SLAM | yes | RTX 3080 Ti / GPU cluster |
+| Elias Bitsch | **VGGT-Long** (Deng et al., ICRA 2026) | monocular RGB | 3D foundation model (VGGT), chunked + Sim(3) chunk alignment | yes | RTX 3080 Ti / GPU cluster |
 | Philip Stix | *your choice* | | | | |
 | Viktoriia Ovdiienko | *your choice* | | | | |
 | Jiayi Zhou | *your choice* | | | | |
+
+**Why VGGT-Long (Elias):** Recommended by the lecturer as the visual option, with the caveat that visual SLAM in general depends strongly on scene texture and illumination. That caveat is exactly what `Varying-illu01` (light switched on and off) tests, so losing track there is a result (success rate, tracked fraction), not a gap; the interesting question is whether tracking recovers when the light returns. VGGT-Long was designed for kilometre-scale outdoor sequences (KITTI); on our short indoor sequences its chunking mainly keeps GPU memory bounded, while its long-range scale-drift advantage barely applies. Mention this in the discussion.
+
+**Backup (Elias): FAST-LIO2** (Xu et al., T-RO 2022), MID-360 + IMU. Used only if VGGT-Long cannot be brought to run on M3DGR. It shares GLIM's sensors but differs in paradigm: iterated Kalman filter without loop closure vs. graph optimisation with loop closure.
 
 ### 3.2 RGB-only deep dive (Elias, optional extension)
 
@@ -107,7 +111,8 @@ All of these run on **the same monocular RGB images**. They all share the same f
 
 | Priority | System | Paradigm | Code | GPU notes |
 |---|---|---|---|---|
-| 1 (core) | **MASt3R-SLAM** (Murai, Dexheimer, Davison, CVPR 2025) | 3D foundation model, dense | ✅ image folder or video input, WSL branch available | authors tested on RTX 4090 (24 GB); 12 GB uncertain → GPU cluster |
+| 0 (core) | **VGGT-Long** (Deng et al., ICRA 2026) | 3D foundation model (VGGT), overlapping chunks, loop closure | ✅ github.com/DengKaiCQ/VGGT-Long | VRAM need still to be measured on the RTX 3080 Ti Laptop (16 GB) |
+| 1 | **MASt3R-SLAM** (Murai, Dexheimer, Davison, CVPR 2025) | 3D foundation model, image pairs, dense | ✅ image folder or video input, WSL branch available | authors tested on RTX 4090 (24 GB); 12 GB uncertain → GPU cluster |
 | 2 | **cuVSLAM** (Korovko et al., NVIDIA, 2025) | classical geometric, CUDA-accelerated | ✅ PyCuVSLAM wheel, Ubuntu 22.04/24.04, CUDA 12/13, NVIDIA Community License | light, runs on Jetson |
 | 3 | **DPV-SLAM** (Lipson, Teed, Deng, ECCV 2024) | learned sparse patches + loop closure | ✅ Python | mid-range GPU |
 | 4 | **Gaussian Splatting SLAM / MonoGS** (Matsuki et al., CVPR 2024) | photorealistic 3D Gaussian map | ✅ monocular supported, TUM loader | authors tested on RTX 4090; slow (~10 fps speed-up branch) |
@@ -116,7 +121,7 @@ Not included: FoundationSLAM (Wu et al., AAAI 2026), because no public code was 
 
 How it fits the paper:
 - **Main table:** only the 4 core systems. The deep dive gets one sentence plus a figure in the main text and full results in the **appendix**, which the course allows. It also makes a strong slide in the final presentation.
-- **Theory angle:** Classical geometric (cuVSLAM) vs. learned (DPV-SLAM) vs. foundation model (MASt3R-SLAM) vs. neural rendering (MonoGS). The key question is whether learned priors make monocular SLAM **more robust** (darkness, dynamics) and whether foundation models recover approximately correct scale. To answer it, report the estimated Sim(3) scale factor.
+- **Theory angle:** Classical geometric (cuVSLAM) vs. learned (DPV-SLAM) vs. foundation models (VGGT-Long on chunks, MASt3R-SLAM on image pairs) vs. neural rendering (MonoGS). The key question is whether learned priors make monocular SLAM **more robust** (darkness, dynamics) and whether foundation models recover approximately correct scale. To answer it, report the estimated Sim(3) scale factor.
 - **MonoGS bonus:** It reports **PSNR / SSIM / LPIPS**, the standard rendering-quality metrics in Gaussian-splatting SLAM papers. PSNR is explicitly listed on the kick-off slides. This gives a quantitative map metric without a reference map.
 - **Time-box:** Work through the systems in priority order. Stop when the time budget for the deep dive is used up.
 
@@ -160,7 +165,7 @@ Principle: **we do not invent metrics.** Every number has an original reference 
 
 **Alignment.** The alignment follows what each sensor can observe (Zhang & Scaramuzza 2018):
 - **Metric systems** (LiDAR, RGB-D, stereo, visual-inertial): SE(3) alignment (`-a`).
-- **Monocular systems** (MASt3R-SLAM and the RGB deep dive): **Sim(3)** alignment (`-as`). The estimated scale factor is reported as well.
+- **Monocular systems** (VGGT-Long and the RGB deep dive): **Sim(3)** alignment (`-as`). The estimated scale factor is reported as well.
 - **Transparency check:** *All* systems are additionally evaluated with Sim(3). This shows how much of the metric systems' error is pure scale error, so the monocular systems do not appear unfairly favoured.
 - **2D values:** Since this is a ground robot, we also report planar values (`--project_to_plane xy`) as a supplement, not a replacement.
 
@@ -318,6 +323,6 @@ Each member writes the theory paragraph for **their** system (3–5 sentences) a
 
 1. **Dataset:** M3DGR as the shared, public dataset. Gazebo is only a private test sandbox. Everyone works independently.
 2. **OS:** Who has Ubuntu (native or WSL2) with ROS 2 Humble/Jazzy? On Windows only via WSL2 + Docker.
-3. **Hardware per system:** Who has which machine? MASt3R-SLAM runs on an RTX 3080 Ti and the H200 GPU cluster.
+3. **Hardware per system:** Who has which machine? VGGT-Long and MASt3R-SLAM run on an RTX 3080 Ti and the H200 GPU cluster.
 4. **Dates:** Fill in the dates of lab sessions 2–5.
 5. **Which system does each of you choose, and who takes which role?** Fill in `team.yaml`.
