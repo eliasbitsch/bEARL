@@ -91,15 +91,18 @@ def wheel_odom_tum(bag: Path, topic: str, out: Path) -> Path:
     return out
 
 
-def align_full(gt: PoseTrajectory3D, est: PoseTrajectory3D, sim3: bool, max_diff: float) -> tuple[PoseTrajectory3D, float]:
-    """Umeyama alignment estimated on the associated poses, applied to the full estimate (as evo does)."""
+def align_full(gt: PoseTrajectory3D, est: PoseTrajectory3D, sim3: bool, max_diff: float):
+    """Umeyama alignment estimated on the associated poses, applied to the full estimate (as evo does).
+
+    Returns the aligned estimate and (s, R, t) with p_aligned = R @ (s * p) + t.
+    """
     ref_a, est_a = sync.associate_trajectories(gt, est, max_diff=max_diff)
     r, t, s = copy.deepcopy(est_a).align(ref_a, correct_scale=sim3)
+    s = float(s) if sim3 else 1.0
     est = copy.deepcopy(est)
-    if sim3:
-        est.scale(s)
+    est.scale(s)
     est.transform(lie.se3(r, t))
-    return est, float(s)
+    return est, (s, np.asarray(r), np.asarray(t))
 
 
 def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None, label: str) -> None:
@@ -110,7 +113,8 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
 
     gt = file_interface.read_tum_trajectory_file(str(seq_dir / "gt_tum.txt"))
     est = file_interface.read_tum_trajectory_file(str(est_file))
-    est, scale = align_full(gt, est, sim3, max_diff)
+    est, sim = align_full(gt, est, sim3, max_diff)
+    scale = sim[0]
 
     # per-pose position error after alignment (the term ATE averages over)
     ref_a, est_a = sync.associate_trajectories(gt, est, max_diff=max_diff)
@@ -171,7 +175,9 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
                          T["std_msgs/msg/Float64"](data=float(grey.mean()))))
 
     if map_file is not None:
-        msgs.append(("/est/map", "sensor_msgs/msg/PointCloud2", t0, _cloud(map_file, scale if sim3 else 1.0, est, t0)))
+        cloud = _cloud(map_file, sim, t0)
+        for t in np.arange(t0, t1, 10.0):        # repeated so that seeking always shows it
+            msgs.append(("/est/map", "sensor_msgs/msg/PointCloud2", t, cloud))
 
     if out.exists():
         out.unlink()
@@ -184,9 +190,34 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
     print(f"-> {out.with_suffix('')}  (open the .mcap inside in Lichtblick / Foxglove)")
 
 
-def _cloud(ply: Path, scale: float, est_aligned: PoseTrajectory3D, t: float):
-    """Map points in the estimate's frame -> same Sim(3)/SE(3) as the trajectory. TODO: verify once a real map exists."""
-    raise NotImplementedError("map overlay: implement once the first VGGT-Long map (.ply) exists")
+def _read_ply_xyzrgb(ply: Path) -> tuple[np.ndarray, np.ndarray]:
+    """Binary little-endian PLY with float x, y, z and uchar red, green, blue (as written by VGGT-Long)."""
+    with open(ply, "rb") as f:
+        header = b""
+        while not header.endswith(b"end_header\n"):
+            header += f.read(1)
+        n = int(header.split(b"element vertex ")[1].split(b"\n")[0])
+        rec = np.fromfile(f, dtype=[("x", "<f4"), ("y", "<f4"), ("z", "<f4"),
+                                    ("r", "u1"), ("g", "u1"), ("b", "u1")], count=n)
+    return np.column_stack([rec["x"], rec["y"], rec["z"]]), np.column_stack([rec["r"], rec["g"], rec["b"]])
+
+
+def _cloud(ply: Path, sim: tuple, t: float, voxel: float = 0.03):
+    """Map points in the estimate's frame -> same Sim(3)/SE(3) as the trajectory, thinned to one point per voxel."""
+    s, r, trans = sim
+    xyz, rgb = _read_ply_xyzrgb(ply)
+    xyz = (s * xyz) @ r.T + trans
+    _, keep = np.unique(np.floor(xyz / voxel).astype(np.int64), axis=0, return_index=True)
+    xyz, rgb = xyz[keep].astype(np.float32), rgb[keep].astype(np.uint32)
+    packed = ((rgb[:, 0] << 16) | (rgb[:, 1] << 8) | rgb[:, 2]).view(np.float32)
+    data = np.zeros(len(xyz), dtype=[("x", "<f4"), ("y", "<f4"), ("z", "<f4"), ("rgb", "<f4")])
+    data["x"], data["y"], data["z"], data["rgb"] = xyz[:, 0], xyz[:, 1], xyz[:, 2], packed
+    PF = T["sensor_msgs/msg/PointField"]
+    fields = [PF(name=n, offset=4 * i, datatype=7, count=1) for i, n in enumerate(("x", "y", "z", "rgb"))]  # 7 = FLOAT32
+    print(f"map: {len(rgb)} points after {voxel * 100:.0f} cm voxel thinning")
+    return T["sensor_msgs/msg/PointCloud2"](header=_header(t), height=1, width=len(data), fields=fields,
+                                            is_bigendian=False, point_step=16, row_step=16 * len(data),
+                                            data=data.view(np.uint8), is_dense=True)
 
 
 def main() -> None:
