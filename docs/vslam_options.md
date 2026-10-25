@@ -1,10 +1,11 @@
 # Monocular RGB SLAM options (Elias)
 
-Candidate SLAM systems that use only a single RGB camera. MASt3R-SLAM is the main system for the group comparison; the others form the optional RGB-only deep dive (see [PLAN.md, Section 3.2](PLAN.md#32-rgb-only-deep-dive-elias-optional-extension)).
+Candidate SLAM systems that use only a single RGB camera. VGGT-Long is the main system for the group comparison (backup: FAST-LIO2, LiDAR-inertial); the others form the optional RGB-only deep dive (see [PLAN.md, Section 3.2](PLAN.md#32-rgb-only-deep-dive-elias-optional-extension)).
 
 | System | Approach | Strength | Hardware |
 |---|---|---|---|
-| **MASt3R-SLAM** (Murai et al., CVPR 2025), main choice | 3D foundation model, dense map | robust, no camera calibration required | large GPU (authors used an RTX 4090) |
+| **VGGT-Long** (Deng et al., ICRA 2026), main choice | VGGT foundation model on overlapping chunks, Sim(3) chunk alignment, loop closure | scales to long sequences, no camera calibration required | to be measured on 16 GB |
+| **MASt3R-SLAM** (Murai et al., CVPR 2025) | 3D foundation model, dense map | robust, no camera calibration required | large GPU (authors used an RTX 4090) |
 | **cuVSLAM** (Korovko et al., NVIDIA, 2025) | classical geometric, CUDA-accelerated | very fast, even runs on Jetson | low |
 | **DPV-SLAM** (Lipson et al., ECCV 2024) | learned image patches + loop closure | good trade-off between learning and speed | mid-range GPU |
 | **MonoGS / Gaussian Splatting SLAM** (Matsuki et al., CVPR 2024) | photorealistic 3D Gaussian map | map quality measurable (PSNR / SSIM / LPIPS) | large GPU, slow |

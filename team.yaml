@@ -16,13 +16,13 @@
 
 members:
   - name: Elias Bitsch
-    slug: mast3r_slam
-    system: MASt3R-SLAM
-    paper: murai2025mast3rslam
+    slug: vggt_long
+    system: VGGT-Long
+    paper: deng2026vggtlong
     sensors: [rgb]
     alignment: sim3
     loop_closure: true
-    hardware: RTX 3080 Ti / H200 GPU cluster
+    hardware: RTX 3080 Ti Laptop (16 GB) / H200 GPU cluster
 
   - name: Philip Stix
     slug: null          # TODO: choose your system
@@ -52,12 +52,24 @@ members:
     hardware: null
 
 # Optional extra systems (e.g. the RGB-only deep dive). Same fields, plus "owner".
-extras: []
-#  - owner: Elias Bitsch
-#    slug: cuvslam_mono
-#    system: cuVSLAM (monocular)
-#    paper: korovko2025cuvslam
-#    sensors: [rgb]
-#    alignment: sim3
-#    loop_closure: true
-#    hardware: H200 GPU cluster
+extras:
+  # Backup for Elias if VGGT-Long fails on M3DGR (e.g. darkness). Contrast to GLIM:
+  # same sensors, but iterated Kalman filter without loop closure vs. graph optimisation.
+  - owner: Elias Bitsch
+    slug: fast_lio2
+    system: FAST-LIO2
+    paper: xu2022fastlio2
+    sensors: [lidar3d, imu]
+    alignment: se3
+    loop_closure: false
+    hardware: null
+
+  # RGB-only deep dive: second foundation-model system on the same images.
+  - owner: Elias Bitsch
+    slug: mast3r_slam
+    system: MASt3R-SLAM
+    paper: murai2025mast3rslam
+    sensors: [rgb]
+    alignment: sim3
+    loop_closure: true
+    hardware: RTX 3080 Ti Laptop (16 GB) / H200 GPU cluster
