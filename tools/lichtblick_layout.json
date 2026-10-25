@@ -26,7 +26,8 @@
         "/gt/pose": { "visible": true, "type": "arrow", "arrowScale": [0.4, 0.06, 0.06], "color": "#2b7bbaff" },
         "/est/pose": { "visible": true, "type": "arrow", "arrowScale": [0.4, 0.06, 0.06], "color": "#e8742aff" },
         "/est/error_line": { "visible": true },
-        "/est/map": { "visible": true, "pointSize": 2, "pointShape": "square", "colorField": "rgb", "colorMode": "rgb" }
+        "/est/map": { "visible": true, "pointSize": 2, "pointShape": "square", "colorField": "rgb", "colorMode": "rgb" },
+        "/gt/map": { "visible": false, "pointSize": 2, "pointShape": "square", "colorField": "rgb", "colorMode": "rgb" }
       },
       "layers": {
         "grid": { "visible": true, "layerId": "foxglove.Grid", "frameId": "map", "size": 10, "divisions": 10, "lineWidth": 1, "color": "#80808080", "position": [0, 0, 0], "rotation": [0, 0, 0], "order": 1 }

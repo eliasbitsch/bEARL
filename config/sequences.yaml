@@ -42,6 +42,20 @@ gt_to_base_extrinsic:
   translation: [0.0, 0.0, 0.0]
   rotation_xyzw: [0.0, 0.0, 0.0, 1.0]
 
+# Pseudo-ground-truth map (pipeline/reference_map.py): MID-360 scans accumulated along the mocap poses.
+# body_T_base is estimated by maximising map consistency (Levinson & Thrun 2010 style), independently on
+# three sequences (2026-10-25); the rig agrees to 0.07 deg / 5 mm (std), so the mean is used for all:
+#   Dynamic01      roll 1.659  pitch -0.702  yaw 184.462  x 0.025  y -0.092  dt 0.0176
+#   Sha-turn01     roll 1.656  pitch -0.842  yaw 184.592  x 0.015  y -0.099  dt 0.0074
+#   Varying-illu01 roll 1.664  pitch -0.748  yaw 184.570  x 0.017  y -0.093  dt 0.0109
+# z is unobservable for planar motion (0). The LiDAR-mocap time offset differs per recording (software sync).
+reference_map:
+  body_T_base: {roll_deg: 1.660, pitch_deg: -0.764, yaw_deg: 184.542, x_m: 0.019, y_m: -0.094}
+  time_offset_s: {Dynamic01: 0.0176, Sha-turn01: 0.0074, Varying-illu01: 0.0109}
+  voxel_m: 0.02
+  static_bin_s: 10.0          # people filter: a 10 cm cell must be hit in >= static_min_bins of these windows
+  static_min_bins: 6
+
 evaluation:
   runs_per_system: 5          # N repetitions per system and sequence (10 if time allows)
   t_max_diff: 0.01            # [s] timestamp association tolerance (evo default)

@@ -14,6 +14,8 @@ Topics (all in frame "map" = mocap world frame):
   /camera/image/compressed   RGB image as recorded
   /camera/brightness         mean grey value 0-255 of each image (a measurement, not a metric)
   /est/map                   optional: point cloud of the SLAM map (--map file.ply), same alignment
+  /gt/map                    pseudo-GT map (LiDAR along the mocap poses, pipeline.reference_map), if built;
+                             hidden in the layout, switch it on in the 3D panel to compare
 
 The visualisation is for plausibility checks only; numbers for the paper come from pipeline.evaluate.
 """
@@ -178,6 +180,11 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
         cloud = _cloud(map_file, sim, t0)
         for t in np.arange(t0, t1, 10.0):        # repeated so that seeking always shows it
             msgs.append(("/est/map", "sensor_msgs/msg/PointCloud2", t, cloud))
+    ref_map = seq_dir / "reference_map.ply"
+    if ref_map.exists():                          # pseudo-GT map (pipeline.reference_map), already in the mocap frame
+        cloud = _cloud(ref_map, (1.0, np.eye(3), np.zeros(3)), t0)
+        for t in np.arange(t0, t1, 10.0):
+            msgs.append(("/gt/map", "sensor_msgs/msg/PointCloud2", t, cloud))
 
     if out.exists():
         out.unlink()
@@ -197,9 +204,12 @@ def _read_ply_xyzrgb(ply: Path) -> tuple[np.ndarray, np.ndarray]:
         while not header.endswith(b"end_header\n"):
             header += f.read(1)
         n = int(header.split(b"element vertex ")[1].split(b"\n")[0])
-        rec = np.fromfile(f, dtype=[("x", "<f4"), ("y", "<f4"), ("z", "<f4"),
-                                    ("r", "u1"), ("g", "u1"), ("b", "u1")], count=n)
-    return np.column_stack([rec["x"], rec["y"], rec["z"]]), np.column_stack([rec["r"], rec["g"], rec["b"]])
+        coloured = b"property uchar red" in header
+        fields = [("x", "<f4"), ("y", "<f4"), ("z", "<f4")] + ([("r", "u1"), ("g", "u1"), ("b", "u1")] if coloured else [])
+        rec = np.fromfile(f, dtype=fields, count=n)
+    xyz = np.column_stack([rec["x"], rec["y"], rec["z"]])
+    rgb = np.column_stack([rec["r"], rec["g"], rec["b"]]) if coloured else np.full((n, 3), 150, np.uint8)
+    return xyz, rgb
 
 
 def _cloud(ply: Path, sim: tuple, t: float, voxel: float = 0.03):
