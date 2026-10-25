@@ -1,38 +1,117 @@
 """Runner for VGGT-Long (Elias Bitsch).
 
-Copied by tools/register_system.py. Every runner has the same interface, so the
-pipeline does not need to know anything about the individual SLAM system.
+VGGT-Long (Deng et al., ICRA 2026) runs offline on a folder of monocular RGB images, in the
+container docker/vggt_long (see the Dockerfile for the pinned upstream commit):
+    docker run --gpus all -v <images>:/data:ro -v <weights>:/weights:ro -v <out>:/out bearl/vggt_long
 
-Contract - after run() returns, `out_dir` must contain:
-    trajectory_tum.txt   estimated trajectory, TUM format: "t x y z qx qy qz qw" (t in seconds,
-                         same clock as the ground truth), pose of the robot/camera in the map frame
-    map.<ext>            the map / reconstruction: .ply or .pcd (point cloud), .pgm + .yaml (grid)
-Raise an exception if the system fails (lost tracking, crash). The failure is then recorded
-as an unsuccessful run - never silently retry or drop failed runs.
+Input prepared by pipeline/prepare_data.py:
+    <data_root>/<sequence>/rgb/<timestamp>.jpg   (one file per frame, 30 Hz)
+The runner links every `frame_step`-th frame into <sequence>/rgb_step<k>/ (see config/systems/vggt_long.yaml).
 
-You may run the system any way you like (pip package, Docker, ROS 1/2, CUDA). Run it
-OFFLINE so that every frame is processed (accuracy must not depend on machine speed).
+Output of VGGT-Long: camera_poses.txt, one 4x4 camera-to-world matrix (row-major) per input image, in
+sorted file-name order -> converted to TUM with the image timestamps; pcd/combined_pcd.ply -> map.ply.
+
+Environment:
+    VGGT_LONG_WEIGHTS   folder with model.pt, dino_salad.ckpt, dinov2_vitb14_pretrain.pth
+                        (default: third_party/weights/vggt_long)
+    VGGT_LONG_LAUNCHER  docker (default; on Windows it runs through `wsl.exe docker`) or apptainer
+    VGGT_LONG_SIF       Apptainer image for the cluster (default: vggt_long.sif)
+    WSL_DISTRO          WSL distribution with Docker + GPU (default: Ubuntu-24.04)
 """
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
 from pathlib import Path
 
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+from pipeline.common import ROOT
+
+
+def _wsl_path(p: Path) -> str:
+    p = p.resolve()
+    return f"/mnt/{p.drive[0].lower()}{p.as_posix()[2:]}"
+
+
+def _host(p: Path) -> str:
+    return _wsl_path(p) if os.name == "nt" else str(p.resolve())
+
+
+def _subsampled_images(seq_dir: Path, step: int) -> Path:
+    """Folder with every `step`-th frame of rgb/ as hard links (no copies, built once)."""
+    src = seq_dir / "rgb"
+    dst = seq_dir / f"rgb_step{step}"
+    frames = sorted(src.glob("*.jpg")) + sorted(src.glob("*.png"))
+    if not frames:
+        if step > 1 and dst.is_dir() and any(dst.iterdir()):
+            return dst                      # e.g. on the cluster, where only rgb_step<k>/ is uploaded
+        raise FileNotFoundError(f"{src} is empty - run pipeline/prepare_data.py first")
+    if step == 1:
+        return src
+    wanted = frames[::step]
+    if dst.is_dir() and len(list(dst.iterdir())) == len(wanted):
+        return dst
+    shutil.rmtree(dst, ignore_errors=True)
+    dst.mkdir()
+    for f in wanted:
+        os.link(f, dst / f.name)
+    return dst
+
+
+def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict) -> list[str]:
+    env = {"CHUNK_SIZE": params.get("chunk_size"), "OVERLAP": params.get("overlap"),
+           "LOOP_CHUNK_SIZE": params.get("loop_chunk_size"), "LOOP_ENABLE": params.get("loop_enable")}
+    env = {k: str(v) for k, v in env.items() if v is not None}
+    launcher = os.environ.get("VGGT_LONG_LAUNCHER", "docker")
+    if launcher == "apptainer":
+        # ADA has Blackwell GPUs (SM 12.0): xformers' FlashAttention-3 kernels fail there ("invalid argument").
+        # xformers is only used by DINOv2 in the loop detector; this switch makes DINOv2 use plain (exact)
+        # PyTorch attention instead. Also set in vggt_long.def for future builds.
+        env["XFORMERS_DISABLED"] = "1"
+        binds = f"{image_dir}:/data:ro,{weights}:/weights:ro,{work}:/out"
+        envs = [a for k, v in env.items() for a in ("--env", f"{k}={v}")]
+        return ["apptainer", "run", "--nv", "--bind", binds, *envs, os.environ.get("VGGT_LONG_SIF", "vggt_long.sif")]
+    cmd = ["docker", "run", "--rm", "--gpus", "all", "--ipc=host",
+           "-v", f"{_host(image_dir)}:/data:ro", "-v", f"{_host(weights)}:/weights:ro", "-v", f"{_host(work)}:/out"]
+    cmd += [a for k, v in env.items() for a in ("-e", f"{k}={v}")]
+    if os.name != "nt":
+        cmd += ["-e", f"HOST_UID={os.getuid()}", "-e", f"HOST_GID={os.getgid()}"]
+    cmd += ["bearl/vggt_long"]
+    if os.name == "nt":
+        cmd = ["wsl.exe", "-d", os.environ.get("WSL_DISTRO", "Ubuntu-24.04"), "--", *cmd]
+    return cmd
+
+
+def poses_to_tum(poses_file: Path, image_dir: Path, out_file: Path) -> int:
+    """camera_poses.txt (4x4 c2w per sorted image) -> TUM 't x y z qx qy qz qw' with image timestamps."""
+    frames = sorted(image_dir.glob("*.jpg")) + sorted(image_dir.glob("*.png"))
+    poses = np.loadtxt(poses_file).reshape(-1, 4, 4)
+    if len(poses) != len(frames):
+        raise RuntimeError(f"{len(poses)} poses for {len(frames)} images")
+    stamps = np.array([float(f.stem) for f in frames])
+    q = Rotation.from_matrix(poses[:, :3, :3]).as_quat()          # x y z w
+    tum = np.column_stack([stamps, poses[:, :3, 3], q])
+    np.savetxt(out_file, tum, fmt="%.6f")
+    return len(tum)
+
 
 def run(sequence: dict, out_dir: Path, run_idx: int, cfg: dict, data_root: Path) -> None:
-    """Run VGGT-Long once on one sequence.
+    """Run VGGT-Long once on one sequence (deterministic inference; run_idx is not used as a seed)."""
+    params = cfg.get("parameters", {})
+    image_dir = _subsampled_images(data_root / sequence["name"], int(params.get("frame_step", 1)))
+    weights = Path(os.environ.get("VGGT_LONG_WEIGHTS", ROOT / "third_party" / "weights" / "vggt_long"))
+    work = out_dir / "vggt_long"
+    work.mkdir(exist_ok=True)
 
-    sequence:  entry from config/sequences.yaml (name, difficulty, ground_truth)
-    out_dir:   results/<slug>/<sequence>/run_<k>/ (already created)
-    run_idx:   repetition index (0..N-1); use it as a random seed if the system has one
-    cfg:       config/systems/<slug>.yaml
-    data_root: folder with the prepared data of all sequences
-    """
-    seq_dir = data_root / sequence["name"]
+    cmd = _container_cmd(image_dir, weights, work, params)
+    (out_dir / "command.txt").write_text(" ".join(cmd) + "\n")
+    subprocess.run(cmd, check=True)
 
-    # TODO: call your SLAM system here, e.g.
-    # subprocess.run(["docker", "run", "--rm", "-v", f"{seq_dir}:/data", "-v", f"{out_dir}:/out",
-    #                 "my-slam-image", "/data", "/out"], check=True)
-    raise NotImplementedError("Implement the runner for VGGT-Long")
-
-    # TODO: convert the system's output to out_dir / "trajectory_tum.txt" and out_dir / "map.<ext>"
+    n = poses_to_tum(work / "camera_poses.txt", image_dir, out_dir / "trajectory_tum.txt")
+    if (work / "combined_pcd.ply").exists():
+        shutil.move(work / "combined_pcd.ply", out_dir / "map.ply")
+    shutil.rmtree(work / "exps", ignore_errors=True)              # per-chunk point clouds, large
+    print(f"VGGT-Long {sequence['name']} run {run_idx}: {n} poses")

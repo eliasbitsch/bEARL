@@ -58,6 +58,8 @@ def collect() -> pd.DataFrame:
     ev = seq_cfg["evaluation"]
     rows = []
     for system in load_systems():
+        if not (RESULTS_DIR / system["slug"]).is_dir():
+            continue                                  # registered, but no runs yet (e.g. a backup system)
         alignment = load_system_config(system["slug"]).get("alignment", "se3")
         for seq in seq_cfg["sequences"]:
             gt_path = ROOT / seq["ground_truth"]

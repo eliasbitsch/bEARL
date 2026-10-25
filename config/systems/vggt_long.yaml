@@ -6,21 +6,28 @@ member: Elias Bitsch
 # Where the system comes from - pin an exact version for reproducibility.
 source:
   repository: https://github.com/DengKaiCQ/VGGT-Long
-  commit: TODO                # exact commit hash you used
-  container: TODO             # e.g. docker/vggt_long/Dockerfile, or "none" for a pip install
+  commit: c160869d1d99c96bb227f414afb3bc68c29c9a76
+  container: docker/vggt_long/Dockerfile
+  weights: VGGT-1B (huggingface.co/facebook/VGGT-1B, model.pt), SALAD + DINOv2 for loop detection
+           (upstream scripts/download_weights.sh)
 
 # Inputs taken from the shared sequences (subset of: lidar3d, imu, wheel_odom, rgb, depth)
 sensors: [rgb]
 
-# se3 for metric systems (LiDAR, RGB-D, stereo, visual-inertial), sim3 for monocular systems
+# Monocular -> scale is unobservable -> Sim(3) alignment (Zhang & Scaramuzza 2018)
 alignment: sim3
 
 # Parameters: use the authors' defaults. Only calibration / topic names may be adapted.
 # Document EVERY deviation from the defaults here.
-parameter_file: TODO          # path to the config file you pass to the system
-deviations_from_defaults: []
+parameter_file: configs/base_config.yaml of the upstream repo (weights paths set by docker/vggt_long/run.sh)
+parameters:
+  frame_step: 3               # every 3rd image = 10 Hz (see deviations)
+  # chunk_size / overlap / loop_chunk_size / loop_enable: not set = upstream defaults (60 / 30 / 20 / True)
+deviations_from_defaults:
+  - "Input frame rate 10 Hz instead of the recorded 30 Hz (frame_step 3). Upstream README, 'Possible problems' d:
+     very dense input with small motion between frames increases drift, extract frames at a lower rate. The
+     authors' own benchmarks (KITTI) are 10 Hz. Evaluation matches poses by timestamp, so ATE stays comparable."
 
 # How the system is executed (file-based offline run, or ROS bag replay)
 execution:
-  mode: offline               # offline | rosbag
-  rosbag_rate: 0.5            # only for mode: rosbag - slow enough that no message is dropped
+  mode: offline               # reads the extracted RGB image folder

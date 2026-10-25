@@ -1,0 +1,40 @@
+# VGGT-Long as an Apptainer image for the ADA cluster (Blackwell GPUs, SM 12.0).
+# Same upstream commit, configuration and run.sh as the Dockerfile; differences:
+#   * PyTorch 2.7.1 + CUDA 12.8 (from the official PyTorch image) instead of 2.5.1 + CUDA 12.4,
+#     because SM 12.0 needs CUDA >= 12.8. Python 3.11 instead of 3.10.
+#   * no apt (unprivileged build); the code is fetched as an archive of the pinned commit.
+#
+# Build (no root needed, ~20 min):
+#   apptainer build --fakeroot --ignore-fakeroot-command vggt_long.sif docker/vggt_long/vggt_long.def
+# Run: apptainer run --nv --bind <images>:/data:ro,<weights>:/weights:ro,<out>:/out vggt_long.sif
+Bootstrap: docker
+From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+
+%files
+    run.sh /opt/run.sh
+
+%environment
+    export PYTHONUNBUFFERED=1
+    # xformers' FlashAttention-3 kernels fail on SM 12.0; DINOv2 (loop detector) then uses exact PyTorch attention
+    export XFORMERS_DISABLED=1
+
+%post
+    set -e
+    export TORCH_CUDA_ARCH_LIST="8.6;12.0" MAX_JOBS=8
+    COMMIT=c160869d1d99c96bb227f414afb3bc68c29c9a76
+    cd /opt
+    python -c "import urllib.request; urllib.request.urlretrieve('https://github.com/DengKaiCQ/VGGT-Long/archive/$COMMIT.tar.gz', 'v.tgz')"
+    tar -xzf v.tgz && rm v.tgz && mv VGGT-Long-$COMMIT VGGT-Long
+    echo "$COMMIT" > /opt/VGGT-Long/UPSTREAM_COMMIT
+    cd /opt/VGGT-Long
+    sed -i -e 's/^faiss-gpu$/faiss-gpu-cu12/' -e '/^xformers/d' requirements.txt
+    pip install --no-cache-dir xformers==0.0.31.post1 --index-url https://download.pytorch.org/whl/cu128
+    pip install --no-cache-dir -r requirements.txt "safetensors==0.5.3" pyyaml \
+        "opencv-python-headless==4.10.0.84" "pypose==0.9.5" trimesh "matplotlib<3.10" "numpy==1.26.1"
+    python setup.py install
+    chmod +x /opt/run.sh
+    python -c "import torch, sim3solve, faiss, numpy; print('sim3solve + faiss ok, torch', torch.__version__, 'numpy', numpy.__version__)"
+    python -c "import vggt_long, base_models.base_model, loop_utils.sim3loop, LoopModels.LoopModel; print('VGGT-Long imports ok')"
+
+%runscript
+    exec /opt/run.sh "$@"

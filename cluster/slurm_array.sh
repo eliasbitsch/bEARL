@@ -11,7 +11,7 @@
 #SBATCH --output=logs/%x_%A_%a.out
 
 set -euo pipefail
-SEQUENCES=(Varying-illu01 Dynamic01 Dark03)
+SEQUENCES=(Dynamic01 Sha-turn01 Varying-illu01)
 RUNS_PER_SEQ=5
 
 SEQ=${SEQUENCES[$((SLURM_ARRAY_TASK_ID / RUNS_PER_SEQ))]}
