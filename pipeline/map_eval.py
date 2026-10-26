@@ -11,6 +11,8 @@ Metrics (Knapitsch et al. 2017, "Tanks and Temples"; Chamfer as in Fan et al. 20
   recall(t)     share of reference points closer than t to the estimate
   F-score(t)    2 P R / (P + R), t = 5 cm and 10 cm
   Chamfer       mean(est -> ref) + mean(ref -> est)
+  (accuracy and completeness are the cloud-to-cloud (C2C) distances of CloudCompare; checked identical on
+   Dynamic01 to 0.001 cm with tools/cloudcompare_c2c.py)
 
 Alignment: the map starts in the frame given by the trajectory alignment (Umeyama, Sim(3) for monocular, SE(3)
 for metric systems, as in pipeline.evaluate) and is then refined with ICP (with scale for Sim(3)), as in the Tanks
@@ -34,6 +36,7 @@ from evo.tools import file_interface
 from scipy.spatial import cKDTree
 
 from pipeline.common import RESULTS_DIR, ROOT, load_sequences, load_system_config, load_systems
+from pipeline.reference_map import write_ply
 from pipeline.visualize import _read_ply_xyzrgb, align_full
 
 VOXEL = 0.02
@@ -94,7 +97,7 @@ def scores(est: np.ndarray, ref: np.ndarray) -> dict:
     return out
 
 
-def evaluate_map(slug: str, seq: str, run: str = "run_00") -> list[dict]:
+def evaluate_map(slug: str, seq: str, run: str = "run_00", export: bool = False) -> list[dict]:
     cfg = load_sequences()
     run_dir = RESULTS_DIR / slug / seq / run
     sim3 = load_system_config(slug).get("alignment", "se3") == "sim3"
@@ -125,6 +128,9 @@ def evaluate_map(slug: str, seq: str, run: str = "run_00") -> list[dict]:
                          "icp_accepted": bool(icp_ok), "icp_scale": s_i, "icp_rotation_deg": rot_i,
                          "icp_translation_m": float(np.linalg.norm(t_i)), "floor_z_m": float(floor),
                          **scores(ee, rr)})
+            if export and stage == "icp_refined":      # the exact clouds compared, e.g. for tools/cloudcompare_c2c.py
+                write_ply(run_dir / "map_eval" / f"{region}_est.ply", ee)
+                write_ply(run_dir / "map_eval" / f"{region}_ref.ply", rr)
     (run_dir / "map_metrics.json").write_text(json.dumps(rows, indent=2, default=float))
     return rows
 
@@ -133,6 +139,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--system")
     ap.add_argument("--sequence")
+    ap.add_argument("--export", action="store_true",
+                    help="also write the compared clouds to results/<slug>/<seq>/run_00/map_eval/ (CloudCompare check)")
     a = ap.parse_args()
     rows = []
     for system in load_systems():
@@ -142,10 +150,16 @@ def main() -> None:
             if a.sequence not in (None, seq["name"]):
                 continue
             if (RESULTS_DIR / system["slug"] / seq["name"] / "run_00" / "map.ply").exists():
-                rows += evaluate_map(system["slug"], seq["name"])
+                rows += evaluate_map(system["slug"], seq["name"], export=a.export)
                 print(f"{system['slug']} {seq['name']}: done")
     df = pd.DataFrame(rows)
-    df.to_csv(RESULTS_DIR / "map_metrics.csv", index=False)
+    csv = RESULTS_DIR / "map_metrics.csv"
+    if csv.exists() and not df.empty:              # keep the rows of systems/sequences not evaluated in this call
+        old = pd.read_csv(csv)
+        done = set(zip(df["slug"], df["sequence"]))
+        old = old[[(s, q) not in done for s, q in zip(old["slug"], old["sequence"])]]
+        df = pd.concat([old, df], ignore_index=True).sort_values(["slug", "sequence", "region", "stage"])
+    df.to_csv(csv, index=False)
     cols = ["slug", "sequence", "region", "stage", "accuracy_median_m", "completeness_median_m", "fscore_5cm",
             "fscore_10cm", "chamfer_m", "icp_accepted", "icp_scale"]
     print(df[cols].round(3).to_string(index=False))

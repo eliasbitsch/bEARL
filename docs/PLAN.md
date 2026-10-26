@@ -111,18 +111,23 @@ All of these run on **the same monocular RGB images**. They all share the same f
 
 | Priority | System | Paradigm | Code | GPU notes |
 |---|---|---|---|---|
-| 0 (core) | **VGGT-Long** (Deng et al., ICRA 2026) | 3D foundation model (VGGT), overlapping chunks, loop closure | ✅ github.com/DengKaiCQ/VGGT-Long | VRAM need still to be measured on the RTX 3080 Ti Laptop (16 GB) |
-| 1 | **MASt3R-SLAM** (Murai, Dexheimer, Davison, CVPR 2025) | 3D foundation model, image pairs, dense | ✅ image folder or video input, WSL branch available | authors tested on RTX 4090 (24 GB); 12 GB uncertain → GPU cluster |
-| 2 | **cuVSLAM** (Korovko et al., NVIDIA, 2025) | classical geometric, CUDA-accelerated | ✅ PyCuVSLAM wheel, Ubuntu 22.04/24.04, CUDA 12/13, NVIDIA Community License | light, runs on Jetson |
-| 3 | **DPV-SLAM** (Lipson, Teed, Deng, ECCV 2024) | learned sparse patches + loop closure | ✅ Python | mid-range GPU |
-| 4 | **Gaussian Splatting SLAM / MonoGS** (Matsuki et al., CVPR 2024) | photorealistic 3D Gaussian map | ✅ monocular supported, TUM loader | authors tested on RTX 4090; slow (~10 fps speed-up branch) |
+| 0 (core) | **VGGT-Long** (Deng et al., ICRA 2026) | 3D foundation model (VGGT), overlapping chunks, loop closure | ✅ github.com/DengKaiCQ/VGGT-Long | default chunk (60 frames, 640x480) needs ~31.6 GB: 16 GB laptop not enough, runs on a 48 GB cluster GPU |
+| 1 | **Map-Long / MapAnything** (same VGGT-Long pipeline, MapAnything backbone) | 3D foundation model with **metric** scale → SE(3) | ✅ supported by the VGGT-Long repo since 12/2025 | same container and runner; answers "does a foundation model recover metric scale?" |
+| 2 | **DA3-Streaming** (Depth Anything 3, long-sequence variant) | depth foundation model, chunked | ✅ in the Depth-Anything-3 repo | optional |
+| 3 | **MASt3R-SLAM** (Murai, Dexheimer, Davison, CVPR 2025) | 3D foundation model, image pairs, dense | ✅ image folder or video input, WSL branch available | authors tested on RTX 4090 (24 GB); 12 GB uncertain → GPU cluster |
+| 4 | **cuVSLAM** (Korovko et al., NVIDIA, 2025) | classical geometric, CUDA-accelerated | ✅ PyCuVSLAM wheel, Ubuntu 22.04/24.04, CUDA 12/13, NVIDIA Community License | light, runs on Jetson |
+| 5 | **DPV-SLAM** (Lipson, Teed, Deng, ECCV 2024) | learned sparse patches + loop closure | ✅ Python | mid-range GPU |
+
+**Not used: Gaussian-splatting maps and rendering metrics (PSNR / SSIM / LPIPS)** - decision 2026-10-26. A splatting
+map can render plausible images from every viewpoint while its geometry is wrong (floaters, holes, misplaced
+surfaces), so image similarity is not a statement about map accuracy. Map quality is evaluated geometrically
+against the LiDAR pseudo-ground truth instead (Section 5.5). MonoGS and VGGT-Long-Gsplat are therefore dropped.
 
 Not included: FoundationSLAM (Wu et al., AAAI 2026), because no public code was found. GPU-heavy alternatives such as DROID-SLAM are mentioned in related work only.
 
 How it fits the paper:
 - **Main table:** only the 4 core systems. The deep dive gets one sentence plus a figure in the main text and full results in the **appendix**, which the course allows. It also makes a strong slide in the final presentation.
-- **Theory angle:** Classical geometric (cuVSLAM) vs. learned (DPV-SLAM) vs. foundation models (VGGT-Long on chunks, MASt3R-SLAM on image pairs) vs. neural rendering (MonoGS). The key question is whether learned priors make monocular SLAM **more robust** (darkness, dynamics) and whether foundation models recover approximately correct scale. To answer it, report the estimated Sim(3) scale factor.
-- **MonoGS bonus:** It reports **PSNR / SSIM / LPIPS**, the standard rendering-quality metrics in Gaussian-splatting SLAM papers. PSNR is explicitly listed on the kick-off slides. This gives a quantitative map metric without a reference map.
+- **Theory angle:** Foundation models with relative scale (VGGT-Long) vs. metric scale (MapAnything) on the same chunking pipeline, then image pairs (MASt3R-SLAM) vs. classical geometric (cuVSLAM) vs. learned patches (DPV-SLAM). Key questions: do learned priors make monocular SLAM **more robust** (darkness, dynamics), and does a metric foundation model recover the true scale (SE(3) instead of Sim(3))? Report the Sim(3) scale factor for all.
 - **Time-box:** Work through the systems in priority order. Stop when the time budget for the deep dive is used up.
 
 **Fairness rule (all systems):** Every system runs with the authors' **default parameters** for the matching sensor. Only sensor calibration and topic names are adapted. Any other change is documented and equally allowed for everyone.
@@ -212,7 +217,7 @@ These are measurements, not metrics, following the practice in SLAMBench and Tre
   - Two evaluation volumes, both reported: **room** (whole reference, a LiDAR's view of the ceiling counts) and
     **common** (floor to 2.5 m, what a forward-looking camera can observe at all).
   - 2D grids: mean nearest-neighbour distance to the reference map (Santos et al. 2013).
-- **Rendering quality** for MonoGS: PSNR / SSIM / LPIPS as defined in the Gaussian-splatting SLAM literature.
+- **No rendering metrics** (PSNR / SSIM / LPIPS): not a measure of geometric map accuracy, see Section 3.2.
 
 ### 5.6 Figures and tables for the paper
 1. **Trajectory overlay** of all 4 systems + GT, top-down, same alignment as the metric *(required)*
