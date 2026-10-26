@@ -1,0 +1,36 @@
+{
+  "system": "Map-Long calibrated (VGGT-Long + MapAnything + intrinsics)",
+  "slug": "map_long_calib",
+  "member": "Elias Bitsch",
+  "sequence": "Varying-illu01",
+  "run": 0,
+  "started": "2026-10-26T12:56:23",
+  "system_source": {
+    "repository": "https://github.com/DengKaiCQ/VGGT-Long",
+    "commit": "c160869d1d99c96bb227f414afb3bc68c29c9a76",
+    "model_repository": "https://github.com/facebookresearch/map-anything (commit 3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9)",
+    "container": "docker/vggt_long/vggt_long.def",
+    "weights": "huggingface.co/facebook/map-anything (CC BY-NC 4.0, non-commercial use); SALAD + DINOv2 for loop detection"
+  },
+  "alignment": "se3",
+  "deviations_from_defaults": [
+    "Input frame rate 10 Hz instead of 30 Hz (frame_step 3), identical to VGGT-Long; see config/systems/vggt_long.yaml.",
+    "calib: True: the D435i intrinsics (calibration.md) are given to MapAnything instead of its own estimate (upstream default False). Same as map_long otherwise, so the two rows show the effect of known intrinsics."
+  ],
+  "pipeline_commit": null,
+  "hardware": {
+    "platform": "Linux-5.14.0-611.49.1.el9_7.x86_64-x86_64-with-glibc2.34",
+    "cpu": "x86_64",
+    "cpu_cores_logical": 64,
+    "ram_gib": 377.6,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 948.6867716126144,
+  "resources": {
+    "cpu_mean_percent": 7.537382744643891,
+    "ram_peak_mib": 11472.55859375,
+    "gpu_mem_peak_mib": 38768.0
+  }
+}

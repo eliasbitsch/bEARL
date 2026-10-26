@@ -77,9 +77,12 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, cal
         # PyTorch attention instead. Also set in vggt_long.def for future builds.
         env["XFORMERS_DISABLED"] = "1"
         binds = f"{image_dir}:/data:ro,{weights}:/weights:ro,{work}:/out"
-        run_sh = ROOT / "docker" / "vggt_long" / "run.sh"   # repo version wins over the copy baked into the image
+        # repo version of run.sh wins over the copy baked into the image; a per-run copy, because bash reads scripts
+        # incrementally and an edit of the repo file during a running job corrupts it
+        run_sh = ROOT / "docker" / "vggt_long" / "run.sh"
         if run_sh.exists():
-            binds += f",{run_sh}:/opt/run.sh:ro"
+            shutil.copy(run_sh, work / "run.sh")
+            binds += f",{work / 'run.sh'}:/opt/run.sh:ro"
         if calib:
             binds += f",{calib}:/calib.txt:ro"
         envs = [a for k, v in env.items() for a in ("--env", f"{k}={v}")]
