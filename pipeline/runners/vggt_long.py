@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from pipeline.common import ROOT
+from pipeline.common import ROOT, load_sequences
 
 
 def _wsl_path(p: Path) -> str:
@@ -61,10 +61,14 @@ def _subsampled_images(seq_dir: Path, step: int) -> Path:
     return dst
 
 
-def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict) -> list[str]:
+def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, calib: Path | None = None) -> list[str]:
     env = {"CHUNK_SIZE": params.get("chunk_size"), "OVERLAP": params.get("overlap"),
            "LOOP_CHUNK_SIZE": params.get("loop_chunk_size"), "LOOP_ENABLE": params.get("loop_enable"),
-           "MODEL": params.get("model"), "USING_SIM3": params.get("using_sim3")}
+           "MODEL": params.get("model"), "USING_SIM3": params.get("using_sim3"),
+           "CALIB": True if calib else None}
+    if calib:
+        k = load_sequences()["rgb_intrinsics"]
+        env.update(CALIB_W=k["w"], CALIB_H=k["h"])
     env = {k: str(v) for k, v in env.items() if v is not None}
     launcher = os.environ.get("VGGT_LONG_LAUNCHER", "docker")
     if launcher == "apptainer":
@@ -73,10 +77,17 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict) -> 
         # PyTorch attention instead. Also set in vggt_long.def for future builds.
         env["XFORMERS_DISABLED"] = "1"
         binds = f"{image_dir}:/data:ro,{weights}:/weights:ro,{work}:/out"
+        run_sh = ROOT / "docker" / "vggt_long" / "run.sh"   # repo version wins over the copy baked into the image
+        if run_sh.exists():
+            binds += f",{run_sh}:/opt/run.sh:ro"
+        if calib:
+            binds += f",{calib}:/calib.txt:ro"
         envs = [a for k, v in env.items() for a in ("--env", f"{k}={v}")]
         return ["apptainer", "run", "--nv", "--bind", binds, *envs, os.environ.get("VGGT_LONG_SIF", "vggt_long.sif")]
     cmd = ["docker", "run", "--rm", "--gpus", "all", "--ipc=host",
            "-v", f"{_host(image_dir)}:/data:ro", "-v", f"{_host(weights)}:/weights:ro", "-v", f"{_host(work)}:/out"]
+    if calib:
+        cmd += ["-v", f"{_host(calib)}:/calib.txt:ro"]
     cmd += [a for k, v in env.items() for a in ("-e", f"{k}={v}")]
     if os.name != "nt":
         cmd += ["-e", f"HOST_UID={os.getuid()}", "-e", f"HOST_GID={os.getgid()}"]
@@ -84,6 +95,13 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict) -> 
     if os.name == "nt":
         cmd = ["wsl.exe", "-d", os.environ.get("WSL_DISTRO", "Ubuntu-24.04"), "--", *cmd]
     return cmd
+
+
+def _write_kitti_calib(path: Path) -> Path:
+    """VGGT-Long reads K from a KITTI-style `P2:` line in <image_dir>/../calib.txt (mounted as /calib.txt)."""
+    k = load_sequences()["rgb_intrinsics"]
+    path.write_text(f"P2: {k['fx']} 0 {k['cx']} 0 0 {k['fy']} {k['cy']} 0 0 0 1 0\n")
+    return path
 
 
 def poses_to_tum(poses_file: Path, image_dir: Path, out_file: Path) -> int:
@@ -107,7 +125,10 @@ def run(sequence: dict, out_dir: Path, run_idx: int, cfg: dict, data_root: Path)
     work = out_dir / "vggt_long"
     work.mkdir(exist_ok=True)
 
-    cmd = _container_cmd(image_dir, weights, work, params)
+    calib = None
+    if params.get("calib"):                # MapAnything only: real intrinsics instead of its own estimate
+        calib = _write_kitti_calib(work / "calib.txt")
+    cmd = _container_cmd(image_dir, weights, work, params, calib)
     (out_dir / "command.txt").write_text(" ".join(cmd) + "\n")
     subprocess.run(cmd, check=True)
 

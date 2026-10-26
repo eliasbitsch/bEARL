@@ -14,6 +14,7 @@
 #                                          /weights/map_anything = HF snapshot of facebook/map-anything)
 #   USING_SIM3                             True / False chunk alignment; upstream: True for VGGT, False (SE(3))
 #                                          for MapAnything ("mapanything need se3")
+#   CALIB=True, CALIB_W, CALIB_H           MapAnything only: K from /calib.txt (KITTI P2 line) for a W x H image
 #   WEIGHTS_DTYPE=bf16                    keep the VGGT weights in bfloat16 on the GPU (upstream: float32 weights,
 #                                          inference under bf16 autocast); saves ~2.5 GB for 16 GB cards
 #   HOST_UID / HOST_GID                    chown the outputs to this user at the end
@@ -42,6 +43,8 @@ if os.environ.get("MODEL"):
 m = cfg["Model"]
 if os.environ.get("USING_SIM3"):
     m["using_sim3"] = os.environ["USING_SIM3"] == "True"
+if os.environ.get("CALIB") == "True":            # K from /calib.txt (KITTI P2 line), image size of that K
+    m["calib"], m["w"], m["h"] = True, int(os.environ["CALIB_W"]), int(os.environ["CALIB_H"])
 for env, key, typ in (("CHUNK_SIZE", "chunk_size", int), ("OVERLAP", "overlap", int),
                       ("LOOP_CHUNK_SIZE", "loop_chunk_size", int)):
     if os.environ.get(env):
@@ -49,7 +52,7 @@ for env, key, typ in (("CHUNK_SIZE", "chunk_size", int), ("OVERLAP", "overlap", 
 if os.environ.get("LOOP_ENABLE"):
     m["loop_enable"] = os.environ["LOOP_ENABLE"] == "True"
 yaml.safe_dump(cfg, open("/out/config_used.yaml", "w"), sort_keys=False)
-print("config:", {"model": w["model"], **{k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3")}})
+print("config:", {"model": w["model"], **{k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3", "calib")}})
 EOF
 
 if [ "${WEIGHTS_DTYPE:-}" = "bf16" ]; then
@@ -68,10 +71,28 @@ print("bf16 weights: patched VGGT adapter")
 EOF
 fi
 
+if [ "${MODEL:-}" = "Mapanything" ]; then
+    # VGGT-Long's loop detector imports its own (older) `dinov2`; MapAnything's encoder then gets that cached module
+    # from torch.hub and fails on dinov2.hub.cell_dino. The loop detector is done and freed by then, so drop it.
+    python - <<'EOF'
+import re
+p = "base_models/base_model.py"
+src = open(p).read()
+new, n = re.subn(r"^(\s*)(from mapanything\.models import MapAnything)[ \t]*$",
+                 r"\1import sys  # bEARL: MODEL=Mapanything\n"
+                 r"\1for _k in [k for k in sys.modules if k == 'dinov2' or k.startswith('dinov2.')]:\n"
+                 r"\1    del sys.modules[_k]\n\1\2", src, count=1, flags=re.M)
+if n != 1:
+    raise SystemExit("MODEL=Mapanything: patch location not found in base_models/base_model.py")
+open(p, "w").write(new)
+print("MapAnything: dropping the loop detector's dinov2 module before loading")
+EOF
+fi
+
 # VGGT-Long writes to ./exps/<image_dir>/<datetime>/ -> put that on the mounted output disk
 mkdir -p /out/exps && rm -rf exps && ln -sfn /out/exps exps
 
-echo "VGGT-Long commit: $(git rev-parse HEAD)"
+echo "VGGT-Long commit: $(cat UPSTREAM_COMMIT 2>/dev/null || git rev-parse HEAD)"
 python vggt_long.py --image_dir /data --config /out/config_used.yaml 2>&1 | tee /out/log.txt
 
 RUN_DIR=$(ls -d /out/exps/*/* | tail -1)

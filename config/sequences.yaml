@@ -25,6 +25,9 @@ reserve_sequences:
   - name: Dark03                # 170 s, 66 m, 94 % of frames near-black; cameras see almost nothing
     ground_truth: data/M3DGR/Dark03/gt_tum.txt
 
+# RealSense D435i colour camera (calibration.md, section 2): pinhole, no distortion, 640 x 480
+rgb_intrinsics: {fx: 607.79772949218, fy: 607.83526613281, cx: 328.79772949218, cy: 245.53321838378, w: 640, h: 480}
+
 # Topics in the original bags (ROS 1). Extracted/converted data lives next to each bag.
 topics:
   lidar3d: /livox/mid360/lidar          # livox CustomMsg -> converted to PointCloud2 by prepare_data.py

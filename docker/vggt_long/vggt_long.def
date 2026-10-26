@@ -34,7 +34,9 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
     python setup.py install
     # MapAnything (Keetha et al. 2025) for "Map-Long" (MODEL=Mapanything), pinned; numpy stays at upstream's 1.26.1
     MAPANYTHING_COMMIT=3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9
-    pip install --no-cache-dir "https://github.com/facebookresearch/map-anything/archive/$MAPANYTHING_COMMIT.tar.gz" \
+    # --no-deps: its rerun-sdk (viewer only) needs numpy>=2, faiss-gpu-cu12 needs numpy<2
+    pip install --no-cache-dir --no-deps "https://github.com/facebookresearch/map-anything/archive/$MAPANYTHING_COMMIT.tar.gz"
+    pip install --no-cache-dir hydra-core natsort orjson pillow-heif plyfile python-box tensorboard "uniception==0.1.7" \
         "numpy==1.26.1" "opencv-python-headless==4.10.0.84"
     chmod +x /opt/run.sh
     python -c "import torch, sim3solve, faiss, numpy; print('sim3solve + faiss ok, torch', torch.__version__, 'numpy', numpy.__version__)"
