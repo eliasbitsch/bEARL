@@ -199,11 +199,20 @@ These are measurements, not metrics, following the practice in SLAMBench and Tre
 ### 5.5 Maps
 - **Required by the slides:** one map/reconstruction per system and a **map overlay**.
   - Render each point cloud / grid map in the GT-aligned frame, same top-down view, same scale.
-- **Quantitative only if a reference map exists** (check for M3DGR; can be exported from Gazebo):
-  - Point clouds: accuracy / completeness / F-score at threshold τ (Knapitsch et al. 2017), plus Chamfer distance.
+- **Reference map:** M3DGR has none. Following the lecturer's suggestion we build a **pseudo ground truth**
+  (`pipeline/reference_map.py`): the MID-360 scans placed with the mocap poses, per point at its own timestamp.
+  The mocap-body-to-robot transform is not in the dataset and is estimated by maximising map consistency
+  (Levinson & Thrun 2010 style); three independent estimates agree to 0.07° / 5 mm. People walking through the
+  scene are removed by a persistence filter. Limitations to state: LiDAR-based (favours systems using the
+  MID-360 in accuracy), software-synchronised sensors, LiDAR noise of a few cm.
+- **Metrics** (`pipeline/map_eval.py`): accuracy / completeness / precision / recall / F-score at τ = 5 and 10 cm
+  (Knapitsch et al. 2017), plus Chamfer distance; both clouds thinned to 2 cm voxels.
+  - Alignment: trajectory alignment (as for ATE), then ICP refinement (with scale for monocular systems) as in the
+    Tanks and Temples protocol; rejected and flagged if it moves the map implausibly far.
+  - Two evaluation volumes, both reported: **room** (whole reference, a LiDAR's view of the ceiling counts) and
+    **common** (floor to 2.5 m, what a forward-looking camera can observe at all).
   - 2D grids: mean nearest-neighbour distance to the reference map (Santos et al. 2013).
 - **Rendering quality** for MonoGS: PSNR / SSIM / LPIPS as defined in the Gaussian-splatting SLAM literature.
-- Without a reference map, the map evaluation stays qualitative, and we say so honestly in the paper.
 
 ### 5.6 Figures and tables for the paper
 1. **Trajectory overlay** of all 4 systems + GT, top-down, same alignment as the metric *(required)*
