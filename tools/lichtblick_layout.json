@@ -74,6 +74,37 @@
       "isSynced": true,
       "xAxisVal": "timestamp",
       "sidebarDimension": 240
+    },
+    "Plot!speed": {
+      "title": "Speed and wheel slip [m/s]",
+      "paths": [
+        { "value": "/robot/speed_gt.data", "enabled": true, "timestampMethod": "receiveTime", "label": "speed (mocap)" },
+        { "value": "/robot/speed_wheel.data", "enabled": true, "timestampMethod": "receiveTime", "label": "speed (wheels)" },
+        { "value": "/robot/wheel_slip.data", "enabled": true, "timestampMethod": "receiveTime", "label": "wheel slip" }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    },
+    "Plot!yaw": {
+      "title": "Yaw rate [deg/s]",
+      "paths": [
+        { "value": "/robot/yaw_rate_gt.data", "enabled": true, "timestampMethod": "receiveTime", "label": "yaw rate (mocap)" },
+        { "value": "/robot/yaw_rate_wheel.data", "enabled": true, "timestampMethod": "receiveTime", "label": "yaw rate (wheels)" }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
     }
   },
   "globalVariables": {},
@@ -83,11 +114,16 @@
     "first": "3D!traj",
     "second": {
       "first": "Image!cam",
-      "second": { "first": "Plot!err", "second": "Plot!light", "direction": "column", "splitPercentage": 55 },
+      "second": {
+        "first": { "first": "Plot!err", "second": "Plot!light", "direction": "column", "splitPercentage": 50 },
+        "second": { "first": "Plot!speed", "second": "Plot!yaw", "direction": "column", "splitPercentage": 50 },
+        "direction": "column",
+        "splitPercentage": 50
+      },
       "direction": "column",
-      "splitPercentage": 50
+      "splitPercentage": 36
     },
     "direction": "row",
-    "splitPercentage": 62
+    "splitPercentage": 58
   }
 }

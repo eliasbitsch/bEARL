@@ -16,6 +16,8 @@ Topics (all in frame "map" = mocap world frame):
   /est/map                   optional: point cloud of the SLAM map (--map file.ply), same alignment
   /gt/map                    pseudo-GT map (LiDAR along the mocap poses, pipeline.reference_map), if built;
                              hidden in the layout, switch it on in the 3D panel to compare
+  /robot/*                   driving state: speed (mocap / wheels), yaw rate, wheel slip, turn radius,
+                             IMU acceleration, distance, LiDAR points per scan (see robot_state)
 
 The visualisation is for plausibility checks only; numbers for the paper come from pipeline.evaluate.
 """
@@ -107,6 +109,69 @@ def align_full(gt: PoseTrajectory3D, est: PoseTrajectory3D, sim3: bool, max_diff
     return est, (s, np.asarray(r), np.asarray(t))
 
 
+def robot_state(bag: Path, gt: PoseTrajectory3D, cfg: dict) -> list:
+    """Driving state as Float64 topics under /robot/ (measurements for context, not metrics).
+
+    speed_gt / yaw_rate_gt from the mocap poses (smoothed to 20 Hz), speed_wheel / yaw_rate_wheel from /odom,
+    wheel_slip = |wheel speed| - true speed, turn_radius = v / omega (differential drive: no steering angle),
+    accel = dynamic acceleration from the MID-360 IMU (|a| - g), distance travelled, LiDAR points per scan.
+    No payload sensor and no GNSS in the indoor sequences.
+    """
+    from scipy.spatial.transform import Rotation
+    F = T["std_msgs/msg/Float64"]
+    out = []
+
+    def put(name, t, v):
+        out.extend((f"/robot/{name}", "std_msgs/msg/Float64", float(ti), F(data=float(vi))) for ti, vi in zip(t, v))
+
+    # 20 Hz medians against the 300 Hz mocap jitter; time = window centre (uniform steps for the derivative)
+    t, p = gt.timestamps, gt.positions_xyz
+    yaw_all = np.unwrap(Rotation.from_quat(gt.orientations_quat_wxyz[:, [1, 2, 3, 0]]).as_euler("zyx")[:, 0])
+    b = np.floor((t - t[0]) * 20).astype(int)
+    starts = np.flatnonzero(np.r_[True, np.diff(b) > 0])
+    ends = np.r_[starts[1:], len(t)]
+    tm = t[0] + (b[starts] + 0.5) / 20
+    pm = np.array([np.median(p[i:j], 0) for i, j in zip(starts, ends)])
+    yaw = np.array([np.median(yaw_all[i:j]) for i, j in zip(starts, ends)])
+    speed = np.linalg.norm(np.gradient(pm[:, :2], tm, axis=0), axis=1)
+    yaw_rate = np.degrees(np.gradient(yaw, tm))
+    put("speed_gt", tm, speed)
+    put("yaw_rate_gt", tm, yaw_rate)
+    put("distance", tm, np.r_[0, np.cumsum(np.linalg.norm(np.diff(pm[:, :2], axis=0), axis=1))])
+    radius = np.where(np.abs(np.radians(yaw_rate)) > 0.05, speed / np.maximum(np.abs(np.radians(yaw_rate)), 1e-6), np.nan)
+    ok = np.isfinite(radius)
+    put("turn_radius", tm[ok], np.minimum(radius[ok], 5.0))
+
+    topics = cfg["topics"]
+    with AnyReader([bag]) as reader:
+        conns = {c.topic: c for c in reader.connections}
+        tw, vw, ww = [], [], []
+        for conn, _, raw in reader.messages(connections=[conns[topics["wheel_odom"]]]):
+            m = reader.deserialize(raw, conn.msgtype)
+            tw.append(m.header.stamp.sec + m.header.stamp.nanosec * 1e-9)
+            vw.append(m.twist.twist.linear.x)
+            ww.append(np.degrees(m.twist.twist.angular.z))
+        tw, vw = np.array(tw), np.abs(np.array(vw))
+        put("speed_wheel", tw, vw)
+        put("yaw_rate_wheel", tw, ww)
+        put("wheel_slip", tw, vw - np.interp(tw, tm, speed))
+        ti, acc = [], []
+        for k, (conn, _, raw) in enumerate(reader.messages(connections=[conns[topics["imu"]]])):
+            if k % 10:                                          # 200 Hz -> 20 Hz
+                continue
+            m = reader.deserialize(raw, conn.msgtype)
+            a = m.linear_acceleration
+            ti.append(m.header.stamp.sec + m.header.stamp.nanosec * 1e-9)
+            acc.append((np.linalg.norm([a.x, a.y, a.z]) - 1.0) * 9.81)  # Livox IMU reports in g
+        put("accel", ti, acc)
+        ts, npts = [], []
+        for conn, t_bag, raw in reader.messages(connections=[conns[topics["lidar3d"]]]):
+            ts.append(t_bag * 1e-9)
+            npts.append(int.from_bytes(bytes(raw)[16 + int.from_bytes(bytes(raw)[12:16], "little") + 8:][:4], "little"))
+        put("lidar_points", ts, npts)
+    return out
+
+
 def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None, label: str) -> None:
     cfg = load_sequences()
     seq_dir = ROOT / cfg["data_root"] / seq
@@ -175,6 +240,8 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
             grey = cv2.imdecode(data, cv2.IMREAD_GRAYSCALE)
             msgs.append(("/camera/brightness", "std_msgs/msg/Float64", t,
                          T["std_msgs/msg/Float64"](data=float(grey.mean()))))
+
+    msgs += robot_state(bag, gt, cfg)
 
     if map_file is not None:
         cloud = _cloud(map_file, sim, t0)
