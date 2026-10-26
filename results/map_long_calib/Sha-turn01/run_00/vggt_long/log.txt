@@ -48,12 +48,12 @@ Top 10 loop pairs:
 Loading model...
 Loading MapAnything model...
 Loading pretrained dinov2_vitg14 from torch hub
-Using cache found in /gpfs/adafs/home/elias.bitsch/.cache/torch/hub/facebookresearch_dinov2_main
-/gpfs/adafs/home/elias.bitsch/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:45: UserWarning: xFormers is disabled (SwiGLU)
+Using cache found in ~/.cache/torch/hub/facebookresearch_dinov2_main
+~/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:45: UserWarning: xFormers is disabled (SwiGLU)
   warnings.warn("xFormers is disabled (SwiGLU)")
-/gpfs/adafs/home/elias.bitsch/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:29: UserWarning: xFormers is disabled (Attention)
+~/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:29: UserWarning: xFormers is disabled (Attention)
   warnings.warn("xFormers is disabled (Attention)")
-/gpfs/adafs/home/elias.bitsch/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:35: UserWarning: xFormers is disabled (Block)
+~/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:35: UserWarning: xFormers is disabled (Block)
   warnings.warn("xFormers is disabled (Block)")
 Loading weights from local directory
 [Progress]: 0/45
