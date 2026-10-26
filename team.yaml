@@ -64,7 +64,17 @@ extras:
     loop_closure: false
     hardware: null
 
-  # RGB-only deep dive: second foundation-model system on the same images.
+  # RGB-only deep dive 1: same VGGT-Long pipeline with the metric foundation model MapAnything.
+  - owner: Elias Bitsch
+    slug: map_long
+    system: Map-Long (VGGT-Long + MapAnything)
+    paper: keetha2025mapanything
+    sensors: [rgb]
+    alignment: se3
+    loop_closure: true
+    hardware: ADA cluster, 48 GB MIG slice of an RTX PRO 6000 Blackwell
+
+  # RGB-only deep dive 2: foundation model on image pairs.
   - owner: Elias Bitsch
     slug: mast3r_slam
     system: MASt3R-SLAM

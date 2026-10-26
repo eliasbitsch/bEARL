@@ -10,7 +10,11 @@
 # Environment (all optional; empty = upstream default from configs/base_config.yaml):
 #   CHUNK_SIZE, OVERLAP, LOOP_CHUNK_SIZE   chunking (defaults 60 / 30 / 20; smaller only for GPU memory)
 #   LOOP_ENABLE                            True / False
-#   WEIGHTS_DTYPE=bf16                     keep the VGGT weights in bfloat16 on the GPU (upstream: float32 weights,
+#   MODEL                                  VGGT (default) or Mapanything ("Map-Long", metric; weights in
+#                                          /weights/map_anything = HF snapshot of facebook/map-anything)
+#   USING_SIM3                             True / False chunk alignment; upstream: True for VGGT, False (SE(3))
+#                                          for MapAnything ("mapanything need se3")
+#   WEIGHTS_DTYPE=bf16                    keep the VGGT weights in bfloat16 on the GPU (upstream: float32 weights,
 #                                          inference under bf16 autocast); saves ~2.5 GB for 16 GB cards
 #   HOST_UID / HOST_GID                    chown the outputs to this user at the end
 #
@@ -32,7 +36,12 @@ w = cfg["Weights"]
 w["VGGT"] = "/weights/model.pt"
 w["SALAD"] = "/weights/dino_salad.ckpt"
 w["DNIO"] = "/weights/dinov2_vitb14_pretrain.pth"
+w["Map"] = "/weights/map_anything"
+if os.environ.get("MODEL"):
+    w["model"] = os.environ["MODEL"]
 m = cfg["Model"]
+if os.environ.get("USING_SIM3"):
+    m["using_sim3"] = os.environ["USING_SIM3"] == "True"
 for env, key, typ in (("CHUNK_SIZE", "chunk_size", int), ("OVERLAP", "overlap", int),
                       ("LOOP_CHUNK_SIZE", "loop_chunk_size", int)):
     if os.environ.get(env):
@@ -40,7 +49,7 @@ for env, key, typ in (("CHUNK_SIZE", "chunk_size", int), ("OVERLAP", "overlap", 
 if os.environ.get("LOOP_ENABLE"):
     m["loop_enable"] = os.environ["LOOP_ENABLE"] == "True"
 yaml.safe_dump(cfg, open("/out/config_used.yaml", "w"), sort_keys=False)
-print("config:", {k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3")})
+print("config:", {"model": w["model"], **{k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3")}})
 EOF
 
 if [ "${WEIGHTS_DTYPE:-}" = "bf16" ]; then

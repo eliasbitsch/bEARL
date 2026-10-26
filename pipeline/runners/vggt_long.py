@@ -63,7 +63,8 @@ def _subsampled_images(seq_dir: Path, step: int) -> Path:
 
 def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict) -> list[str]:
     env = {"CHUNK_SIZE": params.get("chunk_size"), "OVERLAP": params.get("overlap"),
-           "LOOP_CHUNK_SIZE": params.get("loop_chunk_size"), "LOOP_ENABLE": params.get("loop_enable")}
+           "LOOP_CHUNK_SIZE": params.get("loop_chunk_size"), "LOOP_ENABLE": params.get("loop_enable"),
+           "MODEL": params.get("model"), "USING_SIM3": params.get("using_sim3")}
     env = {k: str(v) for k, v in env.items() if v is not None}
     launcher = os.environ.get("VGGT_LONG_LAUNCHER", "docker")
     if launcher == "apptainer":

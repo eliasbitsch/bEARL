@@ -2,6 +2,7 @@
 # VGGT-Long on the ADA cluster: one array task per (sequence, run), 48 GB GPU (MIG 2g.48gb), not preemptible.
 #   cd <repo> && sbatch cluster/run_vggt_long.sh            # all 3 sequences x 5 runs
 #   sbatch --array=0 cluster/run_vggt_long.sh               # only Dynamic01, run 0 (smoke test)
+#   SLUG=map_long sbatch --export=ALL --array=0,5,10 cluster/run_vggt_long.sh   # Map-Long, run 0 of each sequence
 # Needs: containers/vggt_long.sif (cluster/build_vggt_long.sh), weights in $VGGT_LONG_WEIGHTS,
 #        data/M3DGR/<seq>/{rgb_step3/, gt_tum.txt}, and a Python env with numpy, scipy, pyyaml, psutil.
 #SBATCH --job-name=vggt-long
@@ -27,4 +28,4 @@ export VGGT_LONG_LAUNCHER=apptainer
 export VGGT_LONG_SIF="$SLURM_SUBMIT_DIR/containers/vggt_long.sif"
 export VGGT_LONG_WEIGHTS="${VGGT_LONG_WEIGHTS:-$HOME/bearl/weights/vggt_long}"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
-python -m pipeline.run_all --system vggt_long --sequence "$SEQ" --run "$RUN"
+python -m pipeline.run_all --system "${SLUG:-vggt_long}" --sequence "$SEQ" --run "$RUN"

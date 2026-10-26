@@ -32,9 +32,14 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
     pip install --no-cache-dir -r requirements.txt "safetensors==0.5.3" pyyaml \
         "opencv-python-headless==4.10.0.84" "pypose==0.9.5" trimesh "matplotlib<3.10" "numpy==1.26.1"
     python setup.py install
+    # MapAnything (Keetha et al. 2025) for "Map-Long" (MODEL=Mapanything), pinned; numpy stays at upstream's 1.26.1
+    MAPANYTHING_COMMIT=3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9
+    pip install --no-cache-dir "https://github.com/facebookresearch/map-anything/archive/$MAPANYTHING_COMMIT.tar.gz" \
+        "numpy==1.26.1" "opencv-python-headless==4.10.0.84"
     chmod +x /opt/run.sh
     python -c "import torch, sim3solve, faiss, numpy; print('sim3solve + faiss ok, torch', torch.__version__, 'numpy', numpy.__version__)"
     python -c "import vggt_long, base_models.base_model, loop_utils.sim3loop, LoopModels.LoopModel; print('VGGT-Long imports ok')"
+    python -c "from mapanything.models import MapAnything; from mapanything.utils.image import load_images; print('MapAnything imports ok')"
 
 %runscript
     exec /opt/run.sh "$@"
