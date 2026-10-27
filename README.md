@@ -10,7 +10,7 @@ Each member evaluates **one SLAM system of their own choice**. Everything else i
 
 | Member | SLAM system | Sensors | Status |
 |---|---|---|---|
-| Elias Bitsch | VGGT-Long (backup: FAST-LIO2) | monocular RGB | system chosen, runner to do |
+| Elias Bitsch | VGGT-Long | monocular RGB | done (3 sequences x 5 runs) |
 | Philip Stix | GLIM | 3D LiDAR (Livox MID-360) + IMU | system chosen, runner to do |
 | Viktoriia Ovdiienko | *to be chosen* | | |
 | Jiayi Zhou | *to be chosen* | | |

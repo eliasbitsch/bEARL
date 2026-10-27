@@ -25,7 +25,6 @@ Each member adds the paper(s) for their own chosen system here and to `paper/ref
 |---|---|
 | ⭐ Deng, Ti, Xu, Yang, Xie, *VGGT-Long: Chunk it, Loop it, Align it*, ICRA 2026 (`deng2026vggtlong`) | Monocular, VGGT on overlapping chunks + loop closure (Elias, main) |
 | Wang et al., *VGGT: Visual Geometry Grounded Transformer*, CVPR 2025 (`wang2025vggt`) | The foundation model behind VGGT-Long |
-| Xu, Cai, He, Lin, Zhang, *FAST-LIO2: Fast Direct LiDAR-Inertial Odometry*, T-RO 2022 (`xu2022fastlio2`) | LiDAR-inertial, iterated Kalman filter, no loop closure (Elias, backup) |
 | Murai, Dexheimer, Davison, *MASt3R-SLAM: Real-Time Dense SLAM with 3D Reconstruction Priors*, CVPR 2025 (`murai2025mast3rslam`) | Monocular, 3D foundation-model prior, dense (Elias, deep dive) |
 | Leroy, Cabon, Revaud, *Grounding Image Matching in 3D with MASt3R*, ECCV 2024 (`leroy2024mast3r`) | The foundation model behind MASt3R-SLAM |
 | Wang et al., *DUSt3R: Geometric 3D Vision Made Easy*, CVPR 2024 (`wang2024dust3r`) | Predecessor of MASt3R |

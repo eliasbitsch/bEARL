@@ -1,6 +1,6 @@
 # Monocular RGB SLAM options (Elias)
 
-Candidate SLAM systems that use only a single RGB camera. VGGT-Long is the main system for the group comparison (backup: FAST-LIO2, LiDAR-inertial); the others form the optional RGB-only deep dive (see [PLAN.md, Section 3.2](PLAN.md#32-rgb-only-deep-dive-elias-optional-extension)).
+Candidate SLAM systems that use only a single RGB camera. VGGT-Long is the main system for the group comparison; the others form the optional RGB-only deep dive (see [PLAN.md, Section 3.2](PLAN.md#32-rgb-only-deep-dive-elias-optional-extension)).
 
 | System | Approach | Strength | Hardware |
 |---|---|---|---|

@@ -103,8 +103,6 @@ Known pitfalls (resolve in week 1):
 
 **Why VGGT-Long (Elias):** Recommended by the lecturer as the visual option, with the caveat that visual SLAM in general depends strongly on scene texture and illumination. That caveat is exactly what `Varying-illu01` (light switched on and off) tests, so losing track there is a result (success rate, tracked fraction), not a gap; the interesting question is whether tracking recovers when the light returns. VGGT-Long was designed for kilometre-scale outdoor sequences (KITTI); on our short indoor sequences its chunking mainly keeps GPU memory bounded, while its long-range scale-drift advantage barely applies. Mention this in the discussion.
 
-**Backup (Elias): FAST-LIO2** (Xu et al., T-RO 2022), MID-360 + IMU. Used only if VGGT-Long cannot be brought to run on M3DGR. It shares GLIM's sensors but differs in paradigm: iterated Kalman filter without loop closure vs. graph optimisation with loop closure.
-
 ### 3.2 RGB-only deep dive (Elias, optional extension)
 
 All of these run on **the same monocular RGB images**. They all share the same fundamental limitation: a single camera cannot observe metric scale. They differ in paradigm:

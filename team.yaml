@@ -53,17 +53,6 @@ members:
 
 # Optional extra systems (e.g. the RGB-only deep dive). Same fields, plus "owner".
 extras:
-  # Backup for Elias if VGGT-Long fails on M3DGR (e.g. darkness). Contrast to GLIM:
-  # same sensors, but iterated Kalman filter without loop closure vs. graph optimisation.
-  - owner: Elias Bitsch
-    slug: fast_lio2
-    system: FAST-LIO2
-    paper: xu2022fastlio2
-    sensors: [lidar3d, imu]
-    alignment: se3
-    loop_closure: false
-    hardware: null
-
   # RGB-only deep dive 1: same VGGT-Long pipeline with the metric foundation model MapAnything.
   - owner: Elias Bitsch
     slug: map_long
