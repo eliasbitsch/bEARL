@@ -5,16 +5,22 @@ member: Elias Bitsch
 
 source:
   repository: https://github.com/rmurai0610/MASt3R-SLAM
-  commit: TODO
-  container: docker/mast3r_slam/Dockerfile
+  commit: e6f4e3d474fad0e11f561482012be864ba8c3f17
+  container: docker/mast3r_slam/mast3r_slam.def (cluster), docker/mast3r_slam/Dockerfile (local)
+  weights: MASt3R ViT-L 512 catmlpdpt metric + retrieval checkpoints (naverlabs, see upstream README)
 
 sensors: [rgb]
 
 # Monocular -> scale is unobservable -> Sim(3) alignment (Zhang & Scaramuzza 2018)
 alignment: sim3
 
-parameter_file: TODO          # config/base.yaml of the upstream repo + intrinsics from M3DGR calibration.md
-deviations_from_defaults: []
+parameter_file: config/base.yaml of the upstream repo (uncalibrated, upstream default)
+parameters:
+  frame_step: 1               # all frames, 30 Hz (upstream default for video input)
+  config: base
+deviations_from_defaults:
+  - "Upstream's image-folder loader only reads *.png; run.sh extends the glob to *.jpg (M3DGR frames are JPEGs)."
 
 execution:
   mode: offline               # reads the extracted RGB image folder
+  output: keyframe poses only (upstream evaluation protocol); tracked_fraction refers to the keyframe span

@@ -1,0 +1,36 @@
+# MASt3R-SLAM as an Apptainer image for the ADA cluster (Blackwell GPUs, SM 12.0).
+# Same upstream commit as the Dockerfile; PyTorch 2.7.1 + CUDA 12.8 because SM 12.0 needs CUDA >= 12.8.
+#
+# Build (no root needed):
+#   apptainer build --fakeroot --ignore-fakeroot-command mast3r_slam.sif docker/mast3r_slam/mast3r_slam.def
+# Run: apptainer run --nv --bind <images>:/data:ro,<checkpoints>:/ckpt:ro,<out>:/out mast3r_slam.sif
+Bootstrap: docker
+From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+
+%files
+    run.sh /opt/run.sh
+
+%environment
+    export PYTHONUNBUFFERED=1
+
+%post
+    set -e
+    export TORCH_CUDA_ARCH_LIST="8.6;12.0" MAX_JOBS=8
+    # root-mapped build namespace: apt must not drop privileges to its _apt user
+    apt-get -o APT::Sandbox::User=root update && apt-get -o APT::Sandbox::User=root install -y --no-install-recommends \
+        git libgl1 libegl1 libglib2.0-0 libglfw3 && rm -rf /var/lib/apt/lists/*
+    COMMIT=e6f4e3d474fad0e11f561482012be864ba8c3f17
+    cd /opt
+    git clone https://github.com/rmurai0610/MASt3R-SLAM.git && cd MASt3R-SLAM && git checkout $COMMIT \
+        && git submodule update --init --recursive
+    # setup.py only builds the CUDA backend when a GPU is visible; there is none during the build
+    sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
+    pip install --no-cache-dir -e thirdparty/mast3r
+    pip install --no-cache-dir -e thirdparty/in3d
+    pip install --no-cache-dir --no-build-isolation -e .
+    chmod +x /opt/run.sh
+    python -c "import torch, mast3r_slam_backends, lietorch; print('backends ok, torch', torch.__version__)"
+    python -c "import mast3r_slam.dataloader, mast3r_slam.evaluate, mast3r_slam.visualization; print('MASt3R-SLAM imports ok')"
+
+%runscript
+    exec /opt/run.sh "$@"
