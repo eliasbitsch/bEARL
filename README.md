@@ -80,10 +80,11 @@ Tested with Python 3.10–3.12. ROS is **not** required for the evaluation. It i
    ```bash
    python -m pipeline.prepare_data --bag data/M3DGR/Dynamic01.bag --sequence Dynamic01
    ```
-   This copies the GT to `data/M3DGR/<seq>/gt_tum.txt` and extracts the RGB images (JPEG, unchanged from the bag). Still to be implemented by the data role:
-   - depth images;
-   - Livox to `PointCloud2` conversion;
-   - ROS 2 copies of the bags.
+   This copies the GT to `data/M3DGR/<seq>/gt_tum.txt` and extracts the RGB images (JPEG, unchanged from the bag).
+   With `--ros2` it also writes a ROS 2 Humble copy (`data/M3DGR/<seq>_ros2/`, MCAP, ~4.6 GB) that contains every topic
+   plus `sensor_msgs/PointCloud2` versions of the Livox topics (`/livox/mid360/lidar_points`, `/livox/avia/lidar_points`;
+   fields `x y z intensity tag line`, `t` = seconds since scan start, `timestamp` = absolute seconds).
+   Still open: depth images.
 
 ## Repository layout
 
