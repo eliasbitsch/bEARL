@@ -85,6 +85,15 @@ Tested with Python 3.10–3.12. ROS is **not** required for the evaluation. It i
    plus `sensor_msgs/PointCloud2` versions of the Livox topics (`/livox/mid360/lidar_points`, `/livox/avia/lidar_points`;
    fields `x y z intensity tag line`, `t` = seconds since scan start, `timestamp` = absolute seconds).
    Still open: depth images.
+3. Play a sequence in ROS 2 and watch it live (lab session 1: playback + visualisation):
+   ```bash
+   docker build -t bearl/ros2_playback docker/ros2_playback
+   docker run --rm --network host -v $PWD/data/M3DGR:/data:ro bearl/ros2_playback Dynamic01_ros2
+   ```
+   Then open Foxglove or Lichtblick, *Open connection* -> *Foxglove WebSocket* -> `ws://localhost:8765`
+   (`-e PORT=8766` if the port is taken) and import `tools/lichtblick_live_layout.json` (point cloud, camera, odometry).
+   `python -m pipeline.visualize` writes an offline replay of a SLAM run (GT vs. estimate, maps, driving state) for
+   `tools/lichtblick_layout.json`.
 
 ## Repository layout
 
