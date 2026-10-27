@@ -84,6 +84,16 @@ extras:
     loop_closure: true
     hardware: ADA cluster, 48 GB MIG slice of an RTX PRO 6000 Blackwell
 
+  # Diagnostic: map_long with Sim(3) chunk alignment (deviation from upstream).
+  - owner: Elias Bitsch
+    slug: map_long_sim3
+    system: Map-Long Sim(3) (diagnostic)
+    paper: keetha2025mapanything
+    sensors: [rgb]
+    alignment: sim3
+    loop_closure: true
+    hardware: ADA cluster, 48 GB MIG slice of an RTX PRO 6000 Blackwell
+
   # RGB-only deep dive 2: foundation model on image pairs.
   - owner: Elias Bitsch
     slug: mast3r_slam
