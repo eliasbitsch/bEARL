@@ -98,7 +98,7 @@ Known pitfalls (resolve in week 1):
 |---|---|---|---|---|---|
 | Elias Bitsch | **VGGT-Long** (Deng et al., ICRA 2026) | monocular RGB | 3D foundation model (VGGT), chunked + Sim(3) chunk alignment | yes | RTX 3080 Ti / GPU cluster |
 | Philip Stix | *your choice* | | | | |
-| Viktoriia Ovdiienko | *your choice* | | | | |
+| Viktoriia Ovdiienko | **ORB-SLAM3** (Campos et al., T-RO 2021) | RGB camera (RealSense D435i) + IMU | feature-based visual-inertial, keyframe graph optimisation | yes | Intel i5-1155G7, 8 GB RAM, no GPU |
 | Jiayi Zhou | *your choice* | | | | |
 
 **Why VGGT-Long (Elias):** Recommended by the lecturer as the visual option, with the caveat that visual SLAM in general depends strongly on scene texture and illumination. That caveat is exactly what `Varying-illu01` (light switched on and off) tests, so losing track there is a result (success rate, tracked fraction), not a gap; the interesting question is whether tracking recovers when the light returns. VGGT-Long was designed for kilometre-scale outdoor sequences (KITTI); on our short indoor sequences its chunking mainly keeps GPU memory bounded, while its long-range scale-drift advantage barely applies. Mention this in the discussion.
