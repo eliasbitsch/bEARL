@@ -27,6 +27,9 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
     sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
     # Tensor.type() no longer converts to ScalarType in PyTorch >= 2.6
     sed -i 's/tokens\.type()/tokens.scalar_type()/' thirdparty/mast3r/dust3r/croco/models/curope/kernels.cu
+    sed -i 's/D11\.type()/D11.scalar_type()/' mast3r_slam/backend/src/matching_kernels.cu
+    # torch::linalg:: is gone from the C++ API; plain 2-norm of the flattened step is the same thing
+    sed -i 's/torch::linalg::linalg_norm(dx, std::optional<c10::Scalar>(), {}, false, {})/dx.norm()/' mast3r_slam/backend/src/gn_kernels.cu
     pip install --no-cache-dir -e thirdparty/mast3r
     pip install --no-cache-dir -e thirdparty/in3d
     pip install --no-cache-dir --no-build-isolation -e .
