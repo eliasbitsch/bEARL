@@ -25,6 +25,8 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
         && git submodule update --init --recursive
     # setup.py only builds the CUDA backend when a GPU is visible; there is none during the build
     sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
+    # Tensor.type() no longer converts to ScalarType in PyTorch >= 2.6
+    sed -i 's/tokens\.type()/tokens.scalar_type()/' thirdparty/mast3r/dust3r/croco/models/curope/kernels.cu
     pip install --no-cache-dir -e thirdparty/mast3r
     pip install --no-cache-dir -e thirdparty/in3d
     pip install --no-cache-dir --no-build-isolation -e .

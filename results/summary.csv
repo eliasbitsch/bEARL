@@ -2,6 +2,9 @@ system,sequence,successes,runs,ate_rmse_median_m,ate_rmse_iqr_m,tracked_fraction
 Map-Long (VGGT-Long + MapAnything),Dynamic01,1,1,4.271234911173724,0.0,0.9993146614328626,1.0
 Map-Long (VGGT-Long + MapAnything),Sha-turn01,1,1,12.390877168508226,0.0,0.9989200081733174,1.0
 Map-Long (VGGT-Long + MapAnything),Varying-illu01,1,1,16.01090161659596,0.0,0.998832185668574,1.0
+Map-Long Sim(3) (diagnostic),Dynamic01,1,1,0.40653006742069503,0.0,0.9993146614328626,0.38407698643397914
+Map-Long Sim(3) (diagnostic),Sha-turn01,1,1,0.6441638012210039,0.0,0.9989200081733174,0.34466434929466805
+Map-Long Sim(3) (diagnostic),Varying-illu01,1,1,2.189852414893057,0.0,0.6657578039048405,0.1038067583952033
 Map-Long calibrated (VGGT-Long + MapAnything + intrinsics),Dynamic01,1,1,4.818689115598303,0.0,0.9993146614328626,1.0
 Map-Long calibrated (VGGT-Long + MapAnything + intrinsics),Sha-turn01,1,1,12.172172744454452,0.0,0.9989200081733174,1.0
 Map-Long calibrated (VGGT-Long + MapAnything + intrinsics),Varying-illu01,1,1,17.270005494283325,0.0,0.998832185668574,1.0
