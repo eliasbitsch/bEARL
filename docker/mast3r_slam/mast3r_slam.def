@@ -21,8 +21,10 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
         git libgl1 libegl1 libglib2.0-0 libglfw3 && rm -rf /var/lib/apt/lists/*
     COMMIT=e6f4e3d474fad0e11f561482012be864ba8c3f17
     cd /opt
-    git clone https://github.com/rmurai0610/MASt3R-SLAM.git && cd MASt3R-SLAM && git checkout $COMMIT \
-        && git submodule update --init --recursive
+    git clone https://github.com/rmurai0610/MASt3R-SLAM.git && cd MASt3R-SLAM && git checkout $COMMIT
+    # gitlab.com (eigen submodule) sometimes refuses clones under load
+    for i in 1 2 3 4 5; do git submodule update --init --recursive && break; sleep 120; done
+    git submodule status --recursive | grep -q '^-' && exit 1
     # setup.py only builds the CUDA backend when a GPU is visible; there is none during the build
     sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
     # Tensor.type() no longer converts to ScalarType in PyTorch >= 2.6
