@@ -9,7 +9,8 @@
 set -euo pipefail
 cd /opt/MASt3R-SLAM
 if [ ! -w . ]; then                       # Apptainer images are read-only; MASt3R-SLAM writes logs/ next to its code
-    cp -a /opt/MASt3R-SLAM /tmp/MASt3R-SLAM && cd /tmp/MASt3R-SLAM
+    # own folder per job (array tasks can share a node) and writable copies (image files are read-only)
+    W=$(mktemp -d /tmp/mast3r-slam.XXXXXX) && cp -a /opt/MASt3R-SLAM/. "$W"/ && chmod -R u+w "$W" && cd "$W"
 fi
 ln -sfn /ckpt checkpoints
 
@@ -23,6 +24,9 @@ if old not in src:
 open(p, "w").write(src.replace(old, 'natsorted(list((self.dataset_path).glob("*.png")) + list((self.dataset_path).glob("*.jpg")))'))
 print("RGBFiles: *.png and *.jpg")
 EOF
+
+# upstream reports every exception in tracking as "Cholesky failed"; print the real one (e.g. CUDA out of memory)
+sed -i 's/print(f"Cholesky failed {frame.frame_id}")/print(f"Cholesky failed {frame.frame_id}: {e!r}"[:300])/' mast3r_slam/tracker.py
 
 CFG="config/${CONFIG:-base}.yaml"
 cp "$CFG" /out/config_used.yaml

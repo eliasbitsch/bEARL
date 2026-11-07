@@ -83,6 +83,7 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, cal
         run_sh = ROOT / "docker" / "vggt_long" / "run.sh"
         if run_sh.exists():
             shutil.copy(run_sh, work / "run.sh")
+            os.chmod(work / "run.sh", 0o755)          # files copied to the cluster may lack the x bit
             binds += f",{work / 'run.sh'}:/opt/run.sh:ro"
         if calib:
             binds += f",{calib}:/calib.txt:ro"
@@ -93,6 +94,7 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, cal
     run_sh = ROOT / "docker" / "vggt_long" / "run.sh"
     if run_sh.exists():                    # same as for Apptainer: the repo version wins over the baked-in copy
         shutil.copy(run_sh, work / "run.sh")
+        os.chmod(work / "run.sh", 0o755)
         cmd += ["-v", f"{_host(work / 'run.sh')}:/opt/run.sh:ro"]
     if params.get("low_disk"):             # temp chunks in a Docker volume (WSL disk), not in results/
         cmd += ["-v", "bearl_vggt_long_tmp:/out/exps"]

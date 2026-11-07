@@ -27,7 +27,8 @@ set -euo pipefail
 cd /opt/VGGT-Long
 # Apptainer images are read-only, but VGGT-Long writes next to its code (./exps link, optional patch)
 if [ ! -w . ]; then
-    cp -a /opt/VGGT-Long /tmp/VGGT-Long && cd /tmp/VGGT-Long
+    # own folder per job (array tasks can share a node) and writable copies (image files are read-only)
+    W=$(mktemp -d /tmp/vggt-long.XXXXXX) && cp -a /opt/VGGT-Long/. "$W"/ && chmod -R u+w "$W" && cd "$W"
 fi
 
 python - <<'EOF'
