@@ -1,0 +1,36 @@
+{
+  "system": "VGGT-Long 16 GB (chunk 30)",
+  "slug": "vggt_long_16gb",
+  "member": "Elias Bitsch",
+  "sequence": "Varying-illu01",
+  "run": 0,
+  "started": "2026-11-07T18:15:41",
+  "system_source": {
+    "repository": "https://github.com/DengKaiCQ/VGGT-Long",
+    "commit": "c160869d1d99c96bb227f414afb3bc68c29c9a76",
+    "container": "docker/vggt_long/Dockerfile",
+    "weights": "VGGT-1B (huggingface.co/facebook/VGGT-1B, model.pt), SALAD + DINOv2 for loop detection (upstream scripts/download_weights.sh)"
+  },
+  "alignment": "sim3",
+  "deviations_from_defaults": [
+    "chunk_size 30 / overlap 15 instead of 60 / 30, to fit 16 GB of GPU memory (upstream was developed on a 24 GB RTX 4090; our cluster runs peaked at ~31.6 GB). Overlap kept at half the chunk, as in the default.",
+    "loop_chunk_size 15 instead of 20: a loop chunk holds 2 x loop_chunk_size images, so 40 images ran out of memory after all 115 regular chunks had finished; 30 matches the regular chunk.",
+    "Input frame rate 10 Hz (frame_step 3), as for VGGT-Long."
+  ],
+  "pipeline_commit": "47ecf8aad1da48a7b11ea12ac6926bec6e5db533",
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "cpu_cores_logical": 20,
+    "ram_gib": 63.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU, 16384 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 1822.3340355999972,
+  "resources": {
+    "cpu_mean_percent": 13.50028451525713,
+    "ram_peak_mib": 114.33203125,
+    "gpu_mem_peak_mib": 15616.0
+  }
+}

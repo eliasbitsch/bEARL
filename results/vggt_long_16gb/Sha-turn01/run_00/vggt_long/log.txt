@@ -1,0 +1,2492 @@
+Couldn't load dpretrieval. It may not be installed.
+The exp will be saved under dir: ./exps/_data/2026-11-07-16-45-39
+config yaml file has been copied to: ./exps/_data/2026-11-07-16-45-39/config_used.yaml
+
+Warming up Numba JIT-compiled functions...
+ - _weighted_estimate_sim3_numba warmed up.
+ - _weighted_estimate_se3_numba warmed up.
+ - huber_loss_numba warmed up.
+ - compute_huber_weights_numba warmed up.
+ - compute_residuals_numba warmed up.
+ - apply_transformation_numba warmed up.
+Numba warm-up complete.
+
+init done.
+Loading images from /data...
+Found 1389 images
+Loading model...
+/opt/VGGT-Long/./LoopModels/dinov2/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/opt/VGGT-Long/./LoopModels/dinov2/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/opt/VGGT-Long/./LoopModels/dinov2/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+/opt/VGGT-Long/LoopModels/backbones/dinov2.py:36: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  self.model.load_state_dict(torch.load(vggt_long_config['Weights']['DNIO']))
+DINOv2 model loaded.
+/opt/VGGT-Long/LoopModels/LoopModel.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(self.ckpt_path))
+Model loaded: /weights/dino_salad.ckpt
+Found 1389 image files
+Extracting features:   0%|          | 0/44 [00:00<?, ?it/s]Extracting features:   2%|▏         | 1/44 [00:00<00:42,  1.02it/s]Extracting features:   5%|▍         | 2/44 [00:01<00:29,  1.44it/s]Extracting features:   7%|▋         | 3/44 [00:01<00:24,  1.68it/s]Extracting features:   9%|▉         | 4/44 [00:02<00:22,  1.82it/s]Extracting features:  11%|█▏        | 5/44 [00:02<00:20,  1.91it/s]Extracting features:  14%|█▎        | 6/44 [00:03<00:19,  1.92it/s]Extracting features:  16%|█▌        | 7/44 [00:03<00:18,  1.98it/s]Extracting features:  18%|█▊        | 8/44 [00:04<00:17,  2.03it/s]Extracting features:  20%|██        | 9/44 [00:04<00:17,  2.05it/s]Extracting features:  23%|██▎       | 10/44 [00:05<00:16,  2.04it/s]Extracting features:  25%|██▌       | 11/44 [00:05<00:16,  2.06it/s]Extracting features:  27%|██▋       | 12/44 [00:06<00:15,  2.07it/s]Extracting features:  30%|██▉       | 13/44 [00:06<00:15,  2.02it/s]Extracting features:  32%|███▏      | 14/44 [00:07<00:14,  2.05it/s]Extracting features:  34%|███▍      | 15/44 [00:07<00:13,  2.09it/s]Extracting features:  36%|███▋      | 16/44 [00:08<00:13,  2.11it/s]Extracting features:  39%|███▊      | 17/44 [00:08<00:12,  2.12it/s]Extracting features:  41%|████      | 18/44 [00:09<00:12,  2.11it/s]Extracting features:  43%|████▎     | 19/44 [00:09<00:11,  2.12it/s]Extracting features:  45%|████▌     | 20/44 [00:10<00:11,  2.13it/s]Extracting features:  48%|████▊     | 21/44 [00:10<00:10,  2.12it/s]Extracting features:  50%|█████     | 22/44 [00:11<00:10,  2.13it/s]Extracting features:  52%|█████▏    | 23/44 [00:11<00:09,  2.12it/s]Extracting features:  55%|█████▍    | 24/44 [00:11<00:09,  2.14it/s]Extracting features:  57%|█████▋    | 25/44 [00:12<00:08,  2.12it/s]Extracting features:  59%|█████▉    | 26/44 [00:12<00:08,  2.12it/s]Extracting features:  61%|██████▏   | 27/44 [00:13<00:08,  2.10it/s]Extracting features:  64%|██████▎   | 28/44 [00:13<00:07,  2.10it/s]Extracting features:  66%|██████▌   | 29/44 [00:14<00:07,  2.14it/s]Extracting features:  68%|██████▊   | 30/44 [00:14<00:06,  2.13it/s]Extracting features:  70%|███████   | 31/44 [00:15<00:06,  2.15it/s]Extracting features:  73%|███████▎  | 32/44 [00:15<00:05,  2.14it/s]Extracting features:  75%|███████▌  | 33/44 [00:16<00:05,  2.13it/s]Extracting features:  77%|███████▋  | 34/44 [00:16<00:04,  2.09it/s]Extracting features:  80%|███████▉  | 35/44 [00:17<00:04,  2.08it/s]Extracting features:  82%|████████▏ | 36/44 [00:17<00:03,  2.07it/s]Extracting features:  84%|████████▍ | 37/44 [00:18<00:03,  2.07it/s]Extracting features:  86%|████████▋ | 38/44 [00:18<00:02,  2.09it/s]Extracting features:  89%|████████▊ | 39/44 [00:19<00:02,  2.09it/s]Extracting features:  91%|█████████ | 40/44 [00:19<00:01,  2.08it/s]Extracting features:  93%|█████████▎| 41/44 [00:20<00:01,  2.09it/s]Extracting features:  95%|█████████▌| 42/44 [00:20<00:00,  2.08it/s]Extracting features:  98%|█████████▊| 43/44 [00:21<00:00,  2.09it/s]Extracting features: 100%|██████████| 44/44 [00:21<00:00,  2.52it/s]Extracting features: 100%|██████████| 44/44 [00:21<00:00,  2.07it/s]
+Found 16 loop pairs, results saved to ./exps/_data/2026-11-07-16-45-39/loop_closures.txt
+NMS filtering applied, threshold: 25
+
+Top 10 loop pairs:
+1215, 954, similarity: 0.9611
+825, 369, similarity: 0.9491
+793, 115, similarity: 0.9485
+736, 723, similarity: 0.9368
+599, 336, similarity: 0.9259
+490, 478, similarity: 0.9247
+257, 241, similarity: 0.9155
+1344, 1091, similarity: 0.9148
+681, 173, similarity: 0.9098
+548, 50, similarity: 0.9058
+Loading model...
+Loading VGGT model...
+Loading weights from: /weights/model.pt
+/opt/VGGT-Long/base_models/base_model.py:73: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(url, map_location='cpu')
+[Progress]: 0/91
+Loaded 30 images
+/opt/VGGT-Long/base_models/base_model.py:157: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(dtype=self.dtype):
+/opt/VGGT-Long/base_models/vggt/models/vggt.py:63: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=False):
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 1/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 2/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 3/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 4/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 5/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 6/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 7/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 8/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 9/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 10/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 11/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 12/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 13/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 14/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 15/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 16/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 17/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 18/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 19/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 20/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 21/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 22/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 23/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 24/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 25/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 26/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 27/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 28/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 29/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 30/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 31/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 32/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 33/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 34/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 35/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 36/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 37/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 38/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 39/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 40/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 41/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 42/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 43/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 44/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 45/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 46/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 47/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 48/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 49/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 50/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 51/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 52/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 53/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 54/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 55/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 56/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 57/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 58/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 59/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 60/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 61/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 62/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 63/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 64/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 65/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 66/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 67/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 68/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 69/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 70/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 71/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 72/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 73/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 74/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 75/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 76/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 77/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 78/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 79/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 80/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 81/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 82/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 83/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 84/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 85/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 86/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 87/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 88/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 89/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 90/91
+Loaded 30 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+[Progress]: 91/91
+Loaded 24 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+Loop SIM(3) estimating...
+[(81, (1215, 1229), 63, (947, 961)), (55, (825, 839), 24, (362, 376)), (52, (786, 800), 7, (108, 122)), (49, (735, 749), 48, (720, 734)), (39, (592, 606), 22, (330, 344)), (32, (483, 497), 31, (471, 485)), (17, (255, 269), 16, (240, 254)), (89, (1337, 1351), 72, (1084, 1098)), (45, (675, 689), 11, (166, 180)), (36, (541, 555), 3, (45, 59)), (56, (845, 859), 27, (405, 419)), (83, (1252, 1266), 66, (990, 1004)), (69, (1039, 1053), 68, (1024, 1038)), (43, (645, 659), 9, (135, 149)), (86, (1292, 1306), 85, (1281, 1295)), (78, (1170, 1184), 77, (1155, 1169))]
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(81, (1215, 1229), 63, (947, 961))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(55, (825, 839), 24, (362, 376))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(52, (786, 800), 7, (108, 122))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(49, (735, 749), 48, (720, 734))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(39, (592, 606), 22, (330, 344))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(32, (483, 497), 31, (471, 485))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(17, (255, 269), 16, (240, 254))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(89, (1337, 1351), 72, (1084, 1098))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(45, (675, 689), 11, (166, 180))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(36, (541, 555), 3, (45, 59))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(56, (845, 859), 27, (405, 419))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(83, (1252, 1266), 66, (990, 1004))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(69, (1039, 1053), 68, (1024, 1038))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(43, (645, 659), 9, (135, 149))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(86, (1292, 1306), 85, (1281, 1295))
+Loaded 28 images
+Converting pose encoding to extrinsic and intrinsic matrices...
+(78, (1170, 1184), 77, (1155, 1169))
+Processing 1389 images in 92 chunks of size 30 with 15 overlap
+Aligning all the chunks...
+Aligning 0 and 1 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02068982645869255
+Residuals: 0.019824523478746414
+Residuals: 0.01982801966369152
+Residuals: 0.019828040152788162
+Residuals: 0.019828040152788162
+Alignment error statistics [using 3045840 points]: mean=0.0198, std=0.0261, median=0.0106, max=0.4477
+Mean error: 0.019828040152788162
+Estimated Scale: 1.005814790725708
+Estimated Rotation:
+ [[ 0.99999195 -0.0023894   0.00320772]
+ [ 0.0023819   0.99999446  0.00233759]
+ [-0.00321328 -0.00232995  0.99999213]]
+Estimated Translation: [0.00755914 0.00317821 0.13537371]
+Aligning 1 and 2 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.020262081176042557
+Residuals: 0.020275911316275597
+Residuals: 0.02027592994272709
+Alignment error statistics [using 3045840 points]: mean=0.0203, std=0.0275, median=0.0102, max=0.4164
+Mean error: 0.02027592994272709
+Estimated Scale: 0.9330093264579773
+Estimated Rotation:
+ [[ 0.9933857   0.00369387  0.11476623]
+ [-0.00329544  0.9999879  -0.00366111]
+ [-0.11477834  0.00325872  0.99338573]]
+Estimated Translation: [ 0.03202712 -0.00388721  0.2145592 ]
+Aligning 2 and 3 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.015835333615541458
+Residuals: 0.015957044437527657
+Residuals: 0.015955450013279915
+Residuals: 0.015955479815602303
+Alignment error statistics [using 3045840 points]: mean=0.0160, std=0.0284, median=0.0077, max=0.4674
+Mean error: 0.015955476090312004
+Estimated Scale: 0.8571575284004211
+Estimated Rotation:
+ [[ 0.9999973  -0.00163577  0.00164608]
+ [ 0.00163347  0.9999977   0.00141909]
+ [-0.0016484  -0.00141638  0.9999976 ]]
+Estimated Translation: [0.02119547 0.00973934 0.28307503]
+Aligning 3 and 4 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02169627696275711
+Residuals: 0.021633166819810867
+Residuals: 0.02163340523838997
+Residuals: 0.02163340337574482
+Residuals: 0.02163337729871273
+Alignment error statistics [using 3045840 points]: mean=0.0216, std=0.0395, median=0.0093, max=0.7182
+Mean error: 0.021633382886648178
+Estimated Scale: 0.8368567824363708
+Estimated Rotation:
+ [[ 0.9371515  -0.03454121 -0.3472088 ]
+ [ 0.03194334  0.9994024  -0.01320475]
+ [ 0.34745747  0.00128379  0.93769485]]
+Estimated Translation: [-0.06149125  0.02690058  0.31124276]
+Aligning 4 and 5 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.014323337003588676
+Residuals: 0.014559739269316196
+Residuals: 0.014560534618794918
+Residuals: 0.01456050667911768
+Residuals: 0.014560508541762829
+Alignment error statistics [using 3045840 points]: mean=0.0146, std=0.0244, median=0.0085, max=0.4096
+Mean error: 0.014560508541762829
+Estimated Scale: 0.7757536172866821
+Estimated Rotation:
+ [[ 8.3200783e-01 -2.1199403e-02 -5.5435872e-01]
+ [ 1.7766228e-02  9.9977523e-01 -1.1568348e-02]
+ [ 5.5447936e-01 -2.2395852e-04  8.3219743e-01]]
+Estimated Translation: [-0.16788143  0.02698814  0.25820398]
+Aligning 5 and 6 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.008179859258234501
+Residuals: 0.008178884163498878
+Residuals: 0.008178884163498878
+Alignment error statistics [using 3045840 points]: mean=0.0082, std=0.0200, median=0.0046, max=0.7228
+Mean error: 0.008178883232176304
+Estimated Scale: 0.9633255004882812
+Estimated Rotation:
+ [[ 0.9708358  -0.00664931 -0.23965316]
+ [ 0.00523115  0.99996483 -0.00655325]
+ [ 0.23968832  0.00510842  0.9708364 ]]
+Estimated Translation: [-0.04844958  0.01107308  0.17586643]
+Aligning 6 and 7 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01373007707297802
+Residuals: 0.0135633684694767
+Residuals: 0.013562854379415512
+Residuals: 0.01356283389031887
+Alignment error statistics [using 3045840 points]: mean=0.0136, std=0.0213, median=0.0091, max=0.6606
+Mean error: 0.01356283389031887
+Estimated Scale: 1.4699712991714478
+Estimated Rotation:
+ [[ 0.7965798  -0.0164128  -0.6043106 ]
+ [ 0.02179235  0.9997613   0.00157275]
+ [ 0.60414046 -0.01442216  0.79674727]]
+Estimated Translation: [ 0.0730207  -0.01132889 -0.46319824]
+Aligning 7 and 8 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.004574218299239874
+Residuals: 0.004550430458039045
+Residuals: 0.004550411365926266
+Alignment error statistics [using 3045840 points]: mean=0.0046, std=0.0109, median=0.0025, max=0.3779
+Mean error: 0.004550410900264978
+Estimated Scale: 0.9532606601715088
+Estimated Rotation:
+ [[ 9.6848190e-01 -3.7221236e-03 -2.4905625e-01]
+ [ 3.7793864e-03  9.9999279e-01 -2.4831961e-04]
+ [ 2.4905540e-01 -7.0077420e-04  9.6848899e-01]]
+Estimated Translation: [-0.03790943  0.01375249  0.1510784 ]
+Aligning 8 and 9 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.0123591972514987
+Residuals: 0.012356708757579327
+Residuals: 0.01235662680119276
+Residuals: 0.012356613762676716
+Residuals: 0.012356612831354141
+Alignment error statistics [using 3045840 points]: mean=0.0124, std=0.0230, median=0.0086, max=0.9310
+Mean error: 0.012356615625321865
+Estimated Scale: 1.022179126739502
+Estimated Rotation:
+ [[ 9.9088454e-01 -6.5280084e-04  1.3471223e-01]
+ [ 1.5681342e-03  9.9997640e-01 -6.6890880e-03]
+ [-1.3470471e-01  6.8393503e-03  9.9086213e-01]]
+Estimated Translation: [0.11061209 0.00224897 0.34837937]
+Aligning 9 and 10 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.035541508346796036
+Residuals: 0.03559312969446182
+Residuals: 0.03559492528438568
+Residuals: 0.03559530898928642
+Residuals: 0.0355953648686409
+Alignment error statistics [using 3045840 points]: mean=0.0356, std=0.0513, median=0.0237, max=0.9712
+Mean error: 0.035595331341028214
+Estimated Scale: 1.175537347793579
+Estimated Rotation:
+ [[ 0.78621376 -0.01671136 -0.6177287 ]
+ [-0.00128376  0.99958795 -0.02867568]
+ [ 0.61795336  0.02333822  0.7858683 ]]
+Estimated Translation: [-0.20723915  0.02973803  0.2689154 ]
+Aligning 10 and 11 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.07162204384803772
+Residuals: 0.06889544427394867
+Residuals: 0.06839072704315186
+Residuals: 0.06833048909902573
+Residuals: 0.06832540035247803
+Alignment error statistics [using 3045840 points]: mean=0.0683, std=0.0550, median=0.0483, max=0.6728
+Mean error: 0.06832496076822281
+Estimated Scale: 1.0302754640579224
+Estimated Rotation:
+ [[ 0.70598704  0.02368611 -0.7078285 ]
+ [ 0.02872397  0.99766064  0.06203396]
+ [ 0.707642   -0.0641268   0.7036551 ]]
+Estimated Translation: [-0.0906108  -0.04848441  0.23042965]
+Aligning 11 and 12 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.020168356597423553
+Residuals: 0.017178162932395935
+Residuals: 0.017032543197274208
+Residuals: 0.017022116109728813
+Residuals: 0.017021294683218002
+Alignment error statistics [using 3045840 points]: mean=0.0170, std=0.0355, median=0.0097, max=0.4086
+Mean error: 0.017021313309669495
+Estimated Scale: 0.7862259149551392
+Estimated Rotation:
+ [[ 0.79123276 -0.02955101 -0.6108007 ]
+ [ 0.02962496  0.99951124 -0.00998089]
+ [ 0.6107971  -0.01019776  0.79172146]]
+Estimated Translation: [-0.15331846  0.01089947  0.20798069]
+Aligning 12 and 13 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.010521008633077145
+Residuals: 0.010660313069820404
+Residuals: 0.010661807842552662
+Residuals: 0.010661804117262363
+Residuals: 0.010661798529326916
+Alignment error statistics [using 3045840 points]: mean=0.0107, std=0.0128, median=0.0087, max=0.2211
+Mean error: 0.010661798529326916
+Estimated Scale: 0.9024595022201538
+Estimated Rotation:
+ [[ 0.72916424 -0.02721157 -0.6837976 ]
+ [ 0.02301688  0.999619   -0.01523567]
+ [ 0.68395156 -0.00462959  0.7295127 ]]
+Estimated Translation: [-0.14703625  0.02311155  0.2768827 ]
+Aligning 13 and 14 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.016621233895421028
+Residuals: 0.016521157696843147
+Residuals: 0.016518551856279373
+Residuals: 0.01651843637228012
+Residuals: 0.016518406569957733
+Alignment error statistics [using 3045840 points]: mean=0.0165, std=0.0233, median=0.0110, max=0.4879
+Mean error: 0.016518374904990196
+Estimated Scale: 1.0294549465179443
+Estimated Rotation:
+ [[ 0.8534665  -0.01545987 -0.52091825]
+ [ 0.00809948  0.9998327  -0.01640307]
+ [ 0.5210847   0.00978029  0.8534489 ]]
+Estimated Translation: [-0.17103577  0.0106686   0.2616927 ]
+Aligning 14 and 15 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.037577349692583084
+Residuals: 0.03714650869369507
+Residuals: 0.03709191828966141
+Residuals: 0.03708340600132942
+Residuals: 0.03708227723836899
+Alignment error statistics [using 3045840 points]: mean=0.0371, std=0.0364, median=0.0253, max=0.5128
+Mean error: 0.03708207979798317
+Estimated Scale: 0.9747914671897888
+Estimated Rotation:
+ [[ 9.2644531e-01 -6.8866801e-03 -3.7636632e-01]
+ [ 7.3409388e-03  9.9997300e-01 -2.2721379e-04]
+ [ 3.7635767e-01 -2.5523652e-03  9.2647094e-01]]
+Estimated Translation: [-0.08411467  0.01723891  0.2528019 ]
+Aligning 15 and 16 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.038205403834581375
+Residuals: 0.03819190710783005
+Residuals: 0.03818855062127113
+Residuals: 0.03818850964307785
+Residuals: 0.03818851709365845
+Alignment error statistics [using 3045840 points]: mean=0.0382, std=0.0287, median=0.0304, max=0.5615
+Mean error: 0.038188524544239044
+Estimated Scale: 1.3651821613311768
+Estimated Rotation:
+ [[ 0.77737653 -0.0193799  -0.628737  ]
+ [ 0.02215157  0.9997487  -0.00342743]
+ [ 0.6286454  -0.01126314  0.7776105 ]]
+Estimated Translation: [-0.00647277  0.00438055 -0.3484366 ]
+Aligning 16 and 17 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.020586909726262093
+Residuals: 0.020566454157233238
+Residuals: 0.020566340535879135
+Residuals: 0.020566321909427643
+Residuals: 0.020566321909427643
+Alignment error statistics [using 3045840 points]: mean=0.0206, std=0.0207, median=0.0166, max=0.4248
+Mean error: 0.020566321909427643
+Estimated Scale: 1.0145351886749268
+Estimated Rotation:
+ [[ 0.9876494  -0.00489995 -0.15660354]
+ [ 0.00362649  0.999958   -0.00841643]
+ [ 0.15663822  0.00774451  0.9876257 ]]
+Estimated Translation: [0.00487526 0.01085513 0.01464498]
+Aligning 17 and 18 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.019960470497608185
+Residuals: 0.02000308409333229
+Residuals: 0.020002994686365128
+Residuals: 0.020002996549010277
+Alignment error statistics [using 3045840 points]: mean=0.0200, std=0.0246, median=0.0127, max=0.4108
+Mean error: 0.020002996549010277
+Estimated Scale: 0.9410590529441833
+Estimated Rotation:
+ [[ 0.93019885  0.01338629  0.36681187]
+ [-0.00823269  0.9998442  -0.01561071]
+ [-0.36696374  0.0115012   0.93016416]]
+Estimated Translation: [0.08671284 0.00206815 0.14873266]
+Aligning 18 and 19 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01094695832580328
+Residuals: 0.01177978329360485
+Residuals: 0.011782439425587654
+Residuals: 0.011782404035329819
+Residuals: 0.011782404035329819
+Alignment error statistics [using 3045840 points]: mean=0.0118, std=0.0214, median=0.0072, max=0.3761
+Mean error: 0.011782404035329819
+Estimated Scale: 0.9178003668785095
+Estimated Rotation:
+ [[ 0.99855894 -0.00903011 -0.05290145]
+ [ 0.0092031   0.9999531   0.00302728]
+ [ 0.05287161 -0.00350974  0.9985951 ]]
+Estimated Translation: [-0.00529431  0.00800508  0.26933593]
+Aligning 19 and 20 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01634453982114792
+Residuals: 0.01599360629916191
+Residuals: 0.015990452840924263
+Residuals: 0.015990450978279114
+Residuals: 0.015990445390343666
+Alignment error statistics [using 3045840 points]: mean=0.0160, std=0.0412, median=0.0064, max=0.7779
+Mean error: 0.015990450978279114
+Estimated Scale: 0.906706690788269
+Estimated Rotation:
+ [[ 0.9484941  -0.01982182 -0.31617415]
+ [ 0.02333743  0.9997007   0.00733621]
+ [ 0.31593412 -0.01433704  0.94867283]]
+Estimated Translation: [-0.0641638   0.01053552  0.31032503]
+Aligning 20 and 21 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.020731795579195023
+Residuals: 0.0207982137799263
+Residuals: 0.020798267796635628
+Residuals: 0.02079828269779682
+Alignment error statistics [using 3045840 points]: mean=0.0208, std=0.0254, median=0.0151, max=0.3907
+Mean error: 0.02079828269779682
+Estimated Scale: 0.7840318083763123
+Estimated Rotation:
+ [[ 0.7377917  -0.04156107 -0.6737477 ]
+ [ 0.02309025  0.99907255 -0.03634411]
+ [ 0.6746334   0.01125732  0.73806715]]
+Estimated Translation: [-0.1952709   0.04888096  0.26707008]
+Aligning 21 and 22 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.014616488479077816
+Residuals: 0.014612896367907524
+Residuals: 0.01461278460919857
+Residuals: 0.014612780883908272
+Residuals: 0.014612780883908272
+Alignment error statistics [using 3045840 points]: mean=0.0146, std=0.0395, median=0.0063, max=0.5232
+Mean error: 0.014612780883908272
+Estimated Scale: 0.9467182159423828
+Estimated Rotation:
+ [[ 0.9642421  -0.00122936 -0.26502   ]
+ [ 0.00470782  0.9999109   0.01249039]
+ [ 0.26498103 -0.01329145  0.964162  ]]
+Estimated Translation: [-0.04383522 -0.00462124  0.16219151]
+Aligning 22 and 23 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.012186429463326931
+Residuals: 0.012185068801045418
+Residuals: 0.012185058556497097
+Alignment error statistics [using 3045840 points]: mean=0.0122, std=0.0168, median=0.0098, max=0.5341
+Mean error: 0.012185058556497097
+Estimated Scale: 1.4960575103759766
+Estimated Rotation:
+ [[ 0.8812012  -0.0139316  -0.47253603]
+ [ 0.01474281  0.9998894  -0.00198642]
+ [ 0.4725114  -0.00521607  0.8813091 ]]
+Estimated Translation: [ 0.04423761 -0.00651518 -0.38393366]
+Aligning 23 and 24 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.008095367811620235
+Residuals: 0.008001785725355148
+Residuals: 0.008001813665032387
+Residuals: 0.008001808077096939
+Alignment error statistics [using 3045840 points]: mean=0.0080, std=0.0142, median=0.0048, max=0.5896
+Mean error: 0.008001808077096939
+Estimated Scale: 1.0288078784942627
+Estimated Rotation:
+ [[ 0.9926177  -0.00599894 -0.12113632]
+ [ 0.00466636  0.9999255  -0.01128115]
+ [ 0.12119496  0.01063259  0.99257183]]
+Estimated Translation: [-0.01285794  0.02123111  0.19276077]
+Aligning 24 and 25 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.00894488301128149
+Residuals: 0.008952556177973747
+Residuals: 0.008952676318585873
+Alignment error statistics [using 3045840 points]: mean=0.0090, std=0.0227, median=0.0043, max=0.7115
+Mean error: 0.008952676318585873
+Estimated Scale: 0.994388997554779
+Estimated Rotation:
+ [[ 0.825152   -0.0174186  -0.56464213]
+ [ 0.01901375  0.9998145  -0.00305706]
+ [ 0.5645907  -0.0082134   0.82533014]]
+Estimated Translation: [-0.10550779  0.00882529  0.24874187]
+Aligning 25 and 26 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.028979536145925522
+Residuals: 0.028778567910194397
+Residuals: 0.028750937432050705
+Residuals: 0.028749030083417892
+Residuals: 0.028748854994773865
+Alignment error statistics [using 3045840 points]: mean=0.0287, std=0.0486, median=0.0127, max=0.8425
+Mean error: 0.02874886803328991
+Estimated Scale: 1.1033921241760254
+Estimated Rotation:
+ [[ 0.9978986   0.0111255  -0.0638332 ]
+ [-0.01225756  0.99977404 -0.01737016]
+ [ 0.0636255   0.01811607  0.9978094 ]]
+Estimated Translation: [-0.02803805  0.0156561   0.2415387 ]
+Aligning 26 and 27 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.06984000653028488
+Residuals: 0.06682617217302322
+Residuals: 0.06625775992870331
+Residuals: 0.0661151185631752
+Residuals: 0.06607366353273392
+Alignment error statistics [using 3045840 points]: mean=0.0661, std=0.0785, median=0.0321, max=0.7518
+Mean error: 0.06606139242649078
+Estimated Scale: 1.029699683189392
+Estimated Rotation:
+ [[ 0.714131   -0.00222635 -0.7000086 ]
+ [ 0.02931717  0.9992127   0.02673062]
+ [ 0.69939786 -0.03961143  0.713634  ]]
+Estimated Translation: [-0.11632353 -0.01063868  0.24929887]
+Aligning 27 and 28 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.03351297229528427
+Residuals: 0.032327502965927124
+Residuals: 0.032279808074235916
+Residuals: 0.032277729362249374
+Residuals: 0.03227756544947624
+Alignment error statistics [using 3045840 points]: mean=0.0323, std=0.0563, median=0.0146, max=0.5955
+Mean error: 0.03227754309773445
+Estimated Scale: 0.8444632291793823
+Estimated Rotation:
+ [[ 0.9507268  -0.02270428 -0.30919725]
+ [ 0.024772    0.99968934  0.00276254]
+ [ 0.30903843 -0.01028584  0.95099396]]
+Estimated Translation: [-0.04654217  0.00570127  0.25996685]
+Aligning 28 and 29 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02487543411552906
+Residuals: 0.022586289793252945
+Residuals: 0.022451551631093025
+Residuals: 0.022441521286964417
+Residuals: 0.022440701723098755
+Alignment error statistics [using 3045840 points]: mean=0.0224, std=0.0627, median=0.0096, max=0.7759
+Mean error: 0.022440627217292786
+Estimated Scale: 0.7357343435287476
+Estimated Rotation:
+ [[ 0.91406125 -0.03252653 -0.4042698 ]
+ [ 0.02518576  0.99940735 -0.02346439]
+ [ 0.40479347  0.01126603  0.9143387 ]]
+Estimated Translation: [-0.11831477  0.02332629  0.26266313]
+Aligning 29 and 30 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.005944890435785055
+Residuals: 0.005950211547315121
+Residuals: 0.0059502203948795795
+Alignment error statistics [using 3045840 points]: mean=0.0060, std=0.0070, median=0.0038, max=0.1928
+Mean error: 0.005950221326202154
+Estimated Scale: 0.6436885595321655
+Estimated Rotation:
+ [[ 0.8164982  -0.02761515 -0.5766871 ]
+ [ 0.02932968  0.9995497  -0.00633809]
+ [ 0.5766025  -0.01173901  0.8169405 ]]
+Estimated Translation: [-0.15526584  0.01663378  0.2742735 ]
+Aligning 30 and 31 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.005952806677669287
+Residuals: 0.005951154977083206
+Residuals: 0.005951161962002516
+Alignment error statistics [using 3045840 points]: mean=0.0060, std=0.0094, median=0.0036, max=0.3216
+Mean error: 0.005951165221631527
+Estimated Scale: 0.9608908295631409
+Estimated Rotation:
+ [[ 0.99145985  0.00543877 -0.13029869]
+ [-0.00124886  0.9994801   0.03221634]
+ [ 0.13040614 -0.03177848  0.99095124]]
+Estimated Translation: [-0.00566678 -0.02562372  0.01326489]
+Aligning 31 and 32 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.013005330227315426
+Residuals: 0.013005920685827732
+Residuals: 0.013005903922021389
+Alignment error statistics [using 3045840 points]: mean=0.0130, std=0.0134, median=0.0098, max=0.3059
+Mean error: 0.013005902990698814
+Estimated Scale: 1.5967400074005127
+Estimated Rotation:
+ [[ 0.99628556 -0.00996931 -0.08553185]
+ [ 0.00973603  0.99994767 -0.00314413]
+ [ 0.08555872  0.00229963  0.99633044]]
+Estimated Translation: [ 0.03824417 -0.00884691 -0.61589056]
+Aligning 32 and 33 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.007190053351223469
+Residuals: 0.007220998872071505
+Residuals: 0.007220431696623564
+Residuals: 0.007220435421913862
+Alignment error statistics [using 3045840 points]: mean=0.0072, std=0.0175, median=0.0042, max=0.2675
+Mean error: 0.007220435421913862
+Estimated Scale: 1.289912462234497
+Estimated Rotation:
+ [[ 0.99501824 -0.00874958 -0.09930819]
+ [ 0.00919052  0.9999499   0.00398347]
+ [ 0.09926835 -0.00487632  0.9950487 ]]
+Estimated Translation: [-0.01308376  0.00585065  0.17913616]
+Aligning 33 and 34 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.020995935425162315
+Residuals: 0.021028662100434303
+Residuals: 0.02102939411997795
+Residuals: 0.02102939784526825
+Residuals: 0.0210293997079134
+Alignment error statistics [using 3045840 points]: mean=0.0210, std=0.0285, median=0.0130, max=0.4259
+Mean error: 0.02102939784526825
+Estimated Scale: 1.1847625970840454
+Estimated Rotation:
+ [[ 0.6955836  -0.02236824 -0.7180968 ]
+ [ 0.00765846  0.9996892  -0.02372133]
+ [ 0.71840435  0.01100063  0.69553876]]
+Estimated Translation: [-0.20520955  0.0228172   0.32341963]
+Aligning 34 and 35 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.017018992453813553
+Residuals: 0.016985708847641945
+Residuals: 0.016985619440674782
+Residuals: 0.01698562130331993
+Alignment error statistics [using 3045840 points]: mean=0.0170, std=0.0240, median=0.0127, max=0.5811
+Mean error: 0.016985619440674782
+Estimated Scale: 0.9866722226142883
+Estimated Rotation:
+ [[ 0.77446085 -0.03195649 -0.6318142 ]
+ [ 0.02184132  0.9994786  -0.02378003]
+ [ 0.6322447   0.00461699  0.77475506]]
+Estimated Translation: [-0.11392748  0.02247868  0.22607261]
+Aligning 35 and 36 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.009640682488679886
+Residuals: 0.009632940404117107
+Residuals: 0.009632952511310577
+Residuals: 0.009632954373955727
+Alignment error statistics [using 3045840 points]: mean=0.0096, std=0.0183, median=0.0060, max=0.4304
+Mean error: 0.009632953442633152
+Estimated Scale: 0.9208243489265442
+Estimated Rotation:
+ [[ 0.9990136  -0.00855669 -0.04357217]
+ [ 0.00981684  0.99953735  0.02878929]
+ [ 0.04330563 -0.02918861  0.9986354 ]]
+Estimated Translation: [-0.00238556 -0.00813179  0.22749418]
+Aligning 36 and 37 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011703366413712502
+Residuals: 0.011659585870802402
+Residuals: 0.01165925431996584
+Residuals: 0.011659255251288414
+Alignment error statistics [using 3045840 points]: mean=0.0117, std=0.0270, median=0.0062, max=0.4761
+Mean error: 0.011659255251288414
+Estimated Scale: 0.8813974857330322
+Estimated Rotation:
+ [[ 0.9980381  -0.00163941 -0.0625868 ]
+ [ 0.00135691  0.9999887  -0.00455605]
+ [ 0.06259357  0.00446217  0.9980291 ]]
+Estimated Translation: [0.00136518 0.01088699 0.31657332]
+Aligning 37 and 38 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.016371609643101692
+Residuals: 0.016440091654658318
+Residuals: 0.016440212726593018
+Residuals: 0.016440214589238167
+Alignment error statistics [using 3045840 points]: mean=0.0164, std=0.0223, median=0.0131, max=0.6146
+Mean error: 0.016440214589238167
+Estimated Scale: 0.8698218464851379
+Estimated Rotation:
+ [[ 0.8181552  -0.03980625 -0.57361794]
+ [ 0.03883573  0.9991483  -0.01394429]
+ [ 0.57368445 -0.01086821  0.8190043 ]]
+Estimated Translation: [-0.13434792  0.02040603  0.27022603]
+Aligning 38 and 39 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.023798389360308647
+Residuals: 0.02248530648648739
+Residuals: 0.02244892343878746
+Residuals: 0.022447751834988594
+Residuals: 0.022447781637310982
+Alignment error statistics [using 3045840 points]: mean=0.0224, std=0.0473, median=0.0098, max=0.6759
+Mean error: 0.02244778349995613
+Estimated Scale: 0.7832532525062561
+Estimated Rotation:
+ [[ 8.6113882e-01 -1.4690030e-02 -5.0815767e-01]
+ [ 1.2476560e-02  9.9989200e-01 -7.7622198e-03]
+ [ 5.0821686e-01  3.4426068e-04  8.6122906e-01]]
+Estimated Translation: [-0.17864406  0.02250198  0.32235   ]
+Aligning 39 and 40 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.015436484478414059
+Residuals: 0.015448377467691898
+Residuals: 0.015448421239852905
+Alignment error statistics [using 3045840 points]: mean=0.0154, std=0.0250, median=0.0089, max=0.5808
+Mean error: 0.01544842217117548
+Estimated Scale: 1.2972029447555542
+Estimated Rotation:
+ [[ 0.9502781  -0.0052041  -0.31135893]
+ [ 0.01206279  0.9997251   0.0201066 ]
+ [ 0.3111688  -0.02286273  0.9500796 ]]
+Estimated Translation: [-0.01940948 -0.01057842 -0.22750956]
+Aligning 40 and 41 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011778576299548149
+Residuals: 0.011799502186477184
+Residuals: 0.011799544095993042
+Alignment error statistics [using 3045840 points]: mean=0.0118, std=0.0176, median=0.0084, max=0.4496
+Mean error: 0.011799543164670467
+Estimated Scale: 1.3498698472976685
+Estimated Rotation:
+ [[ 0.9451836  -0.01372738 -0.32625082]
+ [ 0.01026386  0.9998712  -0.01233524]
+ [ 0.32637817  0.00831048  0.9452028 ]]
+Estimated Translation: [ 0.02871293  0.00339478 -0.26676112]
+Aligning 41 and 42 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.003837542375549674
+Residuals: 0.003554309019818902
+Residuals: 0.0035543362610042095
+Alignment error statistics [using 3045840 points]: mean=0.0036, std=0.0072, median=0.0024, max=0.2314
+Mean error: 0.0035543355625122786
+Estimated Scale: 0.933006227016449
+Estimated Rotation:
+ [[ 0.9998673  -0.00118289 -0.01624582]
+ [ 0.00125401  0.9999897   0.00436894]
+ [ 0.01624051 -0.00438875  0.99985844]]
+Estimated Translation: [0.011629   0.00443438 0.26251054]
+Aligning 42 and 43 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.015589173883199692
+Residuals: 0.015237594954669476
+Residuals: 0.015237325802445412
+Residuals: 0.015237288549542427
+Residuals: 0.015237290412187576
+Alignment error statistics [using 3045840 points]: mean=0.0152, std=0.0222, median=0.0088, max=0.7886
+Mean error: 0.015237283892929554
+Estimated Scale: 1.1063823699951172
+Estimated Rotation:
+ [[ 9.2088908e-01 -1.1029946e-02 -3.8966867e-01]
+ [ 9.8976027e-03  9.9993896e-01 -4.9136253e-03]
+ [ 3.8969907e-01  6.6804927e-04  9.2094201e-01]]
+Estimated Translation: [-0.05938521  0.00646232  0.29562908]
+Aligning 43 and 44 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.023350790143013
+Residuals: 0.023243356496095657
+Residuals: 0.023240506649017334
+Residuals: 0.023240387439727783
+Residuals: 0.023240376263856888
+Alignment error statistics [using 3045840 points]: mean=0.0232, std=0.0367, median=0.0098, max=0.7821
+Mean error: 0.023240381851792336
+Estimated Scale: 1.1085540056228638
+Estimated Rotation:
+ [[ 9.1074163e-01  3.3135936e-04 -4.1297641e-01]
+ [ 4.6975166e-04  9.9999827e-01  1.8383564e-03]
+ [ 4.1297632e-01 -1.8683000e-03  9.1073990e-01]]
+Estimated Translation: [-0.10145402  0.00543648  0.24243093]
+Aligning 44 and 45 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.018417974933981895
+Residuals: 0.018573785200715065
+Residuals: 0.01857570931315422
+Residuals: 0.018575768917798996
+Residuals: 0.018575789406895638
+Alignment error statistics [using 3045840 points]: mean=0.0186, std=0.0223, median=0.0096, max=0.4460
+Mean error: 0.018575794994831085
+Estimated Scale: 0.8527235984802246
+Estimated Rotation:
+ [[ 0.7092351  -0.02031798 -0.7046793 ]
+ [ 0.03471731  0.99937844  0.0061267 ]
+ [ 0.70411676 -0.02880986  0.70949954]]
+Estimated Translation: [-0.13398534  0.00779934  0.22480863]
+Aligning 45 and 46 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.009053667075932026
+Residuals: 0.008941019885241985
+Residuals: 0.008937195874750614
+Residuals: 0.008937027305364609
+Residuals: 0.008937018923461437
+Alignment error statistics [using 3045840 points]: mean=0.0089, std=0.0184, median=0.0053, max=0.4412
+Mean error: 0.00893702358007431
+Estimated Scale: 0.7354288101196289
+Estimated Rotation:
+ [[ 0.82355756 -0.02393645 -0.56672734]
+ [ 0.02250065  0.9997015  -0.00952623]
+ [ 0.56678617 -0.00490633  0.8238503 ]]
+Estimated Translation: [-0.13744318  0.01232667  0.1929431 ]
+Aligning 46 and 47 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.00498134596273303
+Residuals: 0.004981399513781071
+Residuals: 0.004981400910764933
+Alignment error statistics [using 3045840 points]: mean=0.0050, std=0.0091, median=0.0033, max=0.2627
+Mean error: 0.004981400910764933
+Estimated Scale: 0.8137316107749939
+Estimated Rotation:
+ [[ 8.4875095e-01 -1.3719828e-02 -5.2861470e-01]
+ [ 1.6497910e-02  9.9986374e-01  5.3846108e-04]
+ [ 5.2853531e-01 -9.1780694e-03  8.4886169e-01]]
+Estimated Translation: [-0.14125659  0.00909823  0.28278136]
+Aligning 47 and 48 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.006836830172687769
+Residuals: 0.006792792584747076
+Residuals: 0.006792758125811815
+Alignment error statistics [using 3045840 points]: mean=0.0068, std=0.0080, median=0.0053, max=0.2370
+Mean error: 0.006792758125811815
+Estimated Scale: 0.6816534996032715
+Estimated Rotation:
+ [[ 0.82543075  0.02978188  0.56371725]
+ [-0.02066565  0.9995322  -0.02254657]
+ [-0.56412494  0.006961    0.82566005]]
+Estimated Translation: [0.21986175 0.00530929 0.41691256]
+Aligning 48 and 49 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.03218090161681175
+Residuals: 0.026844901964068413
+Residuals: 0.02672562003135681
+Residuals: 0.026721691712737083
+Residuals: 0.026721494272351265
+Alignment error statistics [using 3045840 points]: mean=0.0267, std=0.0840, median=0.0131, max=0.9364
+Mean error: 0.02672150358557701
+Estimated Scale: 0.9326553344726562
+Estimated Rotation:
+ [[ 0.9983672   0.00206313  0.05708465]
+ [-0.00304445  0.999849    0.01710886]
+ [-0.05704078 -0.01725473  0.9982227 ]]
+Estimated Translation: [ 0.04544889 -0.00471432  0.12343341]
+Aligning 49 and 50 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.19389070570468903
+Residuals: 0.18955519795417786
+Residuals: 0.18958038091659546
+Residuals: 0.19012023508548737
+Residuals: 0.19094106554985046
+Alignment error statistics [using 3045840 points]: mean=0.1916, std=0.2252, median=0.0937, max=0.9456
+Mean error: 0.1916014701128006
+Estimated Scale: 1.9706507921218872
+Estimated Rotation:
+ [[ 0.9924734   0.02919633  0.11892864]
+ [-0.02921402  0.99957186 -0.00159502]
+ [-0.11892429 -0.0018914   0.9929015 ]]
+Estimated Translation: [ 0.02104294  0.00327197 -0.677181  ]
+Aligning 50 and 51 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.04015669599175453
+Residuals: 0.03992807865142822
+Residuals: 0.039922017604112625
+Residuals: 0.039920564740896225
+Residuals: 0.039920516312122345
+Alignment error statistics [using 3045840 points]: mean=0.0399, std=0.0491, median=0.0214, max=0.7588
+Mean error: 0.039920493960380554
+Estimated Scale: 1.0551644563674927
+Estimated Rotation:
+ [[ 0.78485316  0.02292594  0.61925757]
+ [-0.01437925  0.99972004 -0.01878692]
+ [-0.619515    0.00584053  0.7849632 ]]
+Estimated Translation: [-0.01887578 -0.00426685 -0.35591817]
+Aligning 51 and 52 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.012372083030641079
+Residuals: 0.012398285791277885
+Residuals: 0.01239826064556837
+Residuals: 0.01239826250821352
+Alignment error statistics [using 3045840 points]: mean=0.0124, std=0.0278, median=0.0067, max=0.7695
+Mean error: 0.012398261576890945
+Estimated Scale: 0.9008685946464539
+Estimated Rotation:
+ [[ 0.7764023   0.0246745   0.6297544 ]
+ [-0.01520489  0.9996758  -0.02042285]
+ [-0.63005424  0.00628103  0.7765258 ]]
+Estimated Translation: [-0.04848534 -0.01147553 -0.36959538]
+Aligning 52 and 53 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.016035545617341995
+Residuals: 0.01585908979177475
+Residuals: 0.01586015149950981
+Residuals: 0.015860222280025482
+Residuals: 0.015860239043831825
+Alignment error statistics [using 3045840 points]: mean=0.0159, std=0.0380, median=0.0067, max=0.4306
+Mean error: 0.01586023159325123
+Estimated Scale: 1.2254478931427002
+Estimated Rotation:
+ [[ 0.7676701   0.01936738  0.6405525 ]
+ [-0.00810007  0.9997566  -0.02052053]
+ [-0.6407941   0.01056449  0.7676401 ]]
+Estimated Translation: [-0.06802803  0.00056237 -0.42836046]
+Aligning 53 and 54 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.004599213134497404
+Residuals: 0.004594096448272467
+Residuals: 0.004594059195369482
+Residuals: 0.004594055470079184
+Alignment error statistics [using 3045840 points]: mean=0.0046, std=0.0168, median=0.0022, max=0.3648
+Mean error: 0.004594055935740471
+Estimated Scale: 1.189116358757019
+Estimated Rotation:
+ [[ 0.99479836  0.00233888  0.10183679]
+ [-0.00263436  0.9999927   0.00276745]
+ [-0.10182964 -0.0030213   0.9947973 ]]
+Estimated Translation: [-0.00023902 -0.0118976  -0.00771713]
+Aligning 54 and 55 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011181222274899483
+Residuals: 0.011112305335700512
+Residuals: 0.011112261563539505
+Alignment error statistics [using 3045840 points]: mean=0.0111, std=0.0199, median=0.0056, max=0.5680
+Mean error: 0.011112261563539505
+Estimated Scale: 1.0316916704177856
+Estimated Rotation:
+ [[ 0.93677247 -0.01068342 -0.34977594]
+ [ 0.01344045  0.9998948   0.00545589]
+ [ 0.34968084 -0.00981201  0.9368175 ]]
+Estimated Translation: [-0.05488592  0.00349169  0.31790203]
+Aligning 55 and 56 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02543005719780922
+Residuals: 0.02566942758858204
+Residuals: 0.025706032291054726
+Residuals: 0.025708142668008804
+Residuals: 0.025708088651299477
+Alignment error statistics [using 3045840 points]: mean=0.0257, std=0.0378, median=0.0114, max=0.5867
+Mean error: 0.025708099827170372
+Estimated Scale: 1.0484979152679443
+Estimated Rotation:
+ [[ 0.81352824 -0.00790982 -0.5814717 ]
+ [ 0.00897906  0.9999592  -0.00104011]
+ [ 0.5814561  -0.00437493  0.8135659 ]]
+Estimated Translation: [-0.1349886   0.01377227  0.23809168]
+Aligning 56 and 57 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.05630014091730118
+Residuals: 0.05498689413070679
+Residuals: 0.05477479472756386
+Residuals: 0.05474309250712395
+Residuals: 0.05473881587386131
+Alignment error statistics [using 3045840 points]: mean=0.0547, std=0.0441, median=0.0413, max=0.2903
+Mean error: 0.05473827198147774
+Estimated Scale: 0.8526600003242493
+Estimated Rotation:
+ [[ 0.75528085  0.00730212 -0.65536064]
+ [ 0.02776959  0.99868345  0.04313101]
+ [ 0.6548127  -0.0507751   0.75408363]]
+Estimated Translation: [-0.04535365 -0.0294004   0.21441105]
+Aligning 57 and 58 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01340542547404766
+Residuals: 0.013324910774827003
+Residuals: 0.013322011567652225
+Residuals: 0.013321923092007637
+Residuals: 0.013321907259523869
+Alignment error statistics [using 3045840 points]: mean=0.0133, std=0.0174, median=0.0086, max=0.4225
+Mean error: 0.013321907259523869
+Estimated Scale: 0.6708312630653381
+Estimated Rotation:
+ [[ 0.75788015 -0.04908558 -0.6505445 ]
+ [ 0.0412927   0.99877536 -0.02725491]
+ [ 0.6510857  -0.00620676  0.75897896]]
+Estimated Translation: [-0.19695532  0.03767284  0.27658468]
+Aligning 58 and 59 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.00812238734215498
+Residuals: 0.008198859170079231
+Residuals: 0.008198624476790428
+Residuals: 0.008198631927371025
+Residuals: 0.008198633790016174
+Alignment error statistics [using 3045840 points]: mean=0.0082, std=0.0142, median=0.0050, max=0.2802
+Mean error: 0.008198633790016174
+Estimated Scale: 0.7124806046485901
+Estimated Rotation:
+ [[ 0.7967855  -0.0067095  -0.6042251 ]
+ [ 0.023272    0.9995373   0.01958928]
+ [ 0.603814   -0.02966997  0.79657286]]
+Estimated Translation: [-0.21204767 -0.00306141  0.38466638]
+Aligning 59 and 60 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.03296361118555069
+Residuals: 0.03285800293087959
+Residuals: 0.03287376090884209
+Residuals: 0.03287944942712784
+Residuals: 0.032880619168281555
+Alignment error statistics [using 3045840 points]: mean=0.0329, std=0.0480, median=0.0194, max=0.6658
+Mean error: 0.03288121894001961
+Estimated Scale: 2.189344644546509
+Estimated Rotation:
+ [[ 9.6497756e-01 -5.4790478e-05 -2.6233238e-01]
+ [ 4.9733156e-03  9.9982405e-01  1.8085269e-02]
+ [ 2.6228523e-01 -1.8756557e-02  9.6480811e-01]]
+Estimated Translation: [-0.03824908 -0.01584746 -0.18088225]
+Aligning 60 and 61 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.044413723051548004
+Residuals: 0.04434675723314285
+Residuals: 0.04434628039598465
+Residuals: 0.04434631019830704
+Residuals: 0.04434629902243614
+Alignment error statistics [using 3045840 points]: mean=0.0443, std=0.0317, median=0.0402, max=0.5859
+Mean error: 0.04434628039598465
+Estimated Scale: 1.2958261966705322
+Estimated Rotation:
+ [[ 0.6315142  -0.03008425 -0.7747804 ]
+ [ 0.03593485  0.9993088  -0.00951248]
+ [ 0.7745311  -0.02183433  0.6321588 ]]
+Estimated Translation: [ 0.04098576  0.01045851 -0.38707498]
+Aligning 61 and 62 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.017015594989061356
+Residuals: 0.01688772812485695
+Residuals: 0.01688709855079651
+Residuals: 0.016887111589312553
+Residuals: 0.01688712276518345
+Alignment error statistics [using 3045840 points]: mean=0.0169, std=0.0208, median=0.0121, max=0.5455
+Mean error: 0.01688712276518345
+Estimated Scale: 1.073421597480774
+Estimated Rotation:
+ [[ 0.96843225 -0.01527475 -0.24880844]
+ [ 0.01395992  0.9998777  -0.00704811]
+ [ 0.2488857   0.00335232  0.9685271 ]]
+Estimated Translation: [-0.01239908  0.00565456 -0.05258524]
+Aligning 62 and 63 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.012765065766870975
+Residuals: 0.012620961293578148
+Residuals: 0.012620675377547741
+Residuals: 0.012620678171515465
+Alignment error statistics [using 3045840 points]: mean=0.0126, std=0.0300, median=0.0058, max=0.5786
+Mean error: 0.012620678171515465
+Estimated Scale: 0.9002720713615417
+Estimated Rotation:
+ [[ 0.834073   -0.00326503 -0.55164444]
+ [ 0.01513827  0.9997414   0.01697159]
+ [ 0.5514463  -0.02250649  0.8339067 ]]
+Estimated Translation: [-0.09576452  0.00116717  0.20045751]
+Aligning 63 and 64 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01376284472644329
+Residuals: 0.013742159120738506
+Residuals: 0.01374223455786705
+Residuals: 0.0137422364205122
+Alignment error statistics [using 3045840 points]: mean=0.0137, std=0.0260, median=0.0082, max=0.5827
+Mean error: 0.01374223455786705
+Estimated Scale: 0.944853663444519
+Estimated Rotation:
+ [[ 0.9893558   0.00477129  0.14543833]
+ [-0.00545402  0.9999759   0.00429582]
+ [-0.14541435 -0.00504327  0.989358  ]]
+Estimated Translation: [ 0.04883346 -0.00129089  0.2961805 ]
+Aligning 64 and 65 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.009077729657292366
+Residuals: 0.009610957466065884
+Residuals: 0.009610353037714958
+Residuals: 0.009610378183424473
+Residuals: 0.009610358625650406
+Alignment error statistics [using 3045840 points]: mean=0.0096, std=0.0215, median=0.0049, max=0.4434
+Mean error: 0.009610358625650406
+Estimated Scale: 0.942121684551239
+Estimated Rotation:
+ [[ 0.91034067  0.00992257  0.4137407 ]
+ [-0.01002194  0.99994797 -0.00193044]
+ [-0.4137383  -0.00238912  0.9103927 ]]
+Estimated Translation: [1.04260266e-01 2.47387215e-04 2.56779075e-01]
+Aligning 65 and 66 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.013702788390219212
+Residuals: 0.013497212901711464
+Residuals: 0.013494919054210186
+Residuals: 0.013494872488081455
+Residuals: 0.013494882732629776
+Alignment error statistics [using 3045840 points]: mean=0.0135, std=0.0228, median=0.0072, max=0.4732
+Mean error: 0.013494879938662052
+Estimated Scale: 0.7292703986167908
+Estimated Rotation:
+ [[ 0.8467495   0.02589313  0.5313613 ]
+ [-0.01628207  0.9996083  -0.02276449]
+ [-0.53174263  0.01062415  0.84683937]]
+Estimated Translation: [0.1640687  0.01515966 0.3276005 ]
+Aligning 66 and 67 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.009213517419993877
+Residuals: 0.009001381695270538
+Residuals: 0.008997338823974133
+Residuals: 0.008997298777103424
+Residuals: 0.0089972959831357
+Alignment error statistics [using 3045840 points]: mean=0.0090, std=0.0169, median=0.0048, max=0.2044
+Mean error: 0.0089972959831357
+Estimated Scale: 0.5646573305130005
+Estimated Rotation:
+ [[ 0.75020975  0.02879609  0.6605725 ]
+ [-0.0249722   0.99957234 -0.01521313]
+ [-0.6607281  -0.0050829   0.75060815]]
+Estimated Translation: [ 0.19943884 -0.00552286  0.37547433]
+Aligning 67 and 68 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02470814622938633
+Residuals: 0.02443813532590866
+Residuals: 0.024396363645792007
+Residuals: 0.02439199574291706
+Residuals: 0.024391846731305122
+Alignment error statistics [using 3045840 points]: mean=0.0244, std=0.0357, median=0.0112, max=0.8888
+Mean error: 0.024391934275627136
+Estimated Scale: 0.8546061515808105
+Estimated Rotation:
+ [[ 0.9652004   0.01201369  0.2612352 ]
+ [-0.00731653  0.99979377 -0.01894582]
+ [-0.26140895  0.01637513  0.96508926]]
+Estimated Translation: [0.04956627 0.01991295 0.15097946]
+Aligning 68 and 69 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.1284579187631607
+Residuals: 0.12741294503211975
+Residuals: 0.1275598406791687
+Residuals: 0.12774214148521423
+Residuals: 0.1278442144393921
+Alignment error statistics [using 3045840 points]: mean=0.1279, std=0.1172, median=0.0933, max=2.8768
+Mean error: 0.12789513170719147
+Estimated Scale: 2.1549782752990723
+Estimated Rotation:
+ [[ 8.3616793e-01  3.9682694e-02  5.4703617e-01]
+ [-6.5737544e-04  9.9745101e-01 -7.1351513e-02]
+ [-5.4847318e-01  5.9302259e-02  8.3406264e-01]]
+Estimated Translation: [-0.24164355  0.08151884 -0.44558412]
+Aligning 69 and 70 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.03925371915102005
+Residuals: 0.030253920704126358
+Residuals: 0.030208926647901535
+Residuals: 0.030208474025130272
+Residuals: 0.03020847961306572
+Alignment error statistics [using 3045840 points]: mean=0.0302, std=0.1257, median=0.0067, max=1.7282
+Mean error: 0.030208464711904526
+Estimated Scale: 1.1066399812698364
+Estimated Rotation:
+ [[ 0.9949244   0.00825441  0.10028566]
+ [-0.01007609  0.9997931   0.01767144]
+ [-0.10011907 -0.01859221  0.9948017 ]]
+Estimated Translation: [ 0.02541396 -0.00869126  0.19662648]
+Aligning 70 and 71 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.019774114713072777
+Residuals: 0.018054435029625893
+Residuals: 0.01802886091172695
+Residuals: 0.018027303740382195
+Residuals: 0.018027283251285553
+Alignment error statistics [using 3045840 points]: mean=0.0180, std=0.0481, median=0.0049, max=0.7345
+Mean error: 0.018027279525995255
+Estimated Scale: 1.1077989339828491
+Estimated Rotation:
+ [[ 0.9629634   0.00331359  0.26961172]
+ [-0.00106822  0.9999635  -0.00847439]
+ [-0.26962999  0.0078725   0.9629318 ]]
+Estimated Translation: [0.09550354 0.00868263 0.27559704]
+Aligning 71 and 72 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.05552208423614502
+Residuals: 0.05353156849741936
+Residuals: 0.053282350301742554
+Residuals: 0.05324234813451767
+Residuals: 0.053236279636621475
+Alignment error statistics [using 3045840 points]: mean=0.0532, std=0.0570, median=0.0362, max=0.6014
+Mean error: 0.05323513597249985
+Estimated Scale: 1.0150498151779175
+Estimated Rotation:
+ [[ 0.903405    0.00734106  0.42872545]
+ [-0.00301265  0.9999374  -0.01077372]
+ [-0.42877775  0.00844145  0.90337056]]
+Estimated Translation: [ 0.1026817  -0.00386993  0.19088596]
+Aligning 72 and 73 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.029926035553216934
+Residuals: 0.02982223778963089
+Residuals: 0.029819270595908165
+Residuals: 0.02981923520565033
+Residuals: 0.029819224029779434
+Alignment error statistics [using 3045840 points]: mean=0.0298, std=0.0303, median=0.0222, max=0.5581
+Mean error: 0.02981923148036003
+Estimated Scale: 1.0230391025543213
+Estimated Rotation:
+ [[ 0.98533314 -0.00438472  0.17058544]
+ [ 0.00195148  0.999894    0.01442917]
+ [-0.17063063 -0.01388465  0.98523724]]
+Estimated Translation: [ 0.07103056 -0.01094317  0.20626754]
+Aligning 73 and 74 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.06687866896390915
+Residuals: 0.06515109539031982
+Residuals: 0.06487049162387848
+Residuals: 0.06480269134044647
+Residuals: 0.06478473544120789
+Alignment error statistics [using 3045840 points]: mean=0.0648, std=0.0587, median=0.0441, max=0.4886
+Mean error: 0.06478084623813629
+Estimated Scale: 0.8769362568855286
+Estimated Rotation:
+ [[ 9.9987006e-01  1.6114520e-02 -2.9411796e-04]
+ [-1.6106142e-02  9.9834204e-01 -5.5260241e-02]
+ [-5.9688668e-04  5.5257801e-02  9.9847198e-01]]
+Estimated Translation: [-0.03734129  0.05070876  0.32265693]
+Aligning 74 and 75 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.02257179282605648
+Residuals: 0.02282332442700863
+Residuals: 0.022787561640143394
+Residuals: 0.022785047069191933
+Residuals: 0.0227850042283535
+Alignment error statistics [using 3045840 points]: mean=0.0228, std=0.0335, median=0.0133, max=0.6388
+Mean error: 0.022784998640418053
+Estimated Scale: 0.8715389370918274
+Estimated Rotation:
+ [[ 0.85919     0.022911    0.51114345]
+ [-0.03078553  0.9995019   0.00694722]
+ [-0.5107297  -0.02170481  0.8594673 ]]
+Estimated Translation: [ 0.08749211 -0.0143299   0.28622666]
+Aligning 75 and 76 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.027056574821472168
+Residuals: 0.02672722563147545
+Residuals: 0.026721322908997536
+Residuals: 0.02672121301293373
+Residuals: 0.02672119066119194
+Alignment error statistics [using 3045840 points]: mean=0.0267, std=0.0451, median=0.0145, max=0.6673
+Mean error: 0.02672119252383709
+Estimated Scale: 0.833185613155365
+Estimated Rotation:
+ [[ 0.88766974 -0.01530642  0.46022615]
+ [ 0.00871412  0.9998268   0.01644519]
+ [-0.4603982  -0.01058743  0.8876494 ]]
+Estimated Translation: [ 0.1406933  -0.01736856  0.2731918 ]
+Aligning 76 and 77 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.019619934260845184
+Residuals: 0.01962605118751526
+Residuals: 0.019626079127192497
+Alignment error statistics [using 3045840 points]: mean=0.0196, std=0.0281, median=0.0149, max=0.5398
+Mean error: 0.019626079127192497
+Estimated Scale: 1.4059340953826904
+Estimated Rotation:
+ [[ 0.8925454   0.01649206  0.45065594]
+ [-0.02109551  0.999764    0.00519358]
+ [-0.45046392 -0.0141423   0.8926826 ]]
+Estimated Translation: [-0.01755208 -0.03121493 -0.35511124]
+Aligning 77 and 78 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011037785559892654
+Residuals: 0.011039388366043568
+Residuals: 0.011039391160011292
+Alignment error statistics [using 3045840 points]: mean=0.0110, std=0.0193, median=0.0075, max=0.3856
+Mean error: 0.011039391160011292
+Estimated Scale: 1.2336434125900269
+Estimated Rotation:
+ [[ 0.9778074   0.01130685  0.20920041]
+ [-0.00752515  0.99979377 -0.01886405]
+ [-0.2093706   0.01687116  0.9776908 ]]
+Estimated Translation: [ 0.01032734  0.01046559 -0.11168927]
+Aligning 78 and 79 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.006447996012866497
+Residuals: 0.006442749872803688
+Residuals: 0.006442713085561991
+Alignment error statistics [using 3045840 points]: mean=0.0064, std=0.0140, median=0.0036, max=0.3266
+Mean error: 0.006442712154239416
+Estimated Scale: 0.9341656565666199
+Estimated Rotation:
+ [[ 9.4146836e-01  7.4303802e-04  3.3710051e-01]
+ [ 7.8262612e-03  9.9967992e-01 -2.4061028e-02]
+ [-3.3701050e-01  2.5290966e-02  9.4116110e-01]]
+Estimated Translation: [0.11479324 0.01437138 0.28965294]
+Aligning 79 and 80 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.018531277775764465
+Residuals: 0.018481988459825516
+Residuals: 0.01848193071782589
+Residuals: 0.018481934443116188
+Residuals: 0.018481934443116188
+Alignment error statistics [using 3045840 points]: mean=0.0185, std=0.0202, median=0.0136, max=0.7231
+Mean error: 0.01848193258047104
+Estimated Scale: 1.135717511177063
+Estimated Rotation:
+ [[ 0.9281555   0.01820081  0.37174737]
+ [-0.01620014  0.9998326  -0.0085045 ]
+ [-0.37183988  0.00187114  0.92829496]]
+Estimated Translation: [ 0.05449724 -0.00428341  0.26008856]
+Aligning 80 and 81 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011354118585586548
+Residuals: 0.011242037639021873
+Residuals: 0.011241897009313107
+Residuals: 0.011241904459893703
+Alignment error statistics [using 3045840 points]: mean=0.0112, std=0.0242, median=0.0072, max=0.5990
+Mean error: 0.011241904459893703
+Estimated Scale: 0.980268120765686
+Estimated Rotation:
+ [[ 0.8523208   0.01722725  0.5227356 ]
+ [-0.00885678  0.9997895  -0.01850797]
+ [-0.5229444   0.01114501  0.8522939 ]]
+Estimated Translation: [0.15103242 0.00116191 0.2722751 ]
+Aligning 81 and 82 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.011695240624248981
+Residuals: 0.011621137149631977
+Residuals: 0.011621244251728058
+Alignment error statistics [using 3045840 points]: mean=0.0116, std=0.0224, median=0.0061, max=0.4783
+Mean error: 0.011621245183050632
+Estimated Scale: 0.9524268507957458
+Estimated Rotation:
+ [[ 0.98464304  0.00330252  0.17454831]
+ [-0.00286904  0.9999921  -0.00273569]
+ [-0.17455594  0.00219292  0.98464483]]
+Estimated Translation: [0.0497821  0.00884946 0.27149093]
+Aligning 82 and 83 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.012139277532696724
+Residuals: 0.012139023281633854
+Residuals: 0.012139144353568554
+Residuals: 0.012139140628278255
+Alignment error statistics [using 3045840 points]: mean=0.0121, std=0.0164, median=0.0095, max=0.4107
+Mean error: 0.012139140628278255
+Estimated Scale: 0.8359642624855042
+Estimated Rotation:
+ [[ 0.8347522   0.02260675  0.5501616 ]
+ [-0.01245382  0.99967635 -0.02218183]
+ [-0.550485    0.01166476  0.8347636 ]]
+Estimated Translation: [0.12422538 0.00972864 0.33569133]
+Aligning 83 and 84 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.007838714867830276
+Residuals: 0.007874363102018833
+Residuals: 0.007874488830566406
+Residuals: 0.007874500937759876
+Alignment error statistics [using 3045840 points]: mean=0.0079, std=0.0133, median=0.0051, max=0.2419
+Mean error: 0.007874500937759876
+Estimated Scale: 0.6699182391166687
+Estimated Rotation:
+ [[ 7.9294920e-01  2.4246940e-02  6.0880512e-01]
+ [-1.8626252e-02  9.9970549e-01 -1.5555242e-02]
+ [-6.0900295e-01  9.9475496e-04  7.9316729e-01]]
+Estimated Translation: [0.16529876 0.00554537 0.3789489 ]
+Aligning 84 and 85 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.01641084812581539
+Residuals: 0.016251781955361366
+Residuals: 0.016251754015684128
+Residuals: 0.01625175215303898
+Alignment error statistics [using 3045840 points]: mean=0.0163, std=0.0272, median=0.0079, max=0.3395
+Mean error: 0.01625175215303898
+Estimated Scale: 0.6040208339691162
+Estimated Rotation:
+ [[ 9.1368437e-01  5.4566935e-03  4.0638795e-01]
+ [-5.5868165e-03  9.9998403e-01 -8.6619926e-04]
+ [-4.0638620e-01 -1.4789752e-03  9.1370022e-01]]
+Estimated Translation: [0.16377401 0.00459782 0.37165204]
+Aligning 85 and 86 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.027195045724511147
+Residuals: 0.02594885602593422
+Residuals: 0.025943266227841377
+Residuals: 0.025942647829651833
+Residuals: 0.025942634791135788
+Alignment error statistics [using 3045840 points]: mean=0.0259, std=0.0269, median=0.0202, max=0.7125
+Mean error: 0.025942640379071236
+Estimated Scale: 1.7646421194076538
+Estimated Rotation:
+ [[ 0.9114567   0.01683322  0.41105145]
+ [-0.00363099  0.9994528  -0.03287791]
+ [-0.41137996  0.0284743   0.9110191 ]]
+Estimated Translation: [-0.05158335  0.01751868 -0.69575787]
+Aligning 86 and 87 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.20954744517803192
+Residuals: 0.20078057050704956
+Residuals: 0.19912026822566986
+Residuals: 0.19873815774917603
+Residuals: 0.1991119682788849
+Alignment error statistics [using 3045840 points]: mean=0.1997, std=0.2939, median=0.0861, max=2.0439
+Mean error: 0.19974151253700256
+Estimated Scale: 1.4880952835083008
+Estimated Rotation:
+ [[ 0.9519644   0.03344389  0.30437714]
+ [-0.01333746  0.99760306 -0.06789906]
+ [-0.3059184   0.06057785  0.95012856]]
+Estimated Translation: [0.09290218 0.06004442 0.53337365]
+Aligning 87 and 88 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.05618646740913391
+Residuals: 0.056228652596473694
+Residuals: 0.05616274103522301
+Residuals: 0.05615844577550888
+Residuals: 0.05615812912583351
+Alignment error statistics [using 3045840 points]: mean=0.0562, std=0.0398, median=0.0470, max=0.3656
+Mean error: 0.05615806579589844
+Estimated Scale: 0.8191378116607666
+Estimated Rotation:
+ [[ 0.5751931   0.06644753  0.8153144 ]
+ [-0.01839922  0.99749416 -0.06831466]
+ [-0.8178107   0.02429295  0.5749744 ]]
+Estimated Translation: [0.233841   0.03293452 0.28840894]
+Aligning 88 and 89 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.04006583243608475
+Residuals: 0.039965156465768814
+Residuals: 0.03996516764163971
+Residuals: 0.03996516019105911
+Residuals: 0.03996516019105911
+Alignment error statistics [using 3045840 points]: mean=0.0400, std=0.0342, median=0.0347, max=0.4530
+Mean error: 0.03996516391634941
+Estimated Scale: 1.0289802551269531
+Estimated Rotation:
+ [[ 0.9974483  -0.01024559  0.07065378]
+ [ 0.00904816  0.9998103   0.01724725]
+ [-0.07081708 -0.01656393  0.9973518 ]]
+Estimated Translation: [ 0.03942544 -0.01322238  0.13524812]
+Aligning 89 and 90 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.03882872685790062
+Residuals: 0.038033947348594666
+Residuals: 0.03801903873682022
+Residuals: 0.038018934428691864
+Residuals: 0.038018934428691864
+Alignment error statistics [using 3045840 points]: mean=0.0380, std=0.0499, median=0.0215, max=0.4201
+Mean error: 0.03801894560456276
+Estimated Scale: 0.816794753074646
+Estimated Rotation:
+ [[ 0.999773    0.00801058  0.01973974]
+ [-0.00754393  0.9996929  -0.02360217]
+ [-0.01992275  0.02344789  0.99952656]]
+Estimated Translation: [-0.0094057   0.03037831  0.32290792]
+Aligning 90 and 91 (Total 91)
+The number of corresponding points matched: 3045840
+Residuals: 0.026652943342924118
+Residuals: 0.026552865281701088
+Residuals: 0.026552358642220497
+Residuals: 0.02655232697725296
+Residuals: 0.026552334427833557
+Alignment error statistics [using 3045840 points]: mean=0.0266, std=0.0477, median=0.0134, max=0.6372
+Mean error: 0.026552332565188408
+Estimated Scale: 0.8029914498329163
+Estimated Rotation:
+ [[ 0.997091    0.01333735 -0.0750445 ]
+ [-0.01501925  0.99964756 -0.02189242]
+ [ 0.07472606  0.02295581  0.9969399 ]]
+Estimated Translation: [-0.04162633  0.01591911  0.29315197]
+chunk_a align
+(1215, 1245)
+(1215, 1229)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.012375103309750557
+Residuals: 0.012376458384096622
+Residuals: 0.012376466765999794
+Alignment error statistics [using 2842784 points]: mean=0.0124, std=0.0202, median=0.0093, max=0.6169
+Mean error: 0.012376466765999794
+Estimated Scale: 0.8013591170310974
+Estimated Rotation:
+ [[ 0.99997824 -0.00499025  0.00430684]
+ [ 0.00507359  0.9997959  -0.01955719]
+ [-0.00420833  0.01957866  0.99979955]]
+Estimated Translation: [-0.00106181  0.01657406  0.01634365]
+chunk_a align
+(945, 975)
+(947, 961)
+2 16
+The number of corresponding points matched: 2842784
+Residuals: 0.007078452501446009
+Residuals: 0.007080806884914637
+Residuals: 0.007080855313688517
+Residuals: 0.007080853916704655
+Alignment error statistics [using 2842784 points]: mean=0.0071, std=0.0179, median=0.0040, max=0.6221
+Mean error: 0.007080853916704655
+Estimated Scale: 0.773655354976654
+Estimated Rotation:
+ [[ 0.98980004  0.00891992  0.14218412]
+ [-0.00806607  0.9999458  -0.00658051]
+ [-0.14223509  0.00536653  0.98981833]]
+Estimated Translation: [0.01844934 0.00594837 0.19687647]
+a -> b SIM 3
+Estimated Scale: 0.9654290299247094
+Estimated Rotation:
+ [[ 0.9903464   0.01115922  0.13816485]
+ [-0.01308421  0.99982953  0.01303234]
+ [-0.13799578 -0.01471428  0.99032354]]
+Estimated Translation: [ 0.01710593 -0.01026903  0.1813445 ]
+chunk_a align
+(825, 855)
+(825, 839)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.009412321262061596
+Residuals: 0.009386114776134491
+Residuals: 0.00938616693019867
+Alignment error statistics [using 2842784 points]: mean=0.0094, std=0.0186, median=0.0051, max=0.5535
+Mean error: 0.009386168792843819
+Estimated Scale: 0.7186645865440369
+Estimated Rotation:
+ [[ 0.9999544   0.00326762  0.00897519]
+ [-0.00319254  0.9999599  -0.00836583]
+ [-0.00900215  0.00833678  0.99992466]]
+Estimated Translation: [-0.00637032  0.00679467  0.00399238]
+chunk_a align
+(360, 390)
+(362, 376)
+2 16
+The number of corresponding points matched: 2842784
+Residuals: 0.004896396305412054
+Residuals: 0.004883634392172098
+Residuals: 0.004883629269897938
+Alignment error statistics [using 2842784 points]: mean=0.0049, std=0.0140, median=0.0025, max=0.6327
+Mean error: 0.004883628338575363
+Estimated Scale: 0.7942752838134766
+Estimated Rotation:
+ [[ 0.9584977  -0.01008129 -0.28492182]
+ [ 0.01205448  0.99991393  0.00517256]
+ [ 0.2848452  -0.00839254  0.9585368 ]]
+Estimated Translation: [-0.13703093 -0.00025102  0.18850815]
+a -> b SIM 3
+Estimated Scale: 1.105209994599903
+Estimated Rotation:
+ [[ 0.95586383 -0.01075731 -0.29361296]
+ [ 0.0153677   0.99979204  0.01339972]
+ [ 0.29340783 -0.01732054  0.9558304 ]]
+Estimated Translation: [-0.1289248  -0.00770992  0.18648645]
+chunk_a align
+(780, 810)
+(786, 800)
+6 20
+The number of corresponding points matched: 2842784
+Residuals: 0.00627064798027277
+Residuals: 0.0062706004828214645
+Residuals: 0.006270612124353647
+Alignment error statistics [using 2842784 points]: mean=0.0063, std=0.0205, median=0.0036, max=0.8363
+Mean error: 0.006270614452660084
+Estimated Scale: 1.0693578720092773
+Estimated Rotation:
+ [[ 0.96117246  0.0055168   0.27589324]
+ [-0.00390756  0.99997205 -0.00638226]
+ [-0.27592075  0.0050564   0.9611671 ]]
+Estimated Translation: [ 0.00870311 -0.00527788 -0.1770801 ]
+chunk_a align
+(105, 135)
+(108, 122)
+3 17
+The number of corresponding points matched: 2842784
+Residuals: 0.006817408371716738
+Residuals: 0.006787594873458147
+Residuals: 0.006787608377635479
+Alignment error statistics [using 2842784 points]: mean=0.0068, std=0.0130, median=0.0036, max=0.4413
+Mean error: 0.0067876107059419155
+Estimated Scale: 0.8244688510894775
+Estimated Rotation:
+ [[ 0.9065106  -0.00748334 -0.42211688]
+ [ 0.01291428  0.99986655  0.01000814]
+ [ 0.42198566 -0.01452382  0.9064862 ]]
+Estimated Translation: [-0.10065708  0.00656027  0.1825456 ]
+a -> b SIM 3
+Estimated Scale: 0.7709943253518451
+Estimated Rotation:
+ [[ 0.75481254 -0.00833132 -0.6558878 ]
+ [ 0.0206901   0.9997242   0.01111191]
+ [ 0.65561426 -0.02195778  0.75477666]]
+Estimated Translation: [-0.1953027   0.01200661  0.28110498]
+chunk_a align
+(735, 765)
+(735, 749)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.025247227400541306
+Residuals: 0.022565338760614395
+Residuals: 0.02249809540808201
+Residuals: 0.02249547466635704
+Residuals: 0.022495385259389877
+Alignment error statistics [using 2842784 points]: mean=0.0225, std=0.0680, median=0.0122, max=0.9622
+Mean error: 0.022495398297905922
+Estimated Scale: 0.9487903118133545
+Estimated Rotation:
+ [[ 0.9997141  -0.00818585  0.02246588]
+ [ 0.00861669  0.9997795  -0.01914706]
+ [-0.02230426  0.0193352   0.9995643 ]]
+Estimated Translation: [-0.01989297  0.01213772 -0.00640517]
+chunk_a align
+(720, 750)
+(720, 734)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.00198701536282897
+Residuals: 0.0020119266118854284
+Residuals: 0.0020119273103773594
+Alignment error statistics [using 2842784 points]: mean=0.0020, std=0.0046, median=0.0014, max=0.4149
+Mean error: 0.0020119277760386467
+Estimated Scale: 0.883931577205658
+Estimated Rotation:
+ [[ 0.9968007  -0.00473049  0.07978696]
+ [ 0.00491816  0.9999855  -0.00215587]
+ [-0.07977556  0.00254139  0.9968096 ]]
+Estimated Translation: [0.02625927 0.0062679  0.11852622]
+a -> b SIM 3
+Estimated Scale: 0.9316406019326475
+Estimated Rotation:
+ [[ 0.9983469   0.00233199  0.05742782]
+ [-0.00331741  0.9998487   0.0170703 ]
+ [-0.05737935 -0.01723255  0.99820375]]
+Estimated Translation: [ 0.04507805 -0.004998    0.12361427]
+chunk_a align
+(585, 615)
+(592, 606)
+7 21
+The number of corresponding points matched: 2842784
+Residuals: 0.009932544082403183
+Residuals: 0.009914279915392399
+Residuals: 0.009914270602166653
+Residuals: 0.009914267808198929
+Alignment error statistics [using 2842784 points]: mean=0.0099, std=0.0236, median=0.0056, max=0.5733
+Mean error: 0.00991426594555378
+Estimated Scale: 0.9819435477256775
+Estimated Rotation:
+ [[ 0.9999175  -0.0014617  -0.01275882]
+ [ 0.00153076  0.99998426  0.00540231]
+ [ 0.01275073 -0.00542142  0.99990404]]
+Estimated Translation: [ 0.00193021 -0.0044992  -0.00954622]
+chunk_a align
+(330, 360)
+(330, 344)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.00976030807942152
+Residuals: 0.009795489721000195
+Residuals: 0.009795553050935268
+Residuals: 0.009795567020773888
+Residuals: 0.009795566089451313
+Alignment error statistics [using 2842784 points]: mean=0.0098, std=0.0222, median=0.0043, max=0.5484
+Mean error: 0.009795567952096462
+Estimated Scale: 0.889006495475769
+Estimated Rotation:
+ [[ 9.9963611e-01  2.3864074e-04 -2.6971739e-02]
+ [-5.8884127e-04  9.9991572e-01 -1.2975693e-02]
+ [ 2.6966354e-02  1.2986881e-02  9.9955195e-01]]
+Estimated Translation: [0.09189594 0.00838525 0.07363528]
+a -> b SIM 3
+Estimated Scale: 0.9053539763409373
+Estimated Rotation:
+ [[ 0.9998975   0.00162313 -0.01422435]
+ [-0.00188482  0.999829   -0.01840291]
+ [ 0.01419204  0.01842785  0.99972945]]
+Estimated Translation: [0.09003227 0.01230216 0.08232591]
+chunk_a align
+(480, 510)
+(483, 497)
+3 17
+The number of corresponding points matched: 2842784
+Residuals: 0.006648194510489702
+Residuals: 0.006650193128734827
+Residuals: 0.0066501908004283905
+Alignment error statistics [using 2842784 points]: mean=0.0067, std=0.0072, median=0.0051, max=0.1856
+Mean error: 0.0066501908004283905
+Estimated Scale: 0.9916994571685791
+Estimated Rotation:
+ [[ 0.9998944   0.00608839  0.01320025]
+ [-0.00604315  0.9999757  -0.00345945]
+ [-0.01322104  0.00337931  0.99990696]]
+Estimated Translation: [-0.01862726  0.00249004 -0.02234918]
+chunk_a align
+(465, 495)
+(471, 485)
+6 20
+The number of corresponding points matched: 2842784
+Residuals: 0.005574813112616539
+Residuals: 0.0054910313338041306
+Residuals: 0.005491027142852545
+Alignment error statistics [using 2842784 points]: mean=0.0055, std=0.0076, median=0.0036, max=0.3295
+Mean error: 0.005491027142852545
+Estimated Scale: 1.582491397857666
+Estimated Rotation:
+ [[ 0.9973184  -0.00450979 -0.07304493]
+ [ 0.0039617   0.99996287 -0.0076462 ]
+ [ 0.07307671  0.00733626  0.9972993 ]]
+Estimated Translation: [ 0.01241881 -0.00325985 -0.6512899 ]
+a -> b SIM 3
+Estimated Scale: 1.595736880179272
+Estimated Rotation:
+ [[ 0.99622136 -0.01028393 -0.08623897]
+ [ 0.00994851  0.99994105 -0.00431867]
+ [ 0.08627826  0.00344436  0.9962652 ]]
+Estimated Translation: [ 0.03899598 -0.00709137 -0.6132088 ]
+chunk_a align
+(255, 285)
+(255, 269)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.022600028663873672
+Residuals: 0.022602606564760208
+Residuals: 0.022602565586566925
+Residuals: 0.02260258048772812
+Residuals: 0.02260258048772812
+Alignment error statistics [using 2842784 points]: mean=0.0226, std=0.0208, median=0.0187, max=0.4252
+Mean error: 0.02260258048772812
+Estimated Scale: 1.0008907318115234
+Estimated Rotation:
+ [[ 0.99995786 -0.00274623  0.0087635 ]
+ [ 0.00261486  0.99988455  0.01496829]
+ [-0.00880359 -0.01494474  0.99984956]]
+Estimated Translation: [-0.01533894 -0.01501182 -0.01820403]
+chunk_a align
+(240, 270)
+(240, 254)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.005871710367500782
+Residuals: 0.005322811659425497
+Residuals: 0.005322515033185482
+Residuals: 0.005322543438524008
+Alignment error statistics [using 2842784 points]: mean=0.0053, std=0.0080, median=0.0042, max=0.4002
+Mean error: 0.005322542041540146
+Estimated Scale: 1.0117051601409912
+Estimated Rotation:
+ [[ 0.98892385 -0.00477959 -0.1483471 ]
+ [ 0.00563532  0.9999698   0.00534869]
+ [ 0.14831705 -0.00612541  0.98892087]]
+Estimated Translation: [-0.00600714 -0.00238536 -0.00407791]
+a -> b SIM 3
+Estimated Scale: 1.010804804146697
+Estimated Rotation:
+ [[ 0.98759526 -0.00441364 -0.15695943]
+ [ 0.0029358   0.9999491  -0.00964601]
+ [ 0.15699404  0.00906557  0.9875579 ]]
+Estimated Translation: [0.00635006 0.01265591 0.01666557]
+chunk_a align
+(1335, 1365)
+(1337, 1351)
+2 16
+The number of corresponding points matched: 2842784
+Residuals: 0.014960614033043385
+Residuals: 0.014847693033516407
+Residuals: 0.014847921207547188
+Residuals: 0.014847892336547375
+Residuals: 0.0148478914052248
+Alignment error statistics [using 2842784 points]: mean=0.0148, std=0.0240, median=0.0087, max=0.4271
+Mean error: 0.0148478914052248
+Estimated Scale: 0.8472062349319458
+Estimated Rotation:
+ [[ 0.9999249   0.00461763  0.0113562 ]
+ [-0.00457747  0.99998325 -0.0035594 ]
+ [-0.01137244  0.00350713  0.9999292 ]]
+Estimated Translation: [-0.00665222  0.00773657  0.06383651]
+chunk_a align
+(1080, 1110)
+(1084, 1098)
+4 18
+The number of corresponding points matched: 2842784
+Residuals: 0.02357182838022709
+Residuals: 0.02350373938679695
+Residuals: 0.02349531650543213
+Residuals: 0.02349494770169258
+Residuals: 0.023494889959692955
+Alignment error statistics [using 2842784 points]: mean=0.0235, std=0.0307, median=0.0141, max=0.5171
+Mean error: 0.023494917899370193
+Estimated Scale: 0.9453129768371582
+Estimated Rotation:
+ [[ 0.9697527   0.01175339  0.2438061 ]
+ [-0.01084542  0.99992836 -0.00506626]
+ [-0.24384817  0.00226884  0.9698107 ]]
+Estimated Translation: [0.09401105 0.00481507 0.1063773 ]
+a -> b SIM 3
+Estimated Scale: 1.115800306773112
+Estimated Rotation:
+ [[ 9.7250289e-01  6.4463727e-03  2.3280160e-01]
+ [-6.2848404e-03  9.9997932e-01 -1.4356768e-03]
+ [-2.3280603e-01 -6.6931265e-05  9.7252315e-01]]
+Estimated Translation: [ 0.08459167 -0.00376161  0.03537821]
+chunk_a align
+(675, 705)
+(675, 689)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.08093833178281784
+Residuals: 0.07613746076822281
+Residuals: 0.07532840967178345
+Residuals: 0.07514844834804535
+Residuals: 0.07510611414909363
+Alignment error statistics [using 2842784 points]: mean=0.0751, std=0.0739, median=0.0490, max=0.5165
+Mean error: 0.0750965029001236
+Estimated Scale: 1.051026463508606
+Estimated Rotation:
+ [[ 0.9998717   0.01404232  0.00770735]
+ [-0.01442762  0.99851936  0.05244949]
+ [-0.00695943 -0.05255393  0.99859387]]
+Estimated Translation: [ 0.01253119 -0.05782913 -0.05904025]
+chunk_a align
+(165, 195)
+(166, 180)
+1 15
+The number of corresponding points matched: 2842784
+Residuals: 0.030323797836899757
+Residuals: 0.029442721977829933
+Residuals: 0.029365502297878265
+Residuals: 0.02935752458870411
+Residuals: 0.029356809332966805
+Alignment error statistics [using 2842784 points]: mean=0.0294, std=0.0318, median=0.0190, max=0.5517
+Mean error: 0.029356777667999268
+Estimated Scale: 0.9798657298088074
+Estimated Rotation:
+ [[ 0.9968746  -0.00208002 -0.07897345]
+ [ 0.00393738  0.9997191   0.0233706 ]
+ [ 0.07890265 -0.02360854  0.9966027 ]]
+Estimated Translation: [-0.11458641 -0.02182484 -0.10215896]
+a -> b SIM 3
+Estimated Scale: 0.9322940609294983
+Estimated Rotation:
+ [[ 0.9961088  -0.02060159 -0.08569077]
+ [ 0.01815538  0.9994078  -0.02922882]
+ [ 0.08624217  0.02755934  0.99589294]]
+Estimated Translation: [-0.13205108  0.03023604 -0.04686387]
+chunk_a align
+(540, 570)
+(541, 555)
+1 15
+The number of corresponding points matched: 2842784
+Residuals: 0.014824003912508488
+Residuals: 0.014763303101062775
+Residuals: 0.01476355455815792
+Residuals: 0.014763557352125645
+Alignment error statistics [using 2842784 points]: mean=0.0148, std=0.0252, median=0.0084, max=0.4484
+Mean error: 0.014763557352125645
+Estimated Scale: 0.9026412963867188
+Estimated Rotation:
+ [[ 0.9999572   0.00507378  0.00774335]
+ [-0.00495664  0.99987406 -0.01507656]
+ [-0.00781883  0.01503754  0.9998563 ]]
+Estimated Translation: [-0.0083688   0.01188894  0.02225041]
+chunk_a align
+(45, 75)
+(45, 59)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.0236508809030056
+Residuals: 0.02360931597650051
+Residuals: 0.023610500618815422
+Residuals: 0.023610539734363556
+Residuals: 0.02361052855849266
+Alignment error statistics [using 2842784 points]: mean=0.0236, std=0.0443, median=0.0096, max=0.5099
+Mean error: 0.02361052855849266
+Estimated Scale: 0.8778624534606934
+Estimated Rotation:
+ [[ 0.99985355 -0.00140178 -0.01705666]
+ [ 0.00144105  0.99999636  0.00228892]
+ [ 0.01705334 -0.00231316  0.9998519 ]]
+Estimated Translation: [0.05694503 0.00185173 0.03823251]
+a -> b SIM 3
+Estimated Scale: 0.9725485161988319
+Estimated Rotation:
+ [[ 0.9996716  -0.00610036 -0.02489297]
+ [ 0.00653247  0.99982876  0.01731481]
+ [ 0.02478308 -0.01747172  0.9995401 ]]
+Estimated Translation: [ 0.06569063 -0.01003039  0.01700658]
+chunk_a align
+(840, 870)
+(845, 859)
+5 19
+The number of corresponding points matched: 2842784
+Residuals: 0.030590804293751717
+Residuals: 0.030546678230166435
+Residuals: 0.030550118535757065
+Residuals: 0.030549846589565277
+Residuals: 0.03054983913898468
+Alignment error statistics [using 2842784 points]: mean=0.0305, std=0.0453, median=0.0120, max=0.5846
+Mean error: 0.030549831688404083
+Estimated Scale: 0.9981582760810852
+Estimated Rotation:
+ [[ 0.97640735 -0.00702866 -0.21582215]
+ [ 0.00747957  0.9999712   0.00127265]
+ [ 0.21580696 -0.00285689  0.97643185]]
+Estimated Translation: [-0.01645491  0.00021524  0.05665201]
+chunk_a align
+(405, 435)
+(405, 419)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.033590782433748245
+Residuals: 0.032632146030664444
+Residuals: 0.032613787800073624
+Residuals: 0.03261192515492439
+Residuals: 0.03261173889040947
+Alignment error statistics [using 2842784 points]: mean=0.0326, std=0.0580, median=0.0115, max=0.7387
+Mean error: 0.03261171653866768
+Estimated Scale: 1.0144752264022827
+Estimated Rotation:
+ [[ 0.9546041   0.00574325  0.29782227]
+ [-0.00233608  0.9999277  -0.011795  ]
+ [-0.29786852  0.01056381  0.9545485 ]]
+Estimated Translation: [-0.09504344 -0.00146385 -0.1227175 ]
+a -> b SIM 3
+Estimated Scale: 1.016347057087239
+Estimated Rotation:
+ [[ 0.8677655   0.01326214  0.49679694]
+ [-0.0067635   0.9998664  -0.01487784]
+ [-0.49692795  0.00955038  0.86773926]]
+Estimated Translation: [-0.10913854 -0.00093906 -0.18099293]
+chunk_a align
+(1245, 1275)
+(1252, 1266)
+7 21
+The number of corresponding points matched: 2842784
+Residuals: 0.0072778514586389065
+Residuals: 0.007294910028576851
+Residuals: 0.00729502085596323
+Residuals: 0.00729502085596323
+Alignment error statistics [using 2842784 points]: mean=0.0073, std=0.0140, median=0.0047, max=0.5028
+Mean error: 0.00729502085596323
+Estimated Scale: 0.8708189725875854
+Estimated Rotation:
+ [[ 9.7868186e-01  9.7732805e-03  2.0514935e-01]
+ [-9.4997156e-03  9.9995220e-01 -2.3182787e-03]
+ [-2.0516218e-01  3.2001716e-04  9.7872788e-01]]
+Estimated Translation: [0.04179442 0.00484465 0.1893239 ]
+chunk_a align
+(990, 1020)
+(990, 1004)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.017224563285708427
+Residuals: 0.017010653391480446
+Residuals: 0.017007000744342804
+Residuals: 0.017006635665893555
+Residuals: 0.017006631940603256
+Alignment error statistics [using 2842784 points]: mean=0.0170, std=0.0307, median=0.0079, max=0.6016
+Mean error: 0.01700662262737751
+Estimated Scale: 1.0589832067489624
+Estimated Rotation:
+ [[ 9.9823129e-01  4.5541703e-04 -5.9447676e-02]
+ [-2.5371669e-04  9.9999422e-01  3.4006962e-03]
+ [ 5.9448857e-02 -3.3795803e-03  9.9822557e-01]]
+Estimated Translation: [-0.08533055 -0.00248172 -0.00344306]
+a -> b SIM 3
+Estimated Scale: 1.2160773250062047
+Estimated Rotation:
+ [[ 0.9647597  -0.0088897  -0.26298225]
+ [ 0.01022257  0.99994093  0.00370042]
+ [ 0.26293382 -0.00625833  0.96479344]]
+Estimated Translation: [-0.07376526 -0.00974436 -0.23889668]
+chunk_a align
+(1035, 1065)
+(1039, 1053)
+4 18
+The number of corresponding points matched: 2842784
+Residuals: 0.04168684035539627
+Residuals: 0.03988637775182724
+Residuals: 0.03984111174941063
+Residuals: 0.03984000161290169
+Residuals: 0.039839938282966614
+Alignment error statistics [using 2842784 points]: mean=0.0398, std=0.0623, median=0.0298, max=1.7297
+Mean error: 0.03983994573354721
+Estimated Scale: 0.8062108755111694
+Estimated Rotation:
+ [[ 9.9570835e-01  5.7595689e-03 -9.2367947e-02]
+ [-7.0539041e-04  9.9850494e-01  5.4657292e-02]
+ [ 9.2544690e-02 -5.4357547e-02  9.9422371e-01]]
+Estimated Translation: [ 0.08571602 -0.04601227 -0.06640011]
+chunk_a align
+(1020, 1050)
+(1024, 1038)
+4 18
+The number of corresponding points matched: 2842784
+Residuals: 0.04818976670503616
+Residuals: 0.0474148690700531
+Residuals: 0.047241970896720886
+Residuals: 0.047185610979795456
+Residuals: 0.047174982726573944
+Alignment error statistics [using 2842784 points]: mean=0.0472, std=0.0411, median=0.0341, max=0.7491
+Mean error: 0.04717203602194786
+Estimated Scale: 1.7002277374267578
+Estimated Rotation:
+ [[ 0.8823977   0.01986114  0.47008482]
+ [-0.00886425  0.99963313 -0.0255954 ]
+ [-0.47042075  0.01841835  0.88224995]]
+Estimated Translation: [-0.14766699  0.0122869  -0.63063467]
+a -> b SIM 3
+Estimated Scale: 2.108911934918698
+Estimated Rotation:
+ [[ 8.3530438e-01  4.4902574e-02  5.4795110e-01]
+ [-7.0455554e-04  9.9674588e-01 -8.0605499e-02]
+ [-5.4978740e-01  6.6944040e-02  8.3261770e-01]]
+Estimated Translation: [-0.21757507  0.09784696 -0.40816188]
+chunk_a align
+(645, 675)
+(645, 659)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.010470453649759293
+Residuals: 0.010458461940288544
+Residuals: 0.010458456352353096
+Alignment error statistics [using 2842784 points]: mean=0.0105, std=0.0188, median=0.0067, max=0.7421
+Mean error: 0.010458458214998245
+Estimated Scale: 0.7424876689910889
+Estimated Rotation:
+ [[ 0.9998449   0.0091655   0.01503921]
+ [-0.00896254  0.9998686  -0.01350995]
+ [-0.01516107  0.01337299  0.9997956 ]]
+Estimated Translation: [-0.00977196  0.00950134 -0.00288391]
+chunk_a align
+(135, 165)
+(135, 149)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.011212036944925785
+Residuals: 0.011136127635836601
+Residuals: 0.011136183515191078
+Alignment error statistics [using 2842784 points]: mean=0.0111, std=0.0190, median=0.0079, max=0.8183
+Mean error: 0.011136183515191078
+Estimated Scale: 0.8633911609649658
+Estimated Rotation:
+ [[ 0.949593   -0.00598472 -0.31342828]
+ [ 0.00886996  0.99993044  0.00778032]
+ [ 0.31335992 -0.01016825  0.94957995]]
+Estimated Translation: [ 0.08649716 -0.00609794 -0.07055485]
+a -> b SIM 3
+Estimated Scale: 1.1628356901040036
+Estimated Rotation:
+ [[ 0.9446772  -0.0102603  -0.3278411 ]
+ [ 0.01815045  0.9996144   0.02101631]
+ [ 0.32749906 -0.02580419  0.944499  ]]
+Estimated Translation: [ 0.09624564 -0.01686544 -0.06338093]
+chunk_a align
+(1290, 1320)
+(1292, 1306)
+2 16
+The number of corresponding points matched: 2842784
+Residuals: 0.02077402174472809
+Residuals: 0.0201510488986969
+Residuals: 0.020171919837594032
+Residuals: 0.02017192170023918
+Residuals: 0.02017192170023918
+Alignment error statistics [using 2842784 points]: mean=0.0202, std=0.0279, median=0.0136, max=0.5373
+Mean error: 0.02017192170023918
+Estimated Scale: 0.971055269241333
+Estimated Rotation:
+ [[ 0.9998099   0.00389114  0.01910564]
+ [-0.00412624  0.9999161   0.01228093]
+ [-0.01905625 -0.01235738  0.9997421 ]]
+Estimated Translation: [-0.01984115 -0.01260312 -0.02981877]
+chunk_a align
+(1275, 1305)
+(1281, 1295)
+6 20
+The number of corresponding points matched: 2842784
+Residuals: 0.015813063830137253
+Residuals: 0.016824735328555107
+Residuals: 0.01685074158012867
+Residuals: 0.016852080821990967
+Residuals: 0.016852054744958878
+Alignment error statistics [using 2842784 points]: mean=0.0169, std=0.0267, median=0.0121, max=0.7497
+Mean error: 0.016852054744958878
+Estimated Scale: 1.7144672870635986
+Estimated Rotation:
+ [[ 0.9030522   0.01610737  0.42922872]
+ [-0.00522158  0.99963444 -0.02652701]
+ [-0.4294991   0.02171399  0.9028062 ]]
+Estimated Translation: [-0.10785648  0.00697149 -0.7321784 ]
+a -> b SIM 3
+Estimated Scale: 1.76557127217185
+Estimated Rotation:
+ [[ 0.91114396  0.01765114  0.41171017]
+ [-0.00183769  0.9992463  -0.03877352]
+ [-0.41208428  0.03457168  0.9104897 ]]
+Estimated Translation: [-0.05387009  0.02710073 -0.69791013]
+chunk_a align
+(1170, 1200)
+(1170, 1184)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.00931805744767189
+Residuals: 0.009311818517744541
+Residuals: 0.00931178592145443
+Residuals: 0.009311795234680176
+Residuals: 0.0093117980286479
+Alignment error statistics [using 2842784 points]: mean=0.0093, std=0.0159, median=0.0066, max=0.3272
+Mean error: 0.009311795234680176
+Estimated Scale: 0.8890277743339539
+Estimated Rotation:
+ [[ 0.99998504 -0.00154395 -0.00523926]
+ [ 0.00163783  0.9998374   0.01796009]
+ [ 0.00521065 -0.01796834  0.999825  ]]
+Estimated Translation: [ 0.00252196 -0.01529166 -0.00467753]
+chunk_a align
+(1155, 1185)
+(1155, 1169)
+0 14
+The number of corresponding points matched: 2842784
+Residuals: 0.002198164351284504
+Residuals: 0.002125535625964403
+Residuals: 0.0021255509927868843
+Alignment error statistics [using 2842784 points]: mean=0.0021, std=0.0068, median=0.0016, max=0.3751
+Mean error: 0.0021255507599562407
+Estimated Scale: 1.0963693857192993
+Estimated Rotation:
+ [[ 9.7832483e-01  6.8277018e-03  2.0696339e-01]
+ [-6.9316993e-03  9.9997598e-01 -2.2267527e-04]
+ [-2.0695995e-01 -1.2167875e-03  9.7834867e-01]]
+Estimated Translation: [ 0.00890771 -0.00881367 -0.11768079]
+a -> b SIM 3
+Estimated Scale: 1.2332228726382397
+Estimated Rotation:
+ [[ 0.9772153   0.012146    0.2119022 ]
+ [-0.00847434  0.99979806 -0.01822666]
+ [-0.21208079  0.01601567  0.97712094]]
+Estimated Translation: [ 0.00731982  0.00996176 -0.1110827 ]
+Starting optimization with 91 poses and 16 loop constraints
+Iteration 0: cost 0.00203457754105 -> 0.00006878851855 (accepted) | Time of solver (cpp): 0.9735 ms
+Iteration 1: cost 0.00006878851855 -> 0.00004882567373 (accepted) | Time of solver (cpp): 1.3444 ms
+Iteration 2: cost 0.00004882567373 -> 0.00004781306052 (accepted) | Time of solver (cpp): 0.7617 ms
+Iteration 3: cost 0.00004781306052 -> 0.00004774889749 (accepted) | Time of solver (cpp): 1.0026 ms
+Iteration 4: cost 0.00004774889749 -> 0.00004779887240 (rej)      | Time of solver (cpp): 1.1537 ms
+Iteration 5: cost 0.00004774889749 -> 0.00004773628825 (accepted) | Time of solver (cpp): 0.7818 ms
+Iteration 6: cost 0.00004773628825 -> 0.00004779901428 (rej)      | Time of solver (cpp): 1.1077 ms
+Iteration 7: cost 0.00004773628825 -> 0.00004773552064 (accepted) | Time of solver (cpp): 1.1463 ms
+Iteration 8: cost 0.00004773552064 -> 0.00004781828829 (rej)      | Time of solver (cpp): 1.2844 ms
+Iteration 9: cost 0.00004773552064 -> 0.00004773983892 (rej)      | Time of solver (cpp): 1.0152 ms
+Iteration 10: cost 0.00004773552064 -> 0.00004772046668 (accepted) | Time of solver (cpp): 1.0638 ms
+Iteration 11: cost 0.00004772046668 -> 0.00004773605906 (rej)      | Time of solver (cpp): 1.0097 ms
+Iteration 12: cost 0.00004772046668 -> 0.00004771903332 (accepted) | Time of solver (cpp): 0.9570 ms
+Iteration 13: cost 0.00004771903332 -> 0.00004773807450 (rej)      | Time of solver (cpp): 0.9887 ms
+Iteration 14: cost 0.00004771903332 -> 0.00004771984459 (rej)      | Time of solver (cpp): 1.2560 ms
+Iteration 15: cost 0.00004771903332 -> 0.00004771544263 (accepted) | Time of solver (cpp): 0.9902 ms
+Iteration 16: cost 0.00004771544263 -> 0.00004771935710 (rej)      | Time of solver (cpp): 1.0452 ms
+Iteration 17: cost 0.00004771544263 -> 0.00004771495514 (accepted) | Time of solver (cpp): 1.2617 ms
+Iteration 18: cost 0.00004771495514 -> 0.00004771858949 (rej)      | Time of solver (cpp): 0.8235 ms
+Iteration 19: cost 0.00004771495514 -> 0.00004771499880 (rej)      | Time of solver (cpp): 0.9775 ms
+Iteration 20: cost 0.00004771495514 -> 0.00004771396198 (accepted) | Time of solver (cpp): 0.7608 ms
+Iteration 21: cost 0.00004771396198 -> 0.00004771480963 (rej)      | Time of solver (cpp): 0.9027 ms
+Iteration 22: cost 0.00004771396198 -> 0.00004771375825 (accepted) | Time of solver (cpp): 0.9968 ms
+Iteration 23: cost 0.00004771375825 -> 0.00004771470049 (rej)      | Time of solver (cpp): 0.8154 ms
+Iteration 24: cost 0.00004771375825 -> 0.00004771395470 (rej)      | Time of solver (cpp): 0.9539 ms
+Iteration 25: cost 0.00004771375825 -> 0.00004771359454 (accepted) | Time of solver (cpp): 0.8676 ms
+Iteration 26: cost 0.00004771359454 -> 0.00004771376553 (rej)      | Time of solver (cpp): 0.7985 ms
+Iteration 27: cost 0.00004771359454 -> 0.00004771366730 (rej)      | Time of solver (cpp): 0.7861 ms
+Iteration 28: cost 0.00004771359454 -> 0.00004771372551 (rej)      | Time of solver (cpp): 0.8001 ms
+Iteration 29: cost 0.00004771359454 -> 0.00004771358726 (accepted) | Time of solver (cpp): 0.7732 ms
+Optimization completed. Final cost: 4.7713594540255144e-05
+Apply alignment
+Applying 1 -> 0 (Total 91)
+Applying 2 -> 1 (Total 91)
+Applying 3 -> 2 (Total 91)
+Applying 4 -> 3 (Total 91)
+Applying 5 -> 4 (Total 91)
+Applying 6 -> 5 (Total 91)
+Applying 7 -> 6 (Total 91)
+Applying 8 -> 7 (Total 91)
+Applying 9 -> 8 (Total 91)
+Applying 10 -> 9 (Total 91)
+Applying 11 -> 10 (Total 91)
+Applying 12 -> 11 (Total 91)
+Applying 13 -> 12 (Total 91)
+Applying 14 -> 13 (Total 91)
+Applying 15 -> 14 (Total 91)
+Applying 16 -> 15 (Total 91)
+Applying 17 -> 16 (Total 91)
+Applying 18 -> 17 (Total 91)
+Applying 19 -> 18 (Total 91)
+Applying 20 -> 19 (Total 91)
+Applying 21 -> 20 (Total 91)
+Applying 22 -> 21 (Total 91)
+Applying 23 -> 22 (Total 91)
+Applying 24 -> 23 (Total 91)
+Applying 25 -> 24 (Total 91)
+Applying 26 -> 25 (Total 91)
+Applying 27 -> 26 (Total 91)
+Applying 28 -> 27 (Total 91)
+Applying 29 -> 28 (Total 91)
+Applying 30 -> 29 (Total 91)
+Applying 31 -> 30 (Total 91)
+Applying 32 -> 31 (Total 91)
+Applying 33 -> 32 (Total 91)
+Applying 34 -> 33 (Total 91)
+Applying 35 -> 34 (Total 91)
+Applying 36 -> 35 (Total 91)
+Applying 37 -> 36 (Total 91)
+Applying 38 -> 37 (Total 91)
+Applying 39 -> 38 (Total 91)
+Applying 40 -> 39 (Total 91)
+Applying 41 -> 40 (Total 91)
+Applying 42 -> 41 (Total 91)
+Applying 43 -> 42 (Total 91)
+Applying 44 -> 43 (Total 91)
+Applying 45 -> 44 (Total 91)
+Applying 46 -> 45 (Total 91)
+Applying 47 -> 46 (Total 91)
+Applying 48 -> 47 (Total 91)
+Applying 49 -> 48 (Total 91)
+Applying 50 -> 49 (Total 91)
+Applying 51 -> 50 (Total 91)
+Applying 52 -> 51 (Total 91)
+Applying 53 -> 52 (Total 91)
+Applying 54 -> 53 (Total 91)
+Applying 55 -> 54 (Total 91)
+Applying 56 -> 55 (Total 91)
+Applying 57 -> 56 (Total 91)
+Applying 58 -> 57 (Total 91)
+Applying 59 -> 58 (Total 91)
+Applying 60 -> 59 (Total 91)
+Applying 61 -> 60 (Total 91)
+Applying 62 -> 61 (Total 91)
+Applying 63 -> 62 (Total 91)
+Applying 64 -> 63 (Total 91)
+Applying 65 -> 64 (Total 91)
+Applying 66 -> 65 (Total 91)
+Applying 67 -> 66 (Total 91)
+Applying 68 -> 67 (Total 91)
+Applying 69 -> 68 (Total 91)
+Applying 70 -> 69 (Total 91)
+Applying 71 -> 70 (Total 91)
+Applying 72 -> 71 (Total 91)
+Applying 73 -> 72 (Total 91)
+Applying 74 -> 73 (Total 91)
+Applying 75 -> 74 (Total 91)
+Applying 76 -> 75 (Total 91)
+Applying 77 -> 76 (Total 91)
+Applying 78 -> 77 (Total 91)
+Applying 79 -> 78 (Total 91)
+Applying 80 -> 79 (Total 91)
+Applying 81 -> 80 (Total 91)
+Applying 82 -> 81 (Total 91)
+Applying 83 -> 82 (Total 91)
+Applying 84 -> 83 (Total 91)
+Applying 85 -> 84 (Total 91)
+Applying 86 -> 85 (Total 91)
+Applying 87 -> 86 (Total 91)
+Applying 88 -> 87 (Total 91)
+Applying 89 -> 88 (Total 91)
+Applying 90 -> 89 (Total 91)
+Applying 91 -> 90 (Total 91)
+Saving all camera poses to txt file...
+Camera poses saved to ./exps/_data/2026-11-07-16-45-39/camera_poses.txt
+Camera intrinsics saved to ./exps/_data/2026-11-07-16-45-39/intrinsic.txt
+Camera poses visualization saved to ./exps/_data/2026-11-07-16-45-39/camera_poses.ply
+Done.
+Deleting the temp files under ./exps/_data/2026-11-07-16-45-39/_tmp_results_unaligned
+Deleting the temp files under ./exps/_data/2026-11-07-16-45-39/_tmp_results_aligned
+Deleting the temp files under ./exps/_data/2026-11-07-16-45-39/_tmp_results_loop
+Deleting temp files done.
+Saved disk space: 2.3723 GiB
+Saving all the point clouds
+Merge completed! Total points: 5121480
+Output file: ./exps/_data/2026-11-07-16-45-39/pcd/combined_pcd.ply
+All done.

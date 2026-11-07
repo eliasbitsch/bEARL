@@ -65,6 +65,7 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, cal
     env = {"CHUNK_SIZE": params.get("chunk_size"), "OVERLAP": params.get("overlap"),
            "LOOP_CHUNK_SIZE": params.get("loop_chunk_size"), "LOOP_ENABLE": params.get("loop_enable"),
            "MODEL": params.get("model"), "USING_SIM3": params.get("using_sim3"),
+           "WEIGHTS_DTYPE": params.get("weights_dtype"), "LOW_DISK": params.get("low_disk"),
            "CALIB": True if calib else None}
     if calib:
         k = load_sequences()["rgb_intrinsics"]
@@ -89,6 +90,12 @@ def _container_cmd(image_dir: Path, weights: Path, work: Path, params: dict, cal
         return ["apptainer", "run", "--nv", "--bind", binds, *envs, os.environ.get("VGGT_LONG_SIF", "vggt_long.sif")]
     cmd = ["docker", "run", "--rm", "--gpus", "all", "--ipc=host",
            "-v", f"{_host(image_dir)}:/data:ro", "-v", f"{_host(weights)}:/weights:ro", "-v", f"{_host(work)}:/out"]
+    run_sh = ROOT / "docker" / "vggt_long" / "run.sh"
+    if run_sh.exists():                    # same as for Apptainer: the repo version wins over the baked-in copy
+        shutil.copy(run_sh, work / "run.sh")
+        cmd += ["-v", f"{_host(work / 'run.sh')}:/opt/run.sh:ro"]
+    if params.get("low_disk"):             # temp chunks in a Docker volume (WSL disk), not in results/
+        cmd += ["-v", "bearl_vggt_long_tmp:/out/exps"]
     if calib:
         cmd += ["-v", f"{_host(calib)}:/calib.txt:ro"]
     cmd += [a for k, v in env.items() for a in ("-e", f"{k}={v}")]

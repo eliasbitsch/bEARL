@@ -15,8 +15,8 @@
 #   USING_SIM3                             True / False chunk alignment; upstream: True for VGGT, False (SE(3))
 #                                          for MapAnything ("mapanything need se3")
 #   CALIB=True, CALIB_W, CALIB_H           MapAnything only: K from /calib.txt (KITTI P2 line) for a W x H image
-#   WEIGHTS_DTYPE=bf16                    keep the VGGT weights in bfloat16 on the GPU (upstream: float32 weights,
-#                                          inference under bf16 autocast); saves ~2.5 GB for 16 GB cards
+#   WEIGHTS_DTYPE=bf16                    aggregator weights in bfloat16 (heads stay fp32); saves ~2 GB for 16 GB cards
+
 #   HOST_UID / HOST_GID                    chown the outputs to this user at the end
 #
 # Host example (WSL2):
@@ -55,19 +55,37 @@ yaml.safe_dump(cfg, open("/out/config_used.yaml", "w"), sort_keys=False)
 print("config:", {"model": w["model"], **{k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3", "calib")}})
 EOF
 
+# Upstream loads the fp32 state dict straight onto the GPU next to the model (2 x 5 GB peak, OOM on 16 GB).
+# Loading on the CPU gives the same weights.
+python - <<'EOF'
+p = "base_models/base_model.py"
+src = open(p).read()
+old = "torch.load(url, map_location='cuda')"
+if old not in src:
+    raise SystemExit("CPU weight loading: patch location not found in base_models/base_model.py")
+open(p, "w").write(src.replace(old, "torch.load(url, map_location='cpu')", 1))
+EOF
+
 if [ "${WEIGHTS_DTYPE:-}" = "bf16" ]; then
-    # one line after the VGGT adapter moves the model to the GPU
+    # Only the aggregator (most of the weights, already run under bf16 autocast); the heads stay fp32 as upstream
+    # runs them with autocast disabled, so their input tokens are cast back to fp32.
     python - <<'EOF'
 import re
 p = "base_models/base_model.py"
 src = open(p).read()
-new, n = re.subn(r"^(\s*)(self\.model = self\.model\.to\(self\.device\))[ \t]*$",
-                 r"\1\2\n\1self.model = self.model.to(torch.bfloat16)  # bEARL: WEIGHTS_DTYPE=bf16",
-                 src, count=1, flags=re.M)
-if n != 1:
-    raise SystemExit("WEIGHTS_DTYPE=bf16: patch location not found in base_models/base_model.py")
-open(p, "w").write(new)
-print("bf16 weights: patched VGGT adapter")
+src, n1 = re.subn(r"^(\s*)(self\.model = self\.model\.to\(self\.device\))[ \t]*$",
+                  r"\1self.model.aggregator.to(torch.bfloat16)  # bEARL: WEIGHTS_DTYPE=bf16\n\1\2",
+                  src, count=1, flags=re.M)
+open(p, "w").write(src)
+p = "base_models/vggt/models/vggt.py"
+src = open(p).read()
+src, n2 = re.subn(r"^(\s*)(aggregated_tokens_list, patch_start_idx = self\.aggregator\(images\))[ \t]*$",
+                  r"\1\2\n\1aggregated_tokens_list = [t.float() for t in aggregated_tokens_list]  # bEARL: bf16",
+                  src, count=1, flags=re.M)
+open(p, "w").write(src)
+if (n1, n2) != (1, 1):
+    raise SystemExit("WEIGHTS_DTYPE=bf16: patch location not found")
+print("bf16 weights: aggregator in bf16, heads in fp32")
 EOF
 fi
 
@@ -89,8 +107,33 @@ print("MapAnything: dropping the loop detector's dinov2 module before loading")
 EOF
 fi
 
-# VGGT-Long writes to ./exps/<image_dir>/<datetime>/ -> put that on the mounted output disk
-mkdir -p /out/exps && rm -rf exps && ln -sfn /out/exps exps
+if [ "${LOW_DISK:-}" = "True" ]; then
+    # Upstream keeps every chunk on disk twice (unaligned + aligned, ~90 GB peak for 1750 frames). Same results with
+    # less disk: skip fields that are never read back, and drop each chunk file once its point cloud is written.
+    python - <<'EOF'
+p = "vggt_long.py"
+src = open(p).read()
+old_save = "        np.save(save_path, predictions)\n"
+new_save = ("        np.save(save_path, {k: v for k, v in predictions.items()  # bEARL: LOW_DISK\n"
+            "                            if k not in ('depth', 'depth_conf', 'pose_enc')})\n")
+anchor = "ply_path = os.path.join(self.pcd_dir, f'{chunk_idx + 1}_pcd.ply')"
+i = src.find(anchor)
+j = src.find("\n            )\n", i) + len("\n            )\n")
+drop = ("            for _d in (self.result_unaligned_dir, self.result_aligned_dir):  # bEARL: LOW_DISK\n"
+        "                for _n in [f'chunk_{chunk_idx + 1}.npy'] + (['chunk_0.npy'] if chunk_idx == 0 else []):\n"
+        "                    if os.path.exists(os.path.join(_d, _n)):\n"
+        "                        os.remove(os.path.join(_d, _n))\n")
+if src.count(old_save) != 1 or i < 0 or j < len("\n            )\n"):
+    raise SystemExit("LOW_DISK: patch location not found in vggt_long.py")
+src = src.replace(old_save, new_save)
+j = src.find("\n            )\n", src.find(anchor)) + len("\n            )\n")
+open(p, "w").write(src[:j] + drop + src[j:])
+print("LOW_DISK: chunk files trimmed and deleted after use")
+EOF
+fi
+
+# VGGT-Long writes to ./exps/<image_dir>/<datetime>/ -> put that on the mounted output disk (or a mounted volume)
+mkdir -p /out/exps && rm -rf /out/exps/* exps && ln -sfn /out/exps exps
 
 echo "VGGT-Long commit: $(cat UPSTREAM_COMMIT 2>/dev/null || git rev-parse HEAD)"
 python vggt_long.py --image_dir /data --config /out/config_used.yaml 2>&1 | tee /out/log.txt
