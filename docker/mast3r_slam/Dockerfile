@@ -39,10 +39,15 @@ RUN git clone https://github.com/rmurai0610/MASt3R-SLAM.git \
 WORKDIR /opt/MASt3R-SLAM
 # setup.py only builds the CUDA backend when a GPU is visible; there is none during docker build.
 RUN sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py \
-    && pip install --no-cache-dir -e thirdparty/mast3r \
+    && pip install --no-cache-dir --no-build-isolation -e thirdparty/mast3r \
     && pip install --no-cache-dir -e thirdparty/in3d \
-    && pip install --no-cache-dir --no-build-isolation -e . \
-    && python -c "import mast3r_slam_backends, lietorch; print('backends ok')"
+    && pip install --no-cache-dir --no-build-isolation -e .
+
+# The latest opencv-python / pandas pulled in above need numpy 2, moderngl-window needs numpy < 2: keep 1.26 and pin
+# versions built for it. pyrealsense2 (imported by the dataloader) needs libusb. torch must be imported first (libc10).
+RUN apt-get update && apt-get install -y --no-install-recommends libusb-1.0-0 && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir "numpy==1.26.4" "opencv-python<4.11" "pandas<2.3" \
+    && python -c "import torch, mast3r_slam_backends, lietorch, cv2, pandas; import mast3r_slam.dataloader, mast3r_slam.evaluate; print('imports ok, torch', torch.__version__)"
 
 COPY run.sh /opt/run.sh
 RUN chmod +x /opt/run.sh
