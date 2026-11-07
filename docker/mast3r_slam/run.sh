@@ -13,6 +13,8 @@ if [ ! -w . ]; then                       # Apptainer images are read-only; MASt
     W=$(mktemp -d /tmp/mast3r-slam.XXXXXX) && cp -a /opt/MASt3R-SLAM/. "$W"/ && chmod -R u+w "$W" && cd "$W"
 fi
 ln -sfn /ckpt checkpoints
+# PyTorch >= 2.6 loads with weights_only=True; the official MASt3R checkpoints pickle an argparse.Namespace
+export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 
 # upstream's image-folder loader only globs *.png; the M3DGR frames are stored as the original JPEGs
 python - <<'EOF'

@@ -27,6 +27,9 @@ From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
     git submodule status --recursive | grep -q '^-' && exit 1
     # setup.py only builds the CUDA backend when a GPU is visible; there is none during the build
     sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
+    # setup.py hard-codes -gencode flags up to sm_86 and ignores TORCH_CUDA_ARCH_LIST; add Blackwell (SM 12.0)
+    sed -i 's/"-gencode=arch=compute_86,code=sm_86",/"-gencode=arch=compute_86,code=sm_86", "-gencode=arch=compute_120,code=sm_120",/' setup.py
+    grep -q compute_120 setup.py
     # Tensor.type() no longer converts to ScalarType in PyTorch >= 2.6
     sed -i 's/tokens\.type()/tokens.scalar_type()/' thirdparty/mast3r/dust3r/croco/models/curope/kernels.cu
     sed -i 's/D11\.type()/D11.scalar_type()/' mast3r_slam/backend/src/matching_kernels.cu
