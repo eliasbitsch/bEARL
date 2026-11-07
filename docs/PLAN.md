@@ -64,7 +64,7 @@ Known pitfalls (resolve in week 1):
 - **ROS version:** The bags are ROS 1. Convert to ROS 2 with `rosbags-convert` as described in the README, passing the Livox message definitions.
 - **Image compression:** Images are compressed (`compressed`, `compressedDepth`). Extract them once into image folders, which the RGB-only systems need anyway.
 - **Synchronisation:** Sensors are synchronised in software only, and the cameras are rolling shutter. Mention this as a limitation in the paper.
-- **Ground-truth frame:** The mocap body frame is not the robot's `base_link`, and `calibration.md` gives no mocap-to-sensor transform. As in the M3DGR evaluation, we evaluate directly against the GT file; the lever arm is a limitation for the paper.
+- **Ground-truth frame:** The mocap body frame is not the robot's `base_link`, and `calibration.md` gives no mocap-to-sensor transform. As in the M3DGR evaluation, we evaluate directly against the GT file; the lever arm is a limitation for the paper. Measured size (FAST-LIO2, notebook 05, Section 6b): fitting a constant mocap-to-IMU offset drops its ATE from 0.14-0.20 m to ~0.01 m, with the same ~19 cm offset on all three sequences, so absolute ATE values on M3DGR (ours and published) contain an offset term of that size.
 
 ### Working principle: everyone works independently
 
@@ -97,6 +97,7 @@ Known pitfalls (resolve in week 1):
 | Member | System | Sensors | Paradigm | Loop closure | Hardware |
 |---|---|---|---|---|---|
 | Elias Bitsch | **VGGT-Long** (Deng et al., ICRA 2026) | monocular RGB | 3D foundation model (VGGT), chunked + Sim(3) chunk alignment | yes | RTX 3080 Ti / GPU cluster |
+| Elias Bitsch (backup) | **FAST-LIO2** (Xu et al., T-RO 2022), M3DGR authors' MID-360 version | MID-360 LiDAR + IMU | tightly coupled iterated Kalman filter | no | CPU (ROS 1 container) |
 | Philip Stix | *your choice* | | | | |
 | Viktoriia Ovdiienko | *your choice* | | | | |
 | Jiayi Zhou | *your choice* | | | | |
@@ -109,7 +110,7 @@ All of these run on **the same monocular RGB images**. They all share the same f
 
 | Priority | System | Paradigm | Code | GPU notes |
 |---|---|---|---|---|
-| 0 (core) | **VGGT-Long** (Deng et al., ICRA 2026) | 3D foundation model (VGGT), overlapping chunks, loop closure | ✅ github.com/DengKaiCQ/VGGT-Long | default chunk (60 frames, 640x480) needs ~31.6 GB: 16 GB laptop not enough, runs on a 48 GB cluster GPU |
+| 0 (core) | **VGGT-Long** (Deng et al., ICRA 2026) | 3D foundation model (VGGT), overlapping chunks, loop closure | ✅ github.com/DengKaiCQ/VGGT-Long | default chunk (60 frames, 640x480) reserves 28-45 GB: 16 GB laptop not enough (chunk 30 fits, see vggt_long_16gb), runs on a 48 GB cluster GPU |
 | 1 | **Map-Long / MapAnything** (same VGGT-Long pipeline, MapAnything backbone) | 3D foundation model with **metric** scale → SE(3) | ✅ supported by the VGGT-Long repo since 12/2025 | same container and runner; answers "does a foundation model recover metric scale?" |
 | 2 | **DA3-Streaming** (Depth Anything 3, long-sequence variant) | depth foundation model, chunked | ✅ in the Depth-Anything-3 repo | optional |
 | 3 | **MASt3R-SLAM** (Murai, Dexheimer, Davison, CVPR 2025) | 3D foundation model, image pairs, dense | ✅ image folder or video input, WSL branch available | authors tested on RTX 4090 (24 GB); 12 GB uncertain → GPU cluster |
@@ -214,6 +215,10 @@ These are measurements, not metrics, following the practice in SLAMBench and Tre
     Tanks and Temples protocol; rejected and flagged if it moves the map implausibly far.
   - Two evaluation volumes, both reported: **room** (whole reference, a LiDAR's view of the ceiling counts) and
     **common** (floor to 2.5 m, what a forward-looking camera can observe at all).
+  - Volumetric **IoU** of the occupied 5 / 10 cm voxels (Mescheder et al. 2019).
+  - **Wall noise** (lecturer's suggestion): mean plane variance MPV (Razlaw et al. 2015) and mean map entropy MME
+    (Droeschel et al. 2014) on 10 cm neighbourhoods. Both need no reference and measure crispness, not correctness
+    (a collapsed map can score well, see Hu et al. 2024, MapEval), so they are only read next to accuracy / F-score.
   - 2D grids: mean nearest-neighbour distance to the reference map (Santos et al. 2013).
 - **No rendering metrics** (PSNR / SSIM / LPIPS): not a measure of geometric map accuracy, see Section 3.2.
 

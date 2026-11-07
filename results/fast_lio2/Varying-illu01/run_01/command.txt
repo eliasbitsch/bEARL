@@ -1,0 +1,1 @@
+wsl.exe -d Ubuntu-24.04 -- docker run --rm -v /mnt/c/git/FH/bEARL/data/M3DGR:/data:ro -v /mnt/c/git/FH/bEARL/results/fast_lio2/Varying-illu01/run_01/fast_lio2:/out -e SEQ=Varying-illu01 -e RATE=1.0 bearl/fast_lio2

@@ -11,6 +11,10 @@ Metrics (Knapitsch et al. 2017, "Tanks and Temples"; Chamfer as in Fan et al. 20
   recall(t)     share of reference points closer than t to the estimate
   F-score(t)    2 P R / (P + R), t = 5 cm and 10 cm
   Chamfer       mean(est -> ref) + mean(ref -> est)
+  IoU(t)        volumetric IoU of occupied t-voxels (Mescheder et al. 2019), t = 5 cm and 10 cm
+  MME, MPV      no-reference sharpness: mean map entropy (Droeschel et al. 2014) and mean plane variance
+                (Razlaw et al. 2015) of 10 cm neighbourhoods; MPV is the "noise / waviness of the walls".
+                Also computed on the reference, which gives the floor set by the LiDAR's own noise.
   (accuracy and completeness are the cloud-to-cloud (C2C) distances of CloudCompare; checked identical on
    Dynamic01 to 0.001 cm with tools/cloudcompare_c2c.py)
 
@@ -43,6 +47,7 @@ VOXEL = 0.02
 TAUS = (0.05, 0.10)
 COMMON_HEIGHT = 2.5
 ICP_MAX_ROT_DEG, ICP_MAX_SHIFT_M = 10.0, 0.5   # plausibility limits for the ICP refinement (scale: 0.8 .. 1.25)
+MME_RADIUS = 0.10   # indoor scale; LiDAR papers use up to 0.3-1 m on sparse outdoor maps
 
 
 def voxel_thin(p: np.ndarray, voxel: float = VOXEL) -> np.ndarray:
@@ -94,7 +99,43 @@ def scores(est: np.ndarray, ref: np.ndarray) -> dict:
         k = f"{int(tau * 100)}cm"
         out[f"precision_{k}"], out[f"recall_{k}"] = p, r
         out[f"fscore_{k}"] = 2 * p * r / (p + r) if p + r > 0 else 0.0
+        out[f"iou_{k}"] = voxel_iou(est, ref, tau)
+    for name, cloud in (("est", est), ("ref", ref)):
+        key = (len(cloud), cloud[:3].tobytes(), cloud[-3:].tobytes())   # the reference repeats per stage
+        if key not in _SHARPNESS:
+            _SHARPNESS[key] = map_entropy_plane_variance(cloud)
+        out[f"mme_{name}"], out[f"mpv_{name}_m2"] = _SHARPNESS[key]
     return out
+
+
+_SHARPNESS: dict = {}
+
+
+def voxel_iou(est: np.ndarray, ref: np.ndarray, voxel: float) -> float:
+    """Volumetric IoU of the occupied voxels (as in Mescheder et al. 2019, Occupancy Networks)."""
+    a = {tuple(v) for v in np.floor(est / voxel).astype(np.int64)}
+    b = {tuple(v) for v in np.floor(ref / voxel).astype(np.int64)}
+    return len(a & b) / len(a | b) if a or b else 0.0
+
+
+def map_entropy_plane_variance(p: np.ndarray, radius: float = MME_RADIUS, sample: int = 50_000,
+                               min_nn: int = 10, seed: int = 0) -> tuple[float, float]:
+    """No-reference map sharpness from the covariance of each point's neighbourhood within `radius`:
+    mean map entropy MME = mean 0.5 ln det(2 pi e C) (Droeschel et al. 2014) and mean plane variance
+    MPV = mean smallest eigenvalue of C (Razlaw et al. 2015). Lower = crisper, flatter surfaces (wall noise)."""
+    rng = np.random.default_rng(seed)
+    q = p[rng.choice(len(p), min(sample, len(p)), replace=False)]
+    nbrs = cKDTree(p).query_ball_point(q, radius, workers=-1)
+    ent, var = [], []
+    for idx in nbrs:
+        if len(idx) < min_nn:
+            continue
+        c = np.cov(p[idx].T)
+        det = np.linalg.det(2 * np.pi * np.e * c)
+        if det > 0:
+            ent.append(0.5 * np.log(det))
+            var.append(np.linalg.eigvalsh(c)[0])
+    return (float(np.mean(ent)), float(np.mean(var))) if ent else (float("nan"), float("nan"))
 
 
 def evaluate_map(slug: str, seq: str, run: str = "run_00", export: bool = False) -> list[dict]:

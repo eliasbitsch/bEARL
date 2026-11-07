@@ -44,6 +44,7 @@ T = TS.types
 POSE_RATE = 30.0     # Hz for /tf and current poses
 PATH_RATE = 10.0     # Hz of the poses inside the path messages
 PATH_EVERY = 2.0     # s between repeated full-path messages (so seeking always shows them)
+MAP_EVERY = 30.0     # s between repeated map clouds (~15 MB each, the bulk of the file)
 
 
 def _stamp(t: float):
@@ -245,12 +246,12 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
 
     if map_file is not None:
         cloud = _cloud(map_file, sim, t0)
-        for t in np.arange(t0, t1, 10.0):        # repeated so that seeking always shows it
+        for t in np.arange(t0, t1, MAP_EVERY):        # repeated so that seeking always shows it
             msgs.append(("/est/map", "sensor_msgs/msg/PointCloud2", t, cloud))
     ref_map = seq_dir / "reference_map.ply"
     if ref_map.exists():                          # pseudo-GT map (pipeline.reference_map), already in the mocap frame
         cloud = _cloud(ref_map, (1.0, np.eye(3), np.zeros(3)), t0)
-        for t in np.arange(t0, t1, 10.0):
+        for t in np.arange(t0, t1, MAP_EVERY):
             msgs.append(("/gt/map", "sensor_msgs/msg/PointCloud2", t, cloud))
 
     if out.exists():
@@ -265,17 +266,30 @@ def build(seq: str, est_file: Path, sim3: bool, out: Path, map_file: Path | None
 
 
 def _read_ply_xyzrgb(ply: Path) -> tuple[np.ndarray, np.ndarray]:
-    """Binary little-endian PLY with float x, y, z and uchar red, green, blue (as written by VGGT-Long)."""
+    """Binary little-endian PLY with x, y, z and optional red, green, blue; other vertex properties are skipped."""
+    types = {"float": "<f4", "float32": "<f4", "double": "<f8", "float64": "<f8", "uchar": "u1", "uint8": "u1",
+             "char": "i1", "int": "<i4", "uint": "<u4", "short": "<i2", "ushort": "<u2"}
     with open(ply, "rb") as f:
         header = b""
         while not header.endswith(b"end_header\n"):
             header += f.read(1)
-        n = int(header.split(b"element vertex ")[1].split(b"\n")[0])
-        coloured = b"property uchar red" in header
-        fields = [("x", "<f4"), ("y", "<f4"), ("z", "<f4")] + ([("r", "u1"), ("g", "u1"), ("b", "u1")] if coloured else [])
+        lines = header.decode("ascii").splitlines()
+        if "format binary_little_endian 1.0" not in lines:
+            raise ValueError(f"{ply}: only binary little-endian PLY is supported")
+        n, fields, in_vertex = 0, [], False
+        for line in lines:
+            w = line.split()
+            if w[:2] == ["element", "vertex"]:
+                n, in_vertex = int(w[2]), True
+            elif w[:1] == ["element"]:
+                in_vertex = False
+            elif in_vertex and w[:1] == ["property"]:
+                fields.append((w[2], types[w[1]]))
         rec = np.fromfile(f, dtype=fields, count=n)
-    xyz = np.column_stack([rec["x"], rec["y"], rec["z"]])
-    rgb = np.column_stack([rec["r"], rec["g"], rec["b"]]) if coloured else np.full((n, 3), 150, np.uint8)
+    xyz = np.column_stack([rec["x"], rec["y"], rec["z"]]).astype(np.float32)
+    names = rec.dtype.names
+    rgb = (np.column_stack([rec["red"], rec["green"], rec["blue"]]).astype(np.uint8) if "red" in names
+           else np.full((n, 3), 150, np.uint8))
     return xyz, rgb
 
 

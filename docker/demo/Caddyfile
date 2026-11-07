@@ -1,0 +1,9 @@
+:8791 {
+	root * /srv
+	header Access-Control-Allow-Origin *
+	header Access-Control-Allow-Headers Range
+	header Access-Control-Expose-Headers "Accept-Ranges, Content-Range, Content-Length"
+	@preflight method OPTIONS
+	respond @preflight 204
+	file_server browse
+}

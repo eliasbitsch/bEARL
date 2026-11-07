@@ -1,0 +1,23 @@
+# Backup / LiDAR reference for Elias's camera-only systems (suggested by the lecturer).
+slug: fast_lio2
+system: FAST-LIO2
+member: Elias Bitsch
+
+source:
+  repository: https://github.com/sjtuyinjie/M3DGR (baseline_systems/Fast_LIO2_M3DGR)
+  commit: 5fc892c84defef42feb2418f7d38897bef40f490
+  upstream: https://github.com/hku-mars/FAST_LIO
+  container: docker/fast_lio2/Dockerfile
+
+sensors: [lidar3d, imu]
+
+# LiDAR-inertial: metric, so SE(3)
+alignment: se3
+
+parameter_file: src/fast_lio2/config/mid360.yaml + launch/mapping_mid360.launch of the M3DGR baseline (unchanged)
+parameters:
+  rate: 1.0                   # rosbag play rate (real time, as the system is meant to run)
+deviations_from_defaults: []
+
+execution:
+  mode: rosbag                # original ROS 1 bag, LiDAR + IMU topics only
