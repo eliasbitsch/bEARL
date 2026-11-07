@@ -4,7 +4,8 @@
 # Mounts: /data image folder (*.jpg or *.png), /ckpt the three MASt3R checkpoints, /out output folder.
 # Output: /out/traj.txt (keyframe poses, TUM; timestamps = frame index / 30, as upstream's RGBFiles loader),
 #         /out/map.ply, /out/log.txt, /out/config_used.yaml.
-# Environment: CONFIG (default base = upstream default, uncalibrated), CALIB=/calib.yaml to pass intrinsics.
+# Environment: CONFIG (default base = upstream default, uncalibrated), CALIB=/calib.yaml to pass intrinsics,
+#              ENTRY=windows for upstream's single-process main.py (WSL2 Docker has no CUDA IPC between processes).
 set -euo pipefail
 cd /opt/MASt3R-SLAM
 if [ ! -w . ]; then                       # Apptainer images are read-only; MASt3R-SLAM writes logs/ next to its code
@@ -29,7 +30,10 @@ mkdir -p /out/logs && rm -rf logs && ln -sfn /out/logs logs
 ARGS=(--dataset /data --config "$CFG" --save-as bearl --no-viz)
 [ -n "${CALIB:-}" ] && ARGS+=(--calib "$CALIB")
 echo "MASt3R-SLAM commit: $(git rev-parse HEAD 2>/dev/null || echo unknown)  frames: $(ls /data | wc -l)"
-python main.py "${ARGS[@]}" 2>&1 | tee /out/log.txt
+SCRIPT=main.py
+[ "${ENTRY:-main}" = "windows" ] && SCRIPT=main_windows.py
+echo "entry: $SCRIPT"
+python "$SCRIPT" "${ARGS[@]}" 2>&1 | tee /out/log.txt
 
 TRAJ=$(find /out/logs/bearl -maxdepth 1 -name "*.txt" | head -1)
 PLY=$(find /out/logs/bearl -maxdepth 1 -name "*.ply" | head -1)

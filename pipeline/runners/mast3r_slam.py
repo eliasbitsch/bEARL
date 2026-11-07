@@ -31,8 +31,10 @@ def _container_cmd(image_dir: Path, ckpt: Path, work: Path, params: dict) -> lis
         binds = f"{image_dir}:/data:ro,{ckpt}:/ckpt:ro,{work}:/out,{work / 'run.sh'}:/opt/run.sh:ro"
         envs = [a for k, v in env.items() for a in ("--env", f"{k}={v}")]
         return ["apptainer", "run", "--nv", "--bind", binds, *envs, os.environ.get("MAST3R_SLAM_SIF", "mast3r_slam.sif")]
+    env["ENTRY"] = "windows"                     # single-process main.py: WSL2 Docker has no CUDA IPC
+    shutil.copy(ROOT / "docker" / "mast3r_slam" / "run.sh", work / "run.sh")
     cmd = ["docker", "run", "--rm", "--gpus", "all", "--ipc=host", "-v", f"{_host(image_dir)}:/data:ro",
-           "-v", f"{_host(ckpt)}:/ckpt:ro", "-v", f"{_host(work)}:/out"]
+           "-v", f"{_host(ckpt)}:/ckpt:ro", "-v", f"{_host(work)}:/out", "-v", f"{_host(work / 'run.sh')}:/opt/run.sh:ro"]
     cmd += [a for k, v in env.items() for a in ("-e", f"{k}={v}")] + ["bearl/mast3r_slam"]
     if os.name == "nt":
         cmd = ["wsl.exe", "-d", os.environ.get("WSL_DISTRO", "Ubuntu-24.04"), "--", *cmd]

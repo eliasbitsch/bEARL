@@ -64,7 +64,7 @@ Known pitfalls (resolve in week 1):
 - **ROS version:** The bags are ROS 1. Convert to ROS 2 with `rosbags-convert` as described in the README, passing the Livox message definitions.
 - **Image compression:** Images are compressed (`compressed`, `compressedDepth`). Extract them once into image folders, which the RGB-only systems need anyway.
 - **Synchronisation:** Sensors are synchronised in software only, and the cameras are rolling shutter. Mention this as a limitation in the paper.
-- **Ground-truth frame:** The mocap body frame is not the robot's `base_link`, and `calibration.md` gives no mocap-to-sensor transform. As in the M3DGR evaluation, we evaluate directly against the GT file; the lever arm is a limitation for the paper. Measured size (FAST-LIO2, notebook 05, Section 6b): fitting a constant mocap-to-IMU offset drops its ATE from 0.14-0.20 m to ~0.01 m, with the same ~19 cm offset on all three sequences, so absolute ATE values on M3DGR (ours and published) contain an offset term of that size.
+- **Ground-truth frame:** The mocap body frame is not the robot's `base_link`, and `calibration.md` gives no mocap-to-sensor transform. As in the M3DGR evaluation, we evaluate directly against the GT file; the lever arm is a limitation for the paper. Measured size (FAST-LIO2, notebook 05, Section 6b): fitting a constant mocap-to-IMU offset drops its ATE from 0.14-0.20 m to ~0.01 m, with the same ~19 cm offset on all three sequences, which matches the reference-map calibration (Section 5.5) to ~5 mm. The camera sits almost below the mocap body (~5 cm horizontal), so camera-only ATEs change by only 0.5-2 cm; LiDAR ATEs (ours and published) are mostly this offset.
 
 ### Working principle: everyone works independently
 
