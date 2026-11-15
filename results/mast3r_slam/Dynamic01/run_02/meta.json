@@ -1,0 +1,34 @@
+{
+  "system": "MASt3R-SLAM",
+  "slug": "mast3r_slam",
+  "member": "Elias Bitsch",
+  "sequence": "Dynamic01",
+  "run": 2,
+  "started": "2026-11-08T00:20:10",
+  "system_source": {
+    "repository": "https://github.com/rmurai0610/MASt3R-SLAM",
+    "commit": "e6f4e3d474fad0e11f561482012be864ba8c3f17",
+    "container": "docker/mast3r_slam/mast3r_slam.def (cluster), docker/mast3r_slam/Dockerfile (local)",
+    "weights": "MASt3R ViT-L 512 catmlpdpt metric + retrieval checkpoints (naverlabs, see upstream README)"
+  },
+  "alignment": "sim3",
+  "deviations_from_defaults": [
+    "Upstream's image-folder loader only reads *.png; run.sh extends the glob to *.jpg (M3DGR frames are JPEGs)."
+  ],
+  "pipeline_commit": null,
+  "hardware": {
+    "platform": "Linux-5.14.0-611.49.1.el9_7.x86_64-x86_64-with-glibc2.34",
+    "cpu": "x86_64",
+    "cpu_cores_logical": 64,
+    "ram_gib": 377.6,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 417.09007092379034,
+  "resources": {
+    "cpu_mean_percent": 8.559042268592831,
+    "ram_peak_mib": 8195.89453125,
+    "gpu_mem_peak_mib": 88702.0
+  }
+}

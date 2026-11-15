@@ -35,3 +35,6 @@ Thumbs.db
 ~$*
 results/**/viz/
 results/**/map_eval/
+.playwright-mcp/
+results/**/*.ply
+results_bench/**/*.ply

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Run MASt3R-SLAM headless on one image folder (Apptainer / Docker).
+#
+# Mounts: /data image folder (*.jpg or *.png), /ckpt the three MASt3R checkpoints, /out output folder.
+# Output: /out/traj.txt (keyframe poses, TUM; timestamps = frame index / 30, as upstream's RGBFiles loader),
+#         /out/map.ply, /out/log.txt, /out/config_used.yaml.
+# Environment: CONFIG (default base = upstream default, uncalibrated), CALIB=/calib.yaml to pass intrinsics,
+#              ENTRY=windows for upstream's single-process main.py (WSL2 Docker has no CUDA IPC between processes).
+set -euo pipefail
+cd /opt/MASt3R-SLAM
+if [ ! -w . ]; then                       # Apptainer images are read-only; MASt3R-SLAM writes logs/ next to its code
+    # own folder per job (array tasks can share a node) and writable copies (image files are read-only)
+    W=$(mktemp -d /tmp/mast3r-slam.XXXXXX) && cp -a /opt/MASt3R-SLAM/. "$W"/ && chmod -R u+w "$W" && cd "$W"
+fi
+ln -sfn /ckpt checkpoints
+# PyTorch >= 2.6 loads with weights_only=True; the official MASt3R checkpoints pickle an argparse.Namespace
+export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+
+# upstream's image-folder loader only globs *.png; the M3DGR frames are stored as the original JPEGs
+python - <<'EOF'
+p = "mast3r_slam/dataloader.py"
+src = open(p).read()
+old = 'natsorted(list((self.dataset_path).glob("*.png")))'
+if old not in src:
+    raise SystemExit("RGBFiles glob not found in mast3r_slam/dataloader.py")
+open(p, "w").write(src.replace(old, 'natsorted(list((self.dataset_path).glob("*.png")) + list((self.dataset_path).glob("*.jpg")))'))
+print("RGBFiles: *.png and *.jpg")
+EOF
+
+# upstream reports every exception in tracking as "Cholesky failed"; print the real one (e.g. CUDA out of memory)
+sed -i 's/print(f"Cholesky failed {frame.frame_id}")/print(f"Cholesky failed {frame.frame_id}: {e!r}"[:300])/' mast3r_slam/tracker.py
+
+CFG="config/${CONFIG:-base}.yaml"
+cp "$CFG" /out/config_used.yaml
+mkdir -p /out/logs && rm -rf logs && ln -sfn /out/logs logs
+ARGS=(--dataset /data --config "$CFG" --save-as bearl --no-viz)
+[ -n "${CALIB:-}" ] && ARGS+=(--calib "$CALIB")
+echo "MASt3R-SLAM commit: $(git rev-parse HEAD 2>/dev/null || echo unknown)  frames: $(ls /data | wc -l)"
+SCRIPT=main.py
+[ "${ENTRY:-main}" = "windows" ] && SCRIPT=main_windows.py
+echo "entry: $SCRIPT"
+python "$SCRIPT" "${ARGS[@]}" 2>&1 | tee /out/log.txt
+
+TRAJ=$(find /out/logs/bearl -maxdepth 1 -name "*.txt" | head -1)
+PLY=$(find /out/logs/bearl -maxdepth 1 -name "*.ply" | head -1)
+cp "$TRAJ" /out/traj.txt
+[ -n "$PLY" ] && cp "$PLY" /out/map.ply
+echo "keyframe poses: $(wc -l < /out/traj.txt)"

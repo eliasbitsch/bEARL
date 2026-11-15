@@ -1,0 +1,23 @@
+vggt/SLAM
+vggt Long
+
+map anything
+
+Depth anything 3 
+
+Peak Signal to noice Ratio Metrik hinzufügen
+
+Cloud to Cloud Distanz
+
+Oxford
+dense mapping via exchanged semantic geometric verfications
+
+
+Cloud compare
+
+
+pose overlay figure + metrics + qualitative examples
+
+https://scholar.google.com/scholar?cites=8664108640084899295&as_sdt=2005&sciodt=0,5&hl=de
+
+https://arxiv.org/abs/2603.16273

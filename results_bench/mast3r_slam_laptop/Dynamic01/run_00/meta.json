@@ -1,0 +1,34 @@
+{
+  "system": "MASt3R-SLAM",
+  "slug": "mast3r_slam",
+  "member": "Elias Bitsch",
+  "sequence": "Dynamic01",
+  "run": 0,
+  "started": "2026-11-07T20:50:59",
+  "system_source": {
+    "repository": "https://github.com/rmurai0610/MASt3R-SLAM",
+    "commit": "e6f4e3d474fad0e11f561482012be864ba8c3f17",
+    "container": "docker/mast3r_slam/mast3r_slam.def (cluster), docker/mast3r_slam/Dockerfile (local)",
+    "weights": "MASt3R ViT-L 512 catmlpdpt metric + retrieval checkpoints (naverlabs, see upstream README)"
+  },
+  "alignment": "sim3",
+  "deviations_from_defaults": [
+    "Upstream's image-folder loader only reads *.png; run.sh extends the glob to *.jpg (M3DGR frames are JPEGs)."
+  ],
+  "pipeline_commit": "843682cf60f3c18f1fc46143b7a86e716e7e671d",
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "cpu_cores_logical": 20,
+    "ram_gib": 63.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU, 16384 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 1923.4413406999956,
+  "resources": {
+    "cpu_mean_percent": 19.36250278665379,
+    "ram_peak_mib": 113.453125,
+    "gpu_mem_peak_mib": 16156.0
+  }
+}

@@ -1,0 +1,279 @@
+/data
+{'use_calib': False, 'single_thread': False, 'dataset': {'subsample': 1, 'img_downsample': 1, 'center_principle_point': True}, 'matching': {'max_iter': 10, 'lambda_init': 1e-08, 'convergence_thresh': 1e-06, 'dist_thresh': 0.1, 'radius': 3, 'dilation_max': 5}, 'tracking': {'min_match_frac': 0.05, 'max_iters': 50, 'C_conf': 0.0, 'Q_conf': 1.5, 'rel_error': 0.001, 'delta_norm': 0.001, 'huber': 1.345, 'match_frac_thresh': 0.333, 'sigma_ray': 0.003, 'sigma_dist': 10.0, 'sigma_pixel': 1.0, 'sigma_depth': 10.0, 'sigma_point': 0.05, 'pixel_border': -10, 'depth_eps': 1e-06, 'filtering_mode': 'weighted_pointmap', 'filtering_score': 'median'}, 'local_opt': {'pin': 1, 'window_size': 1000000.0, 'C_conf': 0.0, 'Q_conf': 1.5, 'min_match_frac': 0.1, 'pixel_border': -10, 'depth_eps': 1e-06, 'max_iters': 10, 'sigma_ray': 0.003, 'sigma_dist': 10.0, 'sigma_pixel': 1.0, 'sigma_depth': 10.0, 'sigma_point': 0.05, 'delta_norm': 1e-08, 'use_cuda': True}, 'retrieval': {'k': 3, 'min_thresh': 0.005}, 'reloc': {'min_match_frac': 0.3, 'strict': True}}
+... loading model from checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+/opt/MASt3R-SLAM/thirdparty/mast3r/mast3r/model.py:24: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(model_path, map_location='cpu')
+instantiating : AsymmetricMASt3R(enc_depth=24, dec_depth=12, enc_embed_dim=1024, dec_embed_dim=768, enc_num_heads=16, dec_num_heads=12, pos_embed='RoPE100',img_size=(512, 512), head_type='catmlp+dpt', output_mode='pts3d+desc24', depth_mode=('exp', -inf, inf), conf_mode=('exp', 1, inf), patch_embed_cls='PatchEmbedDust3R', two_confs=True, desc_conf_mode=('exp', 0, inf), landscape_only=False)
+<All keys matched successfully>
+Loading retrieval model from checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric_retrieval_trainingfree.pth
+/opt/MASt3R-SLAM/thirdparty/mast3r/mast3r/retrieval/processor.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(modelname, 'cpu')  # TODO from pretrained to download it automatically
+/opt/MASt3R-SLAM/mast3r_slam/frame.py:116: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at ../torch/csrc/utils/tensor_numpy.cpp:206.)
+  uimg = torch.from_numpy(img["unnormalized_img"]) / 255.0
+FPS: 3.9417616386315015
+FPS: 4.238548155564327
+FPS: 4.350934700241854
+FPS: 4.360114881497032
+FPS: 4.281998792891913
+FPS: 4.268381789673008
+FPS: 4.213404264402881
+FPS: 4.185745180102381
+FPS: 4.1607774263465656
+FPS: 4.078742987125643
+FPS: 4.029196278636435
+FPS: 3.9638488346709315
+FPS: 3.9308186270416887
+FPS: 3.8724989500047133
+FPS: 3.88331619898562
+FPS: 3.8859741798402934
+FPS: 3.8920119011526246
+FPS: 3.890344677512254
+FPS: 3.9066871213001475
+FPS: 3.8752359924507056
+FPS: 3.8665274287785616
+FPS: 3.862889248841597
+FPS: 3.851632511355278
+FPS: 3.8398650145108655
+FPS: 3.845337480509048
+FPS: 3.8456934018201108
+FPS: 3.841277390933588
+Database retrieval 9 :  {7}
+FPS: 3.8282359593748008
+FPS: 3.821829510653353
+FPS: 3.811699157405937
+Database retrieval 11 :  {9, 7}
+FPS: 3.779808299462331
+FPS: 3.768962143059502
+Database retrieval 12 :  {10}
+FPS: 3.739951119629436
+FPS: 3.7387005647211846
+Database retrieval 13 :  {11}
+FPS: 3.7160419542480208
+Database retrieval 14 :  {2}
+FPS: 3.704917568761696
+Database retrieval 15 :  {13}
+Database retrieval 16 :  {13, 14}
+FPS: 3.6928946894457546
+Database retrieval 17 :  {14, 15}
+FPS: 3.689511066995993
+Database retrieval 18 :  {14}
+FPS: 3.6846957479460096
+Database retrieval 19 :  {7}
+FPS: 3.6726579406446387
+FPS: 3.6822243046644374
+FPS: 3.6840753294505446
+FPS: 3.6864960002673905
+Database retrieval 20 :  {7}
+FPS: 3.6793105534184583
+FPS: 3.6862969924783764
+FPS: 3.6871212226406165
+Database retrieval 21 :  {8, 7}
+FPS: 3.687641808475225
+FPS: 3.701713072397101
+FPS: 3.6987726939481096
+Database retrieval 23 :  {21}
+FPS: 3.699161856254177
+Database retrieval 24 :  {1, 2}
+FPS: 3.691521755291239
+FPS: 3.691173628595772
+Database retrieval 25 :  {1, 2}
+FPS: 3.6806025071532362
+Database retrieval 26 :  {1, 2}
+FPS: 3.6651355741906997
+FPS: 3.6627729552754387
+Database retrieval 27 :  {25, 2}
+FPS: 3.6591113659652694
+Database retrieval 28 :  {26, 3, 4}
+FPS: 3.6484257777163536
+FPS: 3.645786865530723
+Database retrieval 29 :  {5, 4}
+FPS: 3.646194903225435
+Database retrieval 30 :  {5, 6}
+FPS: 3.6461232015332774
+Database retrieval 31 :  {5, 6}
+FPS: 3.6459134271661355
+FPS: 3.637936569710777
+FPS: 3.633509883961843
+Database retrieval 32 :  {6, 7}
+FPS: 3.6169598729254773
+FPS: 3.6097575182786423
+FPS: 3.607979848504529
+FPS: 3.597867060071484
+Database retrieval 33 :  {8, 7}
+FPS: 3.588972949252876
+FPS: 3.5874435234326447
+Database retrieval 34 :  {8, 9}
+FPS: 3.574333775992162
+FPS: 3.5748186510701236
+Database retrieval 35 :  {8, 9}
+FPS: 3.563782262143455
+FPS: 3.5604434653452426
+FPS: 3.554064814530013
+FPS: 3.553543804904942
+FPS: 3.5517099107862986
+Database retrieval 36 :  {9, 10, 11}
+FPS: 3.54076334580284
+Database retrieval 37 :  {10, 11}
+FPS: 3.5308407108079582
+FPS: 3.52554681999934
+Database retrieval 38 :  {10, 11}
+FPS: 3.5150134218816094
+Database retrieval 39 :  {12, 37}
+FPS: 3.5089229382899405
+Database retrieval 40 :  {12, 13}
+FPS: 3.494139849679793
+FPS: 3.4867362344233066
+Database retrieval 41 :  {12, 13}
+FPS: 3.479432979805114
+Database retrieval 42 :  {16, 18}
+FPS: 3.473460456489269
+FPS: 3.4708191966779234
+Database retrieval 43 :  {18, 19}
+FPS: 3.4637586631069825
+FPS: 3.4635702934615304
+Database retrieval 44 :  {19, 20}
+FPS: 3.461593048856841
+Database retrieval 45 :  {19, 20}
+FPS: 3.4573480112111485
+FPS: 3.4572418404927614
+Database retrieval 46 :  {20, 21, 44}
+FPS: 3.451453139342264
+FPS: 3.450404428302113
+FPS: 3.453532865260064
+Database retrieval 47 :  {21, 22}
+FPS: 3.4516265619765774
+Database retrieval 48 :  {22, 23}
+FPS: 3.44395035939042
+Database retrieval 49 :  {24, 23}
+FPS: 3.4349348494539784
+FPS: 3.434991845974621
+FPS: 3.4348591645531323
+Database retrieval 50 :  {1, 26, 25}
+FPS: 3.427857254905322
+FPS: 3.423693255456185
+FPS: 3.415909313675887
+Database retrieval 51 :  {2, 27}
+FPS: 3.4149601888988994
+FPS: 3.414802238877589
+Database retrieval 52 :  {27, 3, 28}
+FPS: 3.407536017421951
+Database retrieval 53 :  {29, 28, 4}
+FPS: 3.401582686879428
+Database retrieval 54 :  {29, 5, 30}
+FPS: 3.393870459620055
+FPS: 3.3926180950761293
+Database retrieval 55 :  {5, 30}
+FPS: 3.3858407405760746
+FPS: 3.3860187937454436
+FPS: 3.3885356785113476
+FPS: 3.389300797854976
+Database retrieval 56 :  {32, 6, 31}
+FPS: 3.384299835267102
+Database retrieval 57 :  {32, 7}
+FPS: 3.3817026789866325
+FPS: 3.383824843538792
+Database retrieval 58 :  {8, 33}
+FPS: 3.3817492482288247
+Database retrieval 59 :  {8, 9}
+FPS: 3.3787379862469735
+FPS: 3.3802779893297203
+Database retrieval 60 :  {10, 58}
+FPS: 3.375645391882235
+Database retrieval 61 :  {10, 11}
+FPS: 3.3720789152059623
+Database retrieval 62 :  {37, 11}
+FPS: 3.36683281811581
+Database retrieval 63 :  {10, 61}
+FPS: 3.3643141861421895
+Database retrieval 64 :  {61, 62}
+Database retrieval 65 :  {61, 62}
+FPS: 3.355029022485474
+Database retrieval 66 :  {62, 38}
+FPS: 3.3497297877755665
+Database retrieval 67 :  {40, 65}
+FPS: 3.346272223948901
+Database retrieval 68 :  {65, 41, 13}
+FPS: 3.3385753726019676
+Database retrieval 69 :  {41, 14}
+FPS: 3.3300718118417576
+Database retrieval 70 :  {16, 17, 15}
+FPS: 3.323224051262783
+Database retrieval 71 :  {17, 69}
+Database retrieval 72 :  {17, 70}
+Database retrieval 73 :  {18, 43, 71}
+FPS: 3.303774690754706
+Database retrieval 74 :  {43, 19}
+FPS: 3.2988278123596104
+FPS: 3.299871266698853
+Database retrieval 75 :  {19, 44, 20}
+FPS: 3.2933543241146315
+FPS: 3.296618886487586
+FPS: 3.2983978993167162
+FPS: 3.3028599890018615
+Database retrieval 76 :  {20, 21, 46}
+FPS: 3.2978892579100436
+FPS: 3.298158303418095
+FPS: 3.301325095711029
+Database retrieval 77 :  {21, 22, 47}
+FPS: 3.2958742920316357
+FPS: 3.2973520790216235
+Database retrieval 78 :  {21, 22}
+FPS: 3.2912608240620407
+Database retrieval 79 :  {48, 49, 23}
+FPS: 3.2859874643887483
+Database retrieval 80 :  {49, 25}
+FPS: 3.28240695744871
+FPS: 3.284913242044129
+Database retrieval 81 :  {1, 26, 50}
+FPS: 3.2795859847337874
+FPS: 3.2786502888399283
+FPS: 3.279815780965448
+Database retrieval 82 :  {3, 52, 28}
+FPS: 3.273635736023791
+FPS: 3.27450947386981
+Database retrieval 83 :  {53, 4, 29}
+FPS: 3.26774622912199
+Database retrieval 84 :  {5, 54, 30}
+FPS: 3.264032472748428
+Database retrieval 85 :  {5, 30, 55}
+FPS: 3.2594851361528643
+FPS: 3.2616608279469403
+FPS: 3.263523834271972
+Database retrieval 86 :  {56, 32, 6}
+FPS: 3.2587145280213208
+Database retrieval 87 :  {57, 58, 59}
+FPS: 3.254827442563036
+FPS: 3.255314008530884
+FPS: 3.256339441186955
+Database retrieval 88 :  {33, 58, 59}
+FPS: 3.250671581950012
+FPS: 3.2533986908288215
+Database retrieval 89 :  {8, 33, 59}
+FPS: 3.2455064581047512
+FPS: 3.2458112381074886
+Database retrieval 90 :  {8, 9, 34}
+FPS: 3.2401467330484417
+Database retrieval 91 :  {9, 10}
+Database retrieval 92 :  {10, 62}
+FPS: 3.2266071585998883
+Database retrieval 93 :  {65, 10}
+FPS: 3.2206871096567835
+Database retrieval 94 :  {66, 37, 38}
+FPS: 3.2160149413179306
+Database retrieval 95 :  {11, 38, 39}
+FPS: 3.2082072757390145
+Database retrieval 96 :  {40, 12}
+FPS: 3.203502206487162
+Database retrieval 97 :  {41, 68, 13}
+FPS: 3.1857720495391186
+FPS: 3.141455640194423
+Database retrieval 98 :  {42, 70, 15}
+FPS: 3.084366449991557
+Database retrieval 99 :  {18, 43, 42}
+FPS: 3.032597926555926
+FPS: 2.983373820600935
+Database retrieval 100 :  {75, 19, 44}
+FPS: 2.9182139577592885
+Database retrieval 101 :  {75, 20, 45}
+FPS: 2.848611963850589
+done
