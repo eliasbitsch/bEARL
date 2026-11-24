@@ -100,9 +100,11 @@ Known pitfalls (resolve in week 1):
 | Elias Bitsch (backup) | **FAST-LIO2** (Xu et al., T-RO 2022), M3DGR authors' MID-360 version | MID-360 LiDAR + IMU | tightly coupled iterated Kalman filter | no | CPU (ROS 1 container) |
 | Philip Stix | *your choice* | | | | |
 | Viktoriia Ovdiienko | *your choice* | | | | |
-| Jiayi Zhou | *your choice* | | | | |
+| Jiayi Zhou | **ORB-SLAM3** (C Campos et al., IEEE Transactions on Robotics 2020) | RGB-D + IMU | classic geometry + ORB feature extraction, bundle adjustment (BA) with pose graph optimization | yes | CPU |
 
 **Why VGGT-Long (Elias):** Recommended by the lecturer as the visual option, with the caveat that visual SLAM in general depends strongly on scene texture and illumination. That caveat is exactly what `Varying-illu01` (light switched on and off) tests, so losing track there is a result (success rate, tracked fraction), not a gap; the interesting question is whether tracking recovers when the light returns. VGGT-Long was designed for kilometre-scale outdoor sequences (KITTI); on our short indoor sequences its chunking mainly keeps GPU memory bounded, while its long-range scale-drift advantage barely applies. Mention this in the discussion.
+
+**Why ORB-SLAM3 (Jiayi):** Already benchmarked in M3DGR paper, w adapted config (with camera calibration) in data repo, classic feature-based visual+imu baseline on the realsense, good comparison to VGGT-Long since it contrasts different paradigms within vision-based approaches
 
 ### 3.2 RGB-only deep dive (Elias, optional extension)
 
