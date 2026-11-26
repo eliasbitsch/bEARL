@@ -2,6 +2,7 @@
 # VGGT-Long on the ADA cluster: one array task per (sequence, run), 48 GB GPU (MIG 2g.48gb), not preemptible.
 #   cd <repo> && sbatch cluster/run_vggt_long.sh            # all 3 sequences x 5 runs
 #   sbatch --array=0 cluster/run_vggt_long.sh               # only Dynamic01, run 0 (smoke test)
+#   FORCE=1 sbatch --export=ALL --array=0,5,10 cluster/run_vggt_long.sh   # re-run existing runs (e.g. to add frame_confidence.csv)
 #   SLUG=map_long sbatch --export=ALL --array=0,5,10 cluster/run_vggt_long.sh   # Map-Long, run 0 of each sequence
 #   SLUG=mast3r_slam sbatch --export=ALL cluster/run_vggt_long.sh               # MASt3R-SLAM (needs rgb/, mast3r_slam.sif)
 # Needs: containers/vggt_long.sif (cluster/build_vggt_long.sh), weights in $VGGT_LONG_WEIGHTS,
@@ -32,4 +33,4 @@ export MAST3R_SLAM_LAUNCHER=apptainer
 export MAST3R_SLAM_SIF="$SLURM_SUBMIT_DIR/containers/mast3r_slam.sif"
 export MAST3R_SLAM_CKPT="${MAST3R_SLAM_CKPT:-$HOME/bearl/weights/mast3r}"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
-python -m pipeline.run_all --system "${SLUG:-vggt_long}" --sequence "$SEQ" --run "$RUN"
+python -m pipeline.run_all --system "${SLUG:-vggt_long}" --sequence "$SEQ" --run "$RUN" ${FORCE:+--force}
