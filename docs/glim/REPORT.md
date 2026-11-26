@@ -141,7 +141,10 @@ interpolated camera frame's pixels are below grey value 20, with the alignment a
 | Varying-illu01 (5 runs, median) | lit (816 poses) | dark (701 poses) |
 |---|---|---|
 | ATE RMSE as evaluated | 0.123 m | 0.155 m |
-| after removing the fitted body offset (run 0, diagnostic) | 0.0047 m | 0.0039 m |
+| GT frame corrected with the rig calibration + time offset (no fit, [`gt_frame_check.py`](gt_frame_check.py)) | 0.0053 m | 0.0041 m |
+| after removing the GT-fitted body offset (run 0, diagnostic) | 0.0047 m | 0.0039 m |
+
+Recomputed on the repeated runs (2026-11-26); the raw numbers are unchanged to 0.1 mm.
 
 - **Darkness does not affect GLIM.** The 3 cm higher raw error in dark frames comes entirely from the mocap-body offset. Its contribution depends on where the robot is and which way it faces, and the dark phases happen to fall on different parts of the loops. The turning rate is the same in both (median 10.2 vs. 10.6 deg/s).
 - **No self-reported failure:** the GLIM logs contain only two start-up warnings (`playback_speed` not set, default used), on all three sequences. Tracking is continuous: 99.2 % of the GT duration is matched.
@@ -171,6 +174,16 @@ M3DGR `calibration.md` gives the extrinsics between the sensors, but not to the 
 | fitted, Varying-illu01 | -0.154 | -0.132 | 4 mm |
 
 Height is unobservable for planar motion in both, so only x and y are compared. The two independent estimates agree to 3-8 mm. This confirms both the reference-map calibration and the interpretation of GLIM's offset. It also means the group could correct the GT frame for every system with `body_T_base` instead of documenting the offset as a limitation, which should bring GLIM's ATE from 0.14 m close to the < 1 cm left after the fit (not computed yet). That decision belongs to the group (it changes all ATE numbers).
+
+**What the correction would do for GLIM** ([`gt_frame_check.py`](gt_frame_check.py), all 5 runs per sequence). GLIM's IMU poses are moved into the mocap body frame with the calibration chain above. Nothing is fitted on the GT. The evaluation is then the usual SE(3) ATE. Optionally, the LiDAR-mocap time offset of the reference map (`reference_map.time_offset_s`, 7-18 ms) is applied as well.
+
+| ATE RMSE median [m] | as evaluated | corrected frame | corrected frame + time offset |
+|---|---|---|---|
+| Dynamic01 | 0.1417 | 0.0104 | **0.0077** |
+| Sha-turn01 | 0.1999 | 0.0122 | **0.0085** |
+| Varying-illu01 | 0.1385 | 0.0071 | **0.0048** |
+
+GLIM's ATE drops from 14-20 cm to 5-9 mm, which is close to the < 1 cm left by the GT-fitted offset. That is the size of the LiDAR noise and of the mocap-sensor synchronisation. The time offset accounts for another 2-4 mm. For the camera systems, the same chain would need `base_T_camera` instead of `base_T_lidar` (all in `calibration.md`).
 
 Options for the group, to decide in lab 2:
 1. Find the mocap-body ↔ sensor transform: M3DGR README/issues, the paper, or ask the authors. This is the clean solution.
