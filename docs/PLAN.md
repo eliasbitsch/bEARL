@@ -145,15 +145,32 @@ How it fits the paper:
 - The application should **follow from the dataset**, not the other way round. The M3DGR indoor sequences show a robot inside buildings with changing light, darkness, people and tight turns. That motivates **indoor service and intralogistics robots** (warehouse, hospital, office) operating in poor light and among people.
 - A self-driving car does not fit (different scale, different sensors, not a ground-robot dataset). Warehouse or factory fits, but only as a motivating sentence, without drawing conclusions from it.
 
-In the conclusion we may give a **cautious** recommendation, e.g. "for indoor robots under changing illumination, LiDAR-based SLAM is more robust than camera-only SLAM". It must follow directly from our results.
+In the conclusion we may give a **cautious** recommendation, e.g. "a learned monocular SLAM system needs an independent failure check before a robot trusts its pose". It must follow directly from our results.
 
-### Research question (draft, finalise once all systems are chosen)
+### Research question (proposal 2026-11-26, needs group agreement)
 
-> *How do SLAM systems using different sensor modalities (e.g. monocular RGB with a foundation-model prior vs. <the modalities chosen by the others>) compare in accuracy and robustness on the same ground robot, and which sensor-specific failure modes (e.g. scale unobservability, darkness, geometric degeneracy) explain the differences?*
+That a LiDAR beats a camera in the dark is obvious and not worth a paper. The non-obvious question is **how** each system fails and **whether the failure is visible** to the robot. Light switched on and off (`Varying-illu01`) is the stress test; the two well-lit sequences give the nominal accuracy.
+
+> *When the light goes out, do SLAM systems of different paradigms fail visibly or silently, and can standard indicators such as the tracked fraction detect the failure?*
+
+- **RQ1 (nominal accuracy):** How accurate are trajectory and map in normal light? (ATE, map accuracy / completeness / F-score)
+- **RQ2 (failure mode):** What happens to each system when the light switches on and off: lost tracking, drift bridged by an IMU, or a confident but wrong trajectory?
+- **RQ3 (detectability):** Is the tracked fraction a valid success indicator, or does a run look complete while it is wrong?
+
+Expected roles of the systems (to be confirmed by the results, not assumed in the text):
+
+| System | Paradigm | Expected behaviour in the dark |
+|---|---|---|
+| VGGT-Long (Elias, anchor) | monocular, 3D foundation model, chunks + Sim(3) | keeps outputting poses; measured: 99.9 % tracked at 2.35 m ATE = silent failure |
+| MASt3R-SLAM (Elias, comparison) | monocular, foundation model on image pairs | measured: loses part of the run (83 % tracked) but stays at 0.69 m |
+| ORB-SLAM3 (Jiayi) | classical features, RGB-D + IMU | tracking loss is reported (visible), IMU may bridge short gaps |
+| GLIM (Philip) | LiDAR + IMU | unaffected by light: control that the scene itself is not the problem |
+
+**Scope (decided 2026-11-26, Elias):** VGGT-Long is the core system, MASt3R-SLAM the second foundation model. FAST-LIO2 appears in one sentence as a pipeline check (reproduces the published M3DGR value). Map-Long (MapAnything) and the 16 GB laptop variant get one sentence each in the discussion; full results stay in the notebook. No further systems (cuVSLAM, DPV-SLAM, DA3, UGG) for the paper.
 
 **Contribution:**
-- A reproducible comparison (containers + automated pipeline) of four sensor modalities on identical data.
-- An interpretation of the failure modes based on theory: observability, drift without loop closure, degeneracy under darkness or poor geometry.
+- A reproducible comparison (containers + automated pipeline) of different SLAM paradigms on identical data.
+- Evidence that learned monocular SLAM can fail silently, and that the tracked fraction does not reveal it.
 - A sanity check of our numbers against the M3DGR baseline table.
 
 ---
