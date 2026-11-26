@@ -82,6 +82,39 @@ Figures: `fig_trajectory_<seq>.png`, `fig_ate_over_time_<seq>.png`, `fig_map_top
 
 ![ATE over time, Sha-turn01](fig_ate_over_time_Sha-turn01.png)
 
+## Map quality (RQ1)
+
+`pipeline/map_eval.py` from `main` against the LiDAR pseudo-ground-truth map (`pipeline/reference_map.py`, built
+locally for all three sequences), run 0, region `common`, after trajectory alignment + ICP (accepted on all three).
+All GLIM rows: [`map_metrics_glim.csv`](map_metrics_glim.csv).
+
+| Sequence | F-score 10 cm | F-score 5 cm | accuracy median | completeness median | GLIM points / reference points |
+|---|---|---|---|---|---|
+| Dynamic01 | 0.918 | 0.566 | 0.010 m | 0.057 m | 13 779 / 1 281 386 |
+| Sha-turn01 | 0.962 | 0.668 | 0.010 m | 0.049 m | 18 942 / 1 303 922 |
+| Varying-illu01 | 0.934 | 0.586 | 0.010 m | 0.055 m | 13 647 / 1 239 397 |
+
+For comparison, FAST-LIO2 (same evaluation, on `main`) scores 0.89 / 0.99 / 0.99 at 10 cm, and VGGT-Long and MASt3R-SLAM score 0.65-0.78 on D and S.
+
+- **What GLIM maps is right:** accuracy is 1 cm, the level of the LiDAR noise.
+- **Lower completeness comes from GLIM's export, not from its estimate.** The exported `map.ply` is a strongly thinned submap (about 1 % of the reference's points). That is why F-score at 5 cm is low. MPV/MME (wall noise) cannot be computed on it either: too few neighbours, empty on D and V.
+- **ICP translation is 0.38 m, the same as for FAST-LIO2.** ICP removes the mocap-body offset as intended (see below).
+- To-do if map density matters: export a dense map from the GLIM dump (all scans in the optimised poses) instead of the downsampled submap.
+
+## Light on/off: GLIM as the control (RQ2/RQ3)
+
+Same split as `notebooks/story.py` (`dark_lit_rmse` on `main`): a pose counts as dark if more than 80 % of the
+interpolated camera frame's pixels are below grey value 20, with the alignment and association of `tools/build_cache.py`.
+
+| Varying-illu01 (5 runs, median) | lit (816 poses) | dark (701 poses) |
+|---|---|---|
+| ATE RMSE as evaluated | 0.123 m | 0.155 m |
+| after removing the fitted body offset (run 0, diagnostic) | 0.0047 m | 0.0039 m |
+
+- **Darkness does not affect GLIM.** The 3 cm higher raw error in dark frames comes entirely from the mocap-body offset. Its contribution depends on where the robot is and which way it faces, and the dark phases happen to fall on different parts of the loops. The turning rate is the same in both (median 10.2 vs. 10.6 deg/s).
+- **No self-reported failure:** the GLIM logs contain only two start-up warnings (`playback_speed` not set, default used), on all three sequences. Tracking is continuous: 99.2 % of the GT duration is matched.
+- **Caveat for the group:** the raw dark/lit split of every system contains this offset effect, about 3 cm on V for GLIM. The size and sign differ for other sensor frames. That is negligible next to VGGT-Long's 2.48 / 2.17 m, but it matters for any system whose dark/lit difference is only a few centimetres.
+
 ## Key finding: the ground-truth frame
 
 The ATE error oscillates with every loop the robot drives (blue curve). This is the signature of a **constant lever arm** between the tracked frame (GLIM: MID-360 IMU) and the mocap rigid body (`/vrpn_client_node/UGV/pose`).
@@ -136,7 +169,7 @@ Group:
 Me (GLIM):
 - [x] ~~Dynamic01 and Dark03~~ Dynamic01 and Sha-turn01 (the evaluated set changed on `main`), 5 runs each (2026-11-26).
 - [x] Trajectory frame: the group decided on identity (`config/sequences.yaml`), so `traj_imu.txt` stays.
-- [ ] Write the theory paragraph in `paper/members/` after merging `main` (text checked, see below).
+- [x] `paper/members/stix.tex`: SOTA, methods, results (2026-11-26). It is a new file on both branches, so the merge with `main` gives a trivial add/add conflict: keep this version. `koide2024glim` comes with this branch's `references.bib`.
 - [x] Map figures for the paper: `paper/figures/glim_map_<seq>.pdf` for all three sequences.
 
 ## Draft: theory paragraph (for `paper/main.tex`)
