@@ -1,0 +1,344 @@
+{
+ "configById": {
+  "3D!replay": {
+   "followTf": "map",
+   "followMode": "follow-none",
+   "scene": {
+    "transforms": {
+     "showLabel": false,
+     "axisScale": 0.4
+    }
+   },
+   "cameraState": {
+    "perspective": true,
+    "distance": 10,
+    "phi": 20,
+    "thetaOffset": 0,
+    "targetOffset": [
+     0,
+     0,
+     0
+    ],
+    "target": [
+     0,
+     0,
+     0
+    ],
+    "targetOrientation": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "fovy": 45,
+    "near": 0.5,
+    "far": 5000
+   },
+   "transforms": {
+    "frame:gt_body": {
+     "visible": false
+    },
+    "frame:vggt_long_body": {
+     "visible": false
+    },
+    "frame:mast3r_slam_body": {
+     "visible": false
+    },
+    "frame:fast_lio2_body": {
+     "visible": false
+    }
+   },
+   "topics": {
+    "/gt/path": {
+     "visible": true,
+     "lineWidth": 0.03,
+     "gradient": [
+      "#a6a6a6ff",
+      "#a6a6a6ff"
+     ],
+     "type": "line"
+    },
+    "/vggt_long/path": {
+     "visible": true,
+     "lineWidth": 0.03,
+     "gradient": [
+      "#D55E00ff",
+      "#D55E00ff"
+     ],
+     "type": "line"
+    },
+    "/mast3r_slam/path": {
+     "visible": true,
+     "lineWidth": 0.03,
+     "gradient": [
+      "#0072B2ff",
+      "#0072B2ff"
+     ],
+     "type": "line"
+    },
+    "/fast_lio2/path": {
+     "visible": false,
+     "lineWidth": 0.03,
+     "gradient": [
+      "#009E73ff",
+      "#009E73ff"
+     ],
+     "type": "line"
+    },
+    "/gt/pose": {
+     "visible": true,
+     "type": "arrow",
+     "arrowScale": [
+      0.4,
+      0.07,
+      0.07
+     ],
+     "color": "#a6a6a6ff"
+    },
+    "/vggt_long/pose": {
+     "visible": true,
+     "type": "arrow",
+     "arrowScale": [
+      0.4,
+      0.07,
+      0.07
+     ],
+     "color": "#D55E00ff"
+    },
+    "/mast3r_slam/pose": {
+     "visible": true,
+     "type": "arrow",
+     "arrowScale": [
+      0.4,
+      0.07,
+      0.07
+     ],
+     "color": "#0072B2ff"
+    },
+    "/fast_lio2/pose": {
+     "visible": false,
+     "type": "arrow",
+     "arrowScale": [
+      0.4,
+      0.07,
+      0.07
+     ],
+     "color": "#009E73ff"
+    },
+    "/gt/map": {
+     "visible": true,
+     "pointSize": 1.5,
+     "pointShape": "square",
+     "colorMode": "flat",
+     "flatColor": "#9a9a9a50"
+    },
+    "/vggt_long/map": {
+     "visible": false,
+     "pointSize": 2,
+     "pointShape": "square",
+     "colorField": "rgb",
+     "colorMode": "rgb"
+    },
+    "/mast3r_slam/map": {
+     "visible": false,
+     "pointSize": 2,
+     "pointShape": "square",
+     "colorField": "rgb",
+     "colorMode": "rgb"
+    },
+    "/fast_lio2/map": {
+     "visible": false,
+     "pointSize": 2,
+     "pointShape": "square",
+     "colorField": "rgb",
+     "colorMode": "rgb"
+    }
+   },
+   "layers": {
+    "grid": {
+     "visible": true,
+     "layerId": "foxglove.Grid",
+     "frameId": "map",
+     "size": 10,
+     "divisions": 10,
+     "lineWidth": 1,
+     "color": "#80808040",
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotation": [
+      0,
+      0,
+      0
+     ],
+     "order": 1
+    }
+   },
+   "publish": {
+    "type": "point",
+    "poseTopic": "/move_base_simple/goal",
+    "pointTopic": "/clicked_point",
+    "poseEstimateTopic": "/initialpose",
+    "poseEstimateXDeviation": 0.5,
+    "poseEstimateYDeviation": 0.5,
+    "poseEstimateThetaDeviation": 0.26
+   },
+   "imageMode": {},
+   "foxglovePanelTitle": "All systems vs. ground truth (grey)"
+  },
+  "Image!cam": {
+   "cameraState": {
+    "distance": 20,
+    "perspective": true,
+    "phi": 60,
+    "target": [
+     0,
+     0,
+     0
+    ],
+    "targetOffset": [
+     0,
+     0,
+     0
+    ],
+    "targetOrientation": [
+     0,
+     0,
+     0,
+     1
+    ],
+    "thetaOffset": 45,
+    "fovy": 45,
+    "near": 0.5,
+    "far": 5000
+   },
+   "followMode": "follow-pose",
+   "scene": {},
+   "transforms": {},
+   "topics": {},
+   "layers": {},
+   "publish": {
+    "type": "point",
+    "poseTopic": "/move_base_simple/goal",
+    "pointTopic": "/clicked_point",
+    "poseEstimateTopic": "/initialpose",
+    "poseEstimateXDeviation": 0.5,
+    "poseEstimateYDeviation": 0.5,
+    "poseEstimateThetaDeviation": 0.26
+   },
+   "imageMode": {
+    "imageTopic": "/camera/image/compressed"
+   },
+   "foxglovePanelTitle": "Camera (10 Hz)"
+  },
+  "Plot!err": {
+   "title": "Position error after alignment [m]",
+   "paths": [
+    {
+     "value": "/vggt_long/position_error.data",
+     "enabled": true,
+     "timestampMethod": "receiveTime",
+     "label": "VGGT-Long",
+     "color": "#D55E00"
+    },
+    {
+     "value": "/mast3r_slam/position_error.data",
+     "enabled": true,
+     "timestampMethod": "receiveTime",
+     "label": "MASt3R-SLAM",
+     "color": "#0072B2"
+    },
+    {
+     "value": "/fast_lio2/position_error.data",
+     "enabled": true,
+     "timestampMethod": "receiveTime",
+     "label": "FAST-LIO2",
+     "color": "#009E73"
+    }
+   ],
+   "showXAxisLabels": true,
+   "showYAxisLabels": true,
+   "showLegend": true,
+   "legendDisplay": "floating",
+   "showPlotValuesInLegend": true,
+   "isSynced": true,
+   "xAxisVal": "timestamp",
+   "minYValue": 0,
+   "sidebarDimension": 240,
+   "foxglovePanelTitle": "Position error after alignment [m]"
+  },
+  "Plot!conf": {
+   "title": "VGGT confidence (1 = floor)",
+   "paths": [
+    {
+     "value": "/vggt_long/confidence.data",
+     "enabled": true,
+     "timestampMethod": "receiveTime",
+     "label": "VGGT confidence",
+     "color": "#D55E00"
+    }
+   ],
+   "showXAxisLabels": true,
+   "showYAxisLabels": true,
+   "showLegend": false,
+   "legendDisplay": "floating",
+   "showPlotValuesInLegend": true,
+   "isSynced": true,
+   "xAxisVal": "timestamp",
+   "minYValue": 0,
+   "sidebarDimension": 240,
+   "foxglovePanelTitle": "VGGT confidence (1 = floor)"
+  },
+  "Plot!light": {
+   "title": "Image brightness [0-255]",
+   "paths": [
+    {
+     "value": "/camera/brightness.data",
+     "enabled": true,
+     "timestampMethod": "receiveTime",
+     "label": "brightness",
+     "color": "#555555"
+    }
+   ],
+   "showXAxisLabels": true,
+   "showYAxisLabels": true,
+   "showLegend": false,
+   "legendDisplay": "floating",
+   "showPlotValuesInLegend": true,
+   "isSynced": true,
+   "xAxisVal": "timestamp",
+   "minYValue": 0,
+   "maxYValue": 255,
+   "sidebarDimension": 240,
+   "foxglovePanelTitle": "Image brightness [0-255]"
+  }
+ },
+ "globalVariables": {},
+ "userNodes": {},
+ "playbackConfig": {
+  "speed": 1
+ },
+ "layout": {
+  "first": "3D!replay",
+  "second": {
+   "first": "Image!cam",
+   "second": {
+    "first": "Plot!err",
+    "second": {
+     "first": "Plot!conf",
+     "second": "Plot!light",
+     "direction": "column",
+     "splitPercentage": 50
+    },
+    "direction": "column",
+    "splitPercentage": 45
+   },
+   "direction": "column",
+   "splitPercentage": 34
+  },
+  "direction": "row",
+  "splitPercentage": 58
+ }
+}

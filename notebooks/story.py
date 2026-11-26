@@ -55,6 +55,40 @@ def _(mo):
 
 
 @app.cell
+def _(RES, mo, pd):
+    _m = pd.read_csv(RES / "metrics.csv")
+    _runs = _m[_m.slug.isin(["vggt_long", "mast3r_slam", "fast_lio2"])].groupby(["slug", "sequence"]).size() \
+        .unstack().fillna(0).astype(int)
+    mo.vstack([
+        mo.md("## 0. Pipeline\nWhere every number and figure in this notebook comes from. The SLAM runs (grey) "
+              "ran on the ADA cluster; the cache and replay builders need `data/` but no GPU; the notebook "
+              "(dashed arrows) only reads files in `results/`."),
+        mo.mermaid("""
+flowchart TD
+    A[M3DGR bags + OptiTrack GT<br/>data/M3DGR] --> B[pipeline/prepare_data.py<br/>images, GT in TUM, reference map]
+    B --> C[pipeline/run_all.py<br/>ADA cluster, Apptainer, 5 runs each]
+    C --> D[results/slug/seq/run_NN<br/>trajectory_tum.txt, map.ply, logs, resources]
+    D --> E[pipeline/evaluate.py<br/>ATE RMSE, evo, Umeyama Sim3 / SE3]
+    D --> F[pipeline/map_eval.py<br/>F-score at 10 cm vs. LiDAR map]
+    E --> G[results/metrics.csv]
+    F --> G
+    D --> H[tools/build_cache.py<br/>results/cache: small CSV, thumbnails, map slices]
+    D --> R[tools/build_replay.py<br/>results/replay/seq.mcap]
+    G -.-> N[notebooks/story.py<br/>this notebook, reads files only]
+    H -.-> N
+    R -.-> V[tools/viewer.py<br/>Lichtblick 3D replay, section 6]
+    V -.-> N
+    N --> P[paper/figures + tables/results.tex<br/>section 7]
+    classDef heavy fill:#e5e5e5,stroke:#999
+    class A,B,C,D heavy
+"""),
+        mo.md("Runs found per system and sequence (`results/metrics.csv`):"),
+        _runs,
+    ])
+    return
+
+
+@app.cell
 def _(CACHE, RES, SEQS, pd):
     metrics = pd.read_csv(RES / "metrics.csv")
     maps = pd.read_csv(RES / "map_metrics.csv")
@@ -554,9 +588,51 @@ def _(metrics, mo, pd):
 
 
 @app.cell
+def _(RES, SEQS, mo):
+    replay_seq = mo.ui.dropdown(SEQS, value="Varying-illu01", label="Sequence")
+    replay_on = mo.ui.switch(label="Show 3D replay (starts a local server on :8781)")
+    _missing = [s for s in SEQS if not (RES / "replay" / f"{s}.mcap").exists()]
+    mo.vstack([
+        mo.md(r"""
+        ## 6. 3D replay in Lichtblick / Foxglove
+
+        All systems in one scene, played back over time: ground truth (grey), VGGT-Long (orange), MASt3R-SLAM
+        (blue), FAST-LIO2 (green, off by default), the pseudo-GT map, the camera image, the per-pose error, the VGGT
+        confidence and the image brightness. Maps of each system can be switched on in the 3D panel's topic list.
+        The viewer is [Lichtblick](https://github.com/lichtblick-suite/lichtblick), the open-source fork of
+        Foxglove Studio, served locally by `tools/viewer.py` (no Docker, no account). Foxglove itself does not
+        allow being embedded; to use it, open `results/replay/<sequence>.mcap` in Foxglove and import
+        `tools/replay_layout.json`.
+        """),
+        mo.callout(mo.md("Missing replays: " + ", ".join(_missing) + ". Build them with "
+                         "`python tools/build_replay.py` (needs `data/`)."), kind="warn") if _missing else mo.md(""),
+        mo.hstack([replay_seq, replay_on], justify="start", gap=2),
+    ])
+    return replay_on, replay_seq
+
+
+@app.cell
+def _(RES, mo, replay_on, replay_seq):
+    mo.stop(not replay_on.value, mo.md("*Switch the replay on to load it here.*"))
+    mo.stop(not (RES / "replay" / f"{replay_seq.value}.mcap").exists(),
+            mo.md(f"No replay for {replay_seq.value} yet: `python tools/build_replay.py --sequence {replay_seq.value}`"))
+    from tools import viewer
+
+    viewer.serve()
+    _url = viewer.url(replay_seq.value)
+    mo.vstack([
+        mo.Html(f'<iframe src="{_url}" style="width:100%;height:760px;border:1px solid #ccc;border-radius:4px" '
+                'allow="fullscreen"></iframe>'),
+        mo.md(f"[Open in a new tab]({_url}) - the layout is stored in the browser after the first visit; "
+              "*Layouts -> Reset* or a private window brings back `tools/replay_layout.json`."),
+    ])
+    return
+
+
+@app.cell
 def _(mo):
     export = mo.ui.run_button(label="Write paper figures and table")
-    mo.vstack([mo.md("## 6. Export to `paper/`"), export])
+    mo.vstack([mo.md("## 7. Export to `paper/`"), export])
     return (export,)
 
 

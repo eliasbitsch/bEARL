@@ -94,6 +94,10 @@ Tested with Python 3.10–3.12. ROS is **not** required for the evaluation. It i
    (`-e PORT=8766` if the port is taken) and import `tools/lichtblick_live_layout.json` (point cloud, camera, odometry).
    `python -m pipeline.visualize` writes an offline replay of a SLAM run (GT vs. estimate, maps, driving state) for
    `tools/lichtblick_layout.json`.
+4. 3D replay of all systems per sequence (notebook section 6): `python tools/build_replay.py` writes
+   `results/replay/<seq>.mcap`, `python tools/viewer.py` serves a local Lichtblick on :8781 (downloaded once,
+   no Docker, no account) and opens it; `notebooks/story.py` embeds the same view. In Foxglove: open the `.mcap`
+   and import `tools/replay_layout.json`.
 
 ## Repository layout
 
@@ -109,6 +113,8 @@ notebooks/story.py        the paper story (marimo): RQ1-RQ3, all paper figures a
 notebooks/*.ipynb         older per-topic notebooks (00_story is superseded by story.py)
 tools/build_cache.py      small derivatives of images/maps -> results/cache/ (needs data/, run after new results)
 tools/write_paper_figures.py  paper/figures + paper/tables from story.py without the UI
+tools/build_replay.py     one MCAP per sequence with all systems -> results/replay/ (needs data/)
+tools/viewer.py           local Lichtblick for those replays (:8781), also embedded in story.py
 cluster/                  Slurm array job for batch runs on a GPU cluster
 docker/                   one container per SLAM system (optional)
 paper/                    IEEE template (main.tex), references.bib, ieee.mplstyle, figures, tables

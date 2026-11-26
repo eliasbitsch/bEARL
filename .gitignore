@@ -39,3 +39,5 @@ results/**/map_eval/
 results/**/*.ply
 results_bench/**/*.ply
 notebooks/__marimo__/
+tools/lichtblick-web/
+results/replay/
