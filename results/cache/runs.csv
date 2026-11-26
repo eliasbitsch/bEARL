@@ -1,0 +1,10 @@
+slug,sequence,run
+vggt_long,Dynamic01,run_04
+vggt_long,Sha-turn01,run_01
+vggt_long,Varying-illu01,run_02
+mast3r_slam,Dynamic01,run_01
+mast3r_slam,Sha-turn01,run_04
+mast3r_slam,Varying-illu01,run_01
+fast_lio2,Dynamic01,run_01
+fast_lio2,Sha-turn01,run_00
+fast_lio2,Varying-illu01,run_00

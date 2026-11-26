@@ -10,8 +10,9 @@ run:            ## all systems x sequences x N runs (slow; skips finished runs)
 eval:           ## ATE / robustness -> results/metrics.csv, results/summary.csv
 	python -m pipeline.evaluate
 
-figures:        ## execute the notebooks -> paper/figures, paper/tables
-	jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb
+figures:        ## story notebook -> paper/figures, paper/tables, notebooks/story.html
+	python tools/write_paper_figures.py
+	marimo export html notebooks/story.py -o notebooks/story.html
 
 paper:
 	cd paper && latexmk -pdf main.tex

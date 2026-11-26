@@ -12,4 +12,5 @@ psutil
 opencv-python-headless
 open3d
 jupyterlab
+marimo
 nbformat

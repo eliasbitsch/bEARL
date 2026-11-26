@@ -103,7 +103,12 @@ config/sequences.yaml     shared sequences, topics, evaluation settings (fixed f
 config/systems/           one config per SLAM system
 pipeline/                 prepare_data, run_all, evaluate, resources, runners/<slug>.py
 tools/register_system.py  register your system
-notebooks/                01 dataset, 02 trajectories, 03 maps, 04 resources -> paper/figures, paper/tables
+notebooks/story.py        the paper story (marimo): RQ1-RQ3, all paper figures and the results table;
+                          reads only results/ and results/cache/, no GPU or dataset needed.
+                          View without Python: notebooks/story.html. Edit: marimo edit notebooks/story.py
+notebooks/*.ipynb         older per-topic notebooks (00_story is superseded by story.py)
+tools/build_cache.py      small derivatives of images/maps -> results/cache/ (needs data/, run after new results)
+tools/write_paper_figures.py  paper/figures + paper/tables from story.py without the UI
 cluster/                  Slurm array job for batch runs on a GPU cluster
 docker/                   one container per SLAM system (optional)
 paper/                    IEEE template (main.tex), references.bib, ieee.mplstyle, figures, tables
