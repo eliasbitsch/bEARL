@@ -38,6 +38,8 @@ def run_one(system: dict, sequence: dict, run_idx: int, data_root: Path, force: 
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = load_system_config(system["slug"])
+    if cfg.get("docker"):   # runner starts its container with this name, the sampler reads it with docker stats
+        cfg = {**cfg, "container_name": f"bearl-{system['slug']}-{sequence['name']}-run{run_idx:02d}".lower()}
     runner = importlib.import_module(f"pipeline.runners.{system['slug']}")
     meta = {
         "system": system["system"], "slug": system["slug"], "member": system.get("name") or system.get("owner"),
@@ -48,7 +50,7 @@ def run_one(system: dict, sequence: dict, run_idx: int, data_root: Path, force: 
         "pipeline_commit": _git_commit(), "hardware": hardware_info(),
     }
     t0 = time.perf_counter()
-    with ResourceSampler(out_dir / "resources.csv") as sampler:
+    with ResourceSampler(out_dir / "resources.csv", container=cfg.get("container_name")) as sampler:
         try:
             runner.run(sequence, out_dir, run_idx, cfg, data_root)
             meta["success"] = (out_dir / "trajectory_tum.txt").exists()

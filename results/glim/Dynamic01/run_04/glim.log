@@ -1,39 +1,39 @@
-[2026-11-26 12:26:51.773] [glim] [info] config_path: /glim/config
-[2026-11-26 12:26:51.783] [glim] [info] load libodometry_estimation_gpu.so
-[2026-11-26 12:26:52.577] [glim] [info] load libsub_mapping.so
-[2026-11-26 12:26:52.583] [glim] [info] load libglobal_mapping.so
-[2026-11-26 12:26:52.589] [glim] [info] load libmemory_monitor.so
-[2026-11-26 12:26:52.597] [glim] [info] topics:
-[2026-11-26 12:26:52.597] [glim] [info] - /livox/mid360/imu
-[2026-11-26 12:26:52.597] [glim] [info] - /livox/mid360/lidar
-[2026-11-26 12:26:52.597] [glim] [info] - /image
-[2026-11-26 12:26:52.598] [glim] [info] bag_filenames:
-[2026-11-26 12:26:52.598] [glim] [info] - /data/bag
-[2026-11-26 12:26:52.598] [glim] [warning] param glim_ros/playback_speed not found
-[2026-11-26 12:26:52.598] [glim] [warning] use default_value=100
-[2026-11-26 12:26:52.598] [glim] [info] opening /data/bag
-[2026-11-26 12:26:52.604] [glim] [info] detected storage_id=sqlite3 from metadata.yaml
-[INFO] [1795696013.198162279] [rosbag2_storage]: Opened database '/data/bag/glim_ros2.db3' for READ_ONLY.
-[2026-11-26 12:26:53.488] [odom] [info] initial IMU state estimation result
-[2026-11-26 12:26:53.488] [odom] [info] T_world_imu=se3(0.197422,0.034795,-0.042773,-0.014711,0.241865,-0.002055,0.970196)
-[2026-11-26 12:26:53.488] [odom] [info] v_world_imu=vec(0.489678,0.026316,-0.038074)
-[2026-11-26 12:26:53.488] [odom] [info] imu_bias=vec(0.000000,0.000000,-0.000000,0.004896,-0.007568,-0.007691)
-[2026-11-26 12:27:02.913] [glim] [info] playback speed: 0.380x
-[2026-11-26 12:27:07.928] [glim] [info] playback speed: 2.353x
-[2026-11-26 12:27:12.950] [glim] [info] playback speed: 3.445x
-[2026-11-26 12:27:17.950] [glim] [info] playback speed: 3.280x
-[2026-11-26 12:27:22.955] [glim] [info] playback speed: 2.697x
-[2026-11-26 12:27:27.965] [glim] [info] playback speed: 2.894x
-[2026-11-26 12:27:32.986] [glim] [info] playback speed: 3.027x
-[2026-11-26 12:27:38.010] [glim] [info] playback speed: 3.105x
-[2026-11-26 12:27:43.025] [glim] [info] playback speed: 3.051x
-[2026-11-26 12:27:48.035] [glim] [info] playback speed: 3.134x
-[2026-11-26 12:27:53.036] [glim] [info] playback speed: 2.998x
-[2026-11-26 12:27:58.044] [glim] [info] playback speed: 3.095x
-[2026-11-26 12:27:58.807] [glim] [info] waiting for odometry estimation
-[2026-11-26 12:27:58.830] [glim] [info] waiting for local mapping
-[2026-11-26 12:27:58.917] [glim] [info] waiting for global mapping
-[2026-11-26 12:27:58.952] [global] [info] saving to /dumps/run_04...
-[2026-11-26 12:27:58.955] [global] [info] serializing factor graph to /dumps/run_04/graph.bin
-[2026-11-26 12:28:17.817] [global] [info] saving config
-[2026-11-26 12:28:17.849] [global] [info] saved
+[2026-11-26 13:38:23.414] [glim] [info] config_path: /glim/config
+[2026-11-26 13:38:23.427] [glim] [info] load libodometry_estimation_gpu.so
+[2026-11-26 13:38:24.216] [glim] [info] load libsub_mapping.so
+[2026-11-26 13:38:24.221] [glim] [info] load libglobal_mapping.so
+[2026-11-26 13:38:24.226] [glim] [info] load libmemory_monitor.so
+[2026-11-26 13:38:24.234] [glim] [info] topics:
+[2026-11-26 13:38:24.234] [glim] [info] - /livox/mid360/imu
+[2026-11-26 13:38:24.234] [glim] [info] - /livox/mid360/lidar
+[2026-11-26 13:38:24.234] [glim] [info] - /image
+[2026-11-26 13:38:24.234] [glim] [info] bag_filenames:
+[2026-11-26 13:38:24.234] [glim] [info] - /data/bag
+[2026-11-26 13:38:24.234] [glim] [warning] param glim_ros/playback_speed not found
+[2026-11-26 13:38:24.234] [glim] [warning] use default_value=100
+[2026-11-26 13:38:24.234] [glim] [info] opening /data/bag
+[2026-11-26 13:38:24.239] [glim] [info] detected storage_id=sqlite3 from metadata.yaml
+[INFO] [1795700304.828649945] [rosbag2_storage]: Opened database '/data/bag/glim_ros2.db3' for READ_ONLY.
+[2026-11-26 13:38:25.140] [odom] [info] initial IMU state estimation result
+[2026-11-26 13:38:25.140] [odom] [info] T_world_imu=se3(0.197024,0.034022,-0.042644,-0.014584,0.241858,-0.002045,0.970200)
+[2026-11-26 13:38:25.140] [odom] [info] v_world_imu=vec(0.489211,0.022672,-0.037946)
+[2026-11-26 13:38:25.140] [odom] [info] imu_bias=vec(0.000000,0.000000,-0.000000,0.005028,-0.007542,-0.007679)
+[2026-11-26 13:38:34.361] [glim] [info] playback speed: 0.395x
+[2026-11-26 13:38:39.367] [glim] [info] playback speed: 2.777x
+[2026-11-26 13:38:44.376] [glim] [info] playback speed: 3.174x
+[2026-11-26 13:38:49.382] [glim] [info] playback speed: 3.136x
+[2026-11-26 13:38:54.383] [glim] [info] playback speed: 3.100x
+[2026-11-26 13:38:59.387] [glim] [info] playback speed: 3.117x
+[2026-11-26 13:39:04.402] [glim] [info] playback speed: 2.931x
+[2026-11-26 13:39:09.411] [glim] [info] playback speed: 3.034x
+[2026-11-26 13:39:14.430] [glim] [info] playback speed: 3.009x
+[2026-11-26 13:39:19.432] [glim] [info] playback speed: 3.079x
+[2026-11-26 13:39:24.437] [glim] [info] playback speed: 3.156x
+[2026-11-26 13:39:29.443] [glim] [info] playback speed: 3.016x
+[2026-11-26 13:39:29.524] [glim] [info] waiting for odometry estimation
+[2026-11-26 13:39:29.541] [glim] [info] waiting for local mapping
+[2026-11-26 13:39:29.602] [glim] [info] waiting for global mapping
+[2026-11-26 13:39:29.704] [global] [info] saving to /dumps/run_04...
+[2026-11-26 13:39:29.709] [global] [info] serializing factor graph to /dumps/run_04/graph.bin
+[2026-11-26 13:39:49.118] [global] [info] saving config
+[2026-11-26 13:39:49.153] [global] [info] saved

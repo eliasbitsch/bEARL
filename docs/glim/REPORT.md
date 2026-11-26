@@ -6,11 +6,11 @@ Philip Stix · branch `philip-glim` · 2026-10-08
 
 - GLIM runs end to end on M3DGR: M3DGR bag → converter → GLIM (Docker, GPU) → `trajectory_tum.txt` + `map.ply` → `pipeline.evaluate`.
   The lab 1 goal (play the dataset back in ROS and show it in RViz) is done; see [Live demo](#live-demo-rviz).
-- **Varying-illu01, 5/5 runs successful.** ATE RMSE (SE(3)) median **0.138 m**, IQR 0.09 mm. The runs are practically deterministic.
+- **Varying-illu01, 5/5 runs successful.** ATE RMSE (SE(3)) median **0.138 m**, IQR 0.09 mm. The runs are practically deterministic (re-run on 2026-11-26: spread ≤ 0.4 mm, see [Resources](#resources-measured-in-the-container)).
 - **Most of this error is not GLIM's error.** The Sim(3) scale is 1.034, although a LiDAR system should have a scale of about 1.
   A constant 0.20 m offset between GLIM's IMU frame and the mocap body frame explains almost all of it: once it is removed, the ATE is 0.004 m and the scale is 1.000.
   The ground-truth frame (`gt_to_base_extrinsic`) has to be resolved for **all** systems before lab 2 (see [Key finding](#key-finding-the-ground-truth-frame)).
-- Resources: about 1.9 CPU cores, about 440 MiB RAM and ≤ 220 MiB GPU memory. One run takes 70 s for the 154 s sequence.
+- Resources (measured in the container by the pipeline since 2026-11-26): about 1.6 CPU cores on average, ≤ 465 MiB RAM and 217 MiB GPU memory. One run takes 78-88 s for 139-175 s of data.
 
 ## Setup
 
@@ -64,6 +64,8 @@ Same image (digest), config and evaluation as above; 5/5 runs successful on both
 | Dynamic01 | 0.1416 | < 0.0001 | 0.31 | 1.034 | 99.3 % | 89.0 | 1 |
 | Sha-turn01 | 0.1999 | < 0.0001 | 0.27 | 1.002 | 99.1 % | 70.8 | 2 |
 
+These are the first runs. All 15 runs were repeated on 2026-11-26 with the container measurement (see [Resources](#resources-measured-in-the-container)). The committed `results/glim` are the repeated runs: median ATE 0.1385 / 0.1417 / 0.1999 m (V / D / S), IQR 0.16 / 0.15 / 0.30 mm. Single poses differ from the first runs by up to 7 mm; the medians agree to 0.1 mm.
+
 Diagnostic lever-arm fit (run 0, same method as below; uses the GT, not a result):
 
 | Sequence | fitted offset in IMU frame [m] | \|l\| [m] | ATE after fit [m] |
@@ -82,6 +84,24 @@ Figures: `fig_trajectory_<seq>.png`, `fig_ate_over_time_<seq>.png`, `fig_map_top
 
 ![ATE over time, Sha-turn01](fig_ate_over_time_Sha-turn01.png)
 
+## Resources (measured in the container)
+
+Until now, `resources.csv` only saw the `docker` CLI process (8 % CPU, 65 MiB), not GLIM. Since 2026-11-26:
+- `pipeline/resources.py` can sample a container with `docker stats`, about one sample every 2 s. CPU is given in % of one core, as for the process tree; RAM is the container memory.
+- `pipeline/run_all.py` names the container `bearl-<slug>-<seq>-run<k>` when the system config has `docker: true`, and passes that name to the runner (`cfg["container_name"]`).
+- `pipeline/runners/glim.py` starts the container under that name.
+- I tested it with a load container: two busy loops measure 200 %. GPU memory is still the whole GPU (nvidia-smi).
+
+All 15 runs, RTX 3050 Ti laptop, Docker Desktop (WSL2):
+
+| Sequence | wall time median [s] | CPU mean [% of one core], median (min-max) | RAM peak [MiB] | GPU memory peak [MiB] | samples per run |
+|---|---|---|---|---|---|
+| Varying-illu01 | 78 | 165 (146-167) | ≤ 463 | 217 | 38-44 |
+| Dynamic01 | 88 | 165 (163-167) | ≤ 441 | 217 | 42-44 |
+| Sha-turn01 | 80 | 150 (147-160) | ≤ 440 | 217 | 35-40 |
+
+This agrees with the manual `docker stats` measurement in October (426-441 MiB, 217 MiB GPU). The mean CPU is lower than the 193 % measured then, because the start and end of the container are now included. Wall times on V and S are 11-13 % longer than in the first runs, on D they are unchanged. The extra `docker stats` calls are a possible cause, but this was not checked.
+
 ## Map quality (RQ1)
 
 `pipeline/map_eval.py` from `main` against the LiDAR pseudo-ground-truth map (`pipeline/reference_map.py`, built
@@ -99,7 +119,19 @@ For comparison, FAST-LIO2 (same evaluation, on `main`) scores 0.89 / 0.99 / 0.99
 - **What GLIM maps is right:** accuracy is 1 cm, the level of the LiDAR noise.
 - **Lower completeness comes from GLIM's export, not from its estimate.** The exported `map.ply` is a strongly thinned submap (about 1 % of the reference's points). That is why F-score at 5 cm is low. MPV/MME (wall noise) cannot be computed on it either: too few neighbours, empty on D and V.
 - **ICP translation is 0.38 m, the same as for FAST-LIO2.** ICP removes the mocap-body offset as intended (see below).
-- To-do if map density matters: export a dense map from the GLIM dump (all scans in the optimised poses) instead of the downsampled submap.
+### Dense map: all scans on GLIM's trajectory
+
+[`tools/glim_dense_map.py`](../../tools/glim_dense_map.py) places every MID-360 scan with GLIM's own LiDAR-frame trajectory (`traj_lidar.txt`, with global optimisation). Each point gets the pose interpolated at its own time. The filters are the same as for the reference (noise tag, 0.5-12 m, 2 cm voxels), but there is no people filter, because that belongs to the reference, not to an estimate. No ground truth is used. Output: `results/glim/<seq>/run_00/map.dense.ply` (git-ignored). All rows: [`map_metrics_glim_dense.csv`](map_metrics_glim_dense.csv).
+
+| Sequence | F-score 10 cm (dense / thinned) | precision 10 cm | recall 10 cm | accuracy median | MPV est / ref [m²] | FAST-LIO2 F-score 10 cm |
+|---|---|---|---|---|---|---|
+| Dynamic01 | **0.796** / 0.918 | 0.662 | 1.000 | 0.014 m | 8e-4 / 5e-4 | 0.892 |
+| Sha-turn01 | **0.987** / 0.962 | 0.975 | 1.000 | 0.010 m | 5e-4 / 5e-4 | 0.990 |
+| Varying-illu01 | **0.986** / 0.934 | 0.972 | 1.000 | 0.010 m | 5e-4 / 5e-4 | 0.990 |
+
+- **On S and V, GLIM's dense map is as good as FAST-LIO2's** (0.99): recall is 1.0, and the wall noise (MPV) is at the level of the reference, which is set by the LiDAR's own noise.
+- **On D, precision drops to 0.66 because of the people walking through the scene.** The mean accuracy is 0.27 m against a median of 1.4 cm, so the drop comes from a few distant points, not from a systematic error. The reference removes people with a static filter; an estimate keeps them. FAST-LIO2 shows the same effect, but less strongly (precision 0.81), probably because its map does not keep every scan. With the thinned map the effect is smaller, because it hardly contains any people.
+- For the paper, the dense map is the fairer comparison with FAST-LIO2, because both place all scans on their own trajectory. The thinned map shows what GLIM itself exports.
 
 ## Light on/off: GLIM as the control (RQ2/RQ3)
 
@@ -129,6 +161,17 @@ Diagnostic: I fitted a constant offset in the IMU frame together with the SE(3) 
 **Do not use the 0.004 m in the paper.** The offset was estimated from the GT itself, so it is optimistic. The finding is that **our current numbers mostly measure the frame offset, not the SLAM error.** This affects every system, including camera-based ones (camera ≠ mocap body).
 M3DGR `calibration.md` gives the extrinsics between the sensors, but not to the mocap body. The `gt_to_base_extrinsic` entry in `config/sequences.yaml` is still TODO.
 
+**Cross-check against the rig calibration (2026-11-26, [`lever_arm_check.py`](lever_arm_check.py)).** The reference map on `main` estimates `body_T_base` from map consistency alone (no SLAM involved). Chained with the calibration (`base_T_lidar`) and GLIM's `T_lidar_imu`, it predicts where GLIM's IMU sits in the mocap body frame. The fit above gives the same position from GLIM's trajectory alone:
+
+| | IMU origin in body frame x [m] | y [m] | difference to predicted |
+|---|---|---|---|
+| predicted (rig calibration) | -0.150 | -0.132 | |
+| fitted, Dynamic01 | -0.158 | -0.131 | 8 mm |
+| fitted, Sha-turn01 | -0.153 | -0.134 | 3 mm |
+| fitted, Varying-illu01 | -0.154 | -0.132 | 4 mm |
+
+Height is unobservable for planar motion in both, so only x and y are compared. The two independent estimates agree to 3-8 mm. This confirms both the reference-map calibration and the interpretation of GLIM's offset. It also means the group could correct the GT frame for every system with `body_T_base` instead of documenting the offset as a limitation, which should bring GLIM's ATE from 0.14 m close to the < 1 cm left after the fit (not computed yet). That decision belongs to the group (it changes all ATE numbers).
+
 Options for the group, to decide in lab 2:
 1. Find the mocap-body ↔ sensor transform: M3DGR README/issues, the paper, or ask the authors. This is the clean solution.
 2. If it is not available, evaluate every system in **one** common sensor frame and convert each system's trajectory into it with the known `calibration.md` extrinsics. Fit the remaining body offset **once** on one reference system and document it as a limitation. Not ideal, but the same for everyone.
@@ -154,7 +197,7 @@ End of the sequence (map complete, the GLIM trajectory lies under the GT):
 
 ## Observations for the discussion (paper)
 
-- **Determinism:** 5 runs agree to < 0.1 mm. GLIM on the GPU is effectively deterministic here, so N = 5 runs say little about variance. Report it honestly instead of adding more runs.
+- **Determinism:** 5 runs agree to < 0.4 mm ATE (single poses to a few mm). GLIM is not bit-exact, probably because of multithreading, but practically deterministic, so N = 5 runs say little about variance. Report it honestly instead of adding more runs.
 - **Global optimisation not exercised:** one submap means no submap-to-submap factors and no loop closure effect. `Dynamic01` and `Dark03` may differ, so check whether more submaps appear there.
 - **Darkness:** irrelevant for GLIM (expected), and a contrast to the camera systems.
 - **Map figure:** GLIM's own map is a single downsampled submap (31.5 k points). The top-view slice shows the room outline well. For a 3D figure use the RViz screenshot or the offline viewer.
@@ -163,7 +206,7 @@ End of the sequence (map complete, the GLIM trajectory lies under the GT):
 
 Group:
 - [ ] Decide on the GT frame (see above) and fill `gt_to_base_extrinsic`. **Blocking for all ATE numbers.**
-- [ ] Decide how resources are measured for Docker-based systems: `docker stats` instead of the process tree.
+- [x] Resources for Docker-based systems: implemented on this branch (`docker: true` in the system config, see [Resources](#resources-measured-in-the-container)). Other container systems can switch it on by naming their container `cfg["container_name"]`.
 - [ ] Do not commit `results/metrics.csv` / `summary.csv` per branch (merge conflicts). Generate them once on `main`.
 
 Me (GLIM):

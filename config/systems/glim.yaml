@@ -30,6 +30,9 @@ execution:
   mode: offline               # glim_rosbag reads the bag itself and throttles so no scan is dropped
   rosbag_rate: null
 
+# Runs in Docker: run_all.py names the container, pipeline/resources.py measures it with docker stats
+docker: true
+
 # Used by pipeline/runners/glim.py
 glim:
   image: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc   # CPU fallback: koide3/glim_ros2:jazzy + *_cpu.json in config.json (document it!)

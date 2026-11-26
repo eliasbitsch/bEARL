@@ -4,7 +4,7 @@
   "member": "Philip Stix",
   "sequence": "Dynamic01",
   "run": 3,
-  "started": "2026-11-26T13:25:22",
+  "started": "2026-11-26T14:36:50",
   "system_source": {
     "repository": "https://github.com/koide3/glim",
     "commit": "2262aafa2369acff6afab2268a7743aec7a7fa49",
@@ -18,7 +18,7 @@
     "config_sensors.json: T_lidar_imu -> MID-360 LiDAR-IMU extrinsic from M3DGR calibration.md (calibration)",
     "input: Livox CustomMsg converted to PointCloud2 with per-point times (tools/glim_prepare_bag.py), no points removed"
   ],
-  "pipeline_commit": "fbf70d182e0551368a45b21a4433dabab2e61bc8",
+  "pipeline_commit": "5031aa4756778e868c99c3635cc07f8307a86b45",
   "hardware": {
     "platform": "Windows-11-10.0.26300-SP0",
     "cpu": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
@@ -28,10 +28,12 @@
   },
   "success": true,
   "error": null,
-  "wall_time_s": 85.66433450000477,
+  "wall_time_s": 88.72534800000722,
   "resources": {
-    "cpu_mean_percent": 8.74546762589928,
-    "ram_peak_mib": 65.08984375,
-    "gpu_mem_peak_mib": 217.0
+    "cpu_mean_percent": 167.02162790697676,
+    "ram_peak_mib": 441.3,
+    "gpu_mem_peak_mib": 217.0,
+    "scope": "container bearl-glim-dynamic01-run03",
+    "samples": 43
   }
 }

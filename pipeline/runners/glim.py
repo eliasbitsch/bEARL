@@ -11,7 +11,8 @@ GLIM writes its result to the dump directory (kept under data/, git-ignored, for
     000000/ 000001/ ...              submaps: data.txt (T_world_origin) + points_compact.bin (float32 xyz)
 The runner copies the configured trajectory to trajectory_tum.txt and merges the submaps into map.ply.
 
-Note: GLIM runs inside the container, so resources.csv only sees the docker CLI process.
+Resources: with `docker: true` in config/systems/glim.yaml, run_all.py names the container and
+pipeline/resources.py samples it with `docker stats` (before 2026-11-26, resources.csv only saw the docker CLI).
 """
 from __future__ import annotations
 
@@ -36,8 +37,11 @@ def run(sequence: dict, out_dir: Path, run_idx: int, cfg: dict, data_root: Path)
         shutil.rmtree(dump)
     dump.parent.mkdir(parents=True, exist_ok=True)
 
-    cmd = ["docker", "run", "--rm",
-           "-v", f"{bag}:/data/bag:ro", "-v", f"{config_dir}:/glim/config:ro",
+    cmd = ["docker", "run", "--rm"]
+    if cfg.get("container_name"):   # lets pipeline/resources.py measure the container (docker stats)
+        subprocess.run(["docker", "rm", "-f", cfg["container_name"]], capture_output=True)   # leftover of a killed run
+        cmd += ["--name", cfg["container_name"]]
+    cmd += ["-v", f"{bag}:/data/bag:ro", "-v", f"{config_dir}:/glim/config:ro",
            "-v", f"{dump.parent}:/dumps"]
     if g.get("gpus", False):
         cmd += ["--gpus", "all"]
