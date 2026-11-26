@@ -31,7 +31,7 @@ members:
     sensors: [lidar3d, imu]
     alignment: se3
     loop_closure: true
-    hardware: null
+    hardware: RTX 3050 Ti Laptop 4 GB / i7-11370H, Docker Desktop (WSL2)
 
   - name: Viktoriia Ovdiienko
     slug: null          # TODO: choose your system

@@ -94,11 +94,13 @@ Until now, `resources.csv` only saw the `docker` CLI process (8 % CPU, 65 MiB), 
 
 All 15 runs, RTX 3050 Ti laptop, Docker Desktop (WSL2):
 
-| Sequence | wall time median [s] | CPU mean [% of one core], median (min-max) | RAM peak [MiB] | GPU memory peak [MiB] | samples per run |
-|---|---|---|---|---|---|
-| Varying-illu01 | 78 | 165 (146-167) | ≤ 463 | 217 | 38-44 |
-| Dynamic01 | 88 | 165 (163-167) | ≤ 441 | 217 | 42-44 |
-| Sha-turn01 | 80 | 150 (147-160) | ≤ 440 | 217 | 35-40 |
+| Sequence | wall time median [s] | real-time factor median (min-max) | CPU mean [% of one core], median (min-max) | RAM peak [MiB] | GPU memory peak [MiB] | samples per run |
+|---|---|---|---|---|---|---|
+| Varying-illu01 | 78 | 0.51 (0.50-0.59) | 165 (146-167) | ≤ 463 | 217 | 38-44 |
+| Dynamic01 | 88 | 0.50 (0.49-0.51) | 165 (163-167) | ≤ 441 | 217 | 42-44 |
+| Sha-turn01 | 80 | 0.58 (0.52-0.61) | 150 (147-160) | ≤ 440 | 217 | 35-40 |
+
+Real-time factor = wall time / duration of the data (GT span: 154.1 / 175.2 / 139.0 s). Below 1 means faster than real time: GLIM processes the sequences in about half their duration. The wall time includes the container start and the dump at the end, so GLIM's own processing is somewhat faster than this. Offline mode (`glim_rosbag`) reads as fast as GLIM can process, so this measures throughput and does not show whether GLIM would keep up live. The RViz demo runs GLIM live at 1x (default rate of `run_demo.sh`) and looks smooth. Whether every scan is processed in that mode was not checked.
 
 This agrees with the manual `docker stats` measurement in October (426-441 MiB, 217 MiB GPU). The mean CPU is lower than the 193 % measured then, because the start and end of the container are now included. Wall times on V and S are 11-13 % longer than in the first runs, on D they are unchanged. The extra `docker stats` calls are a possible cause, but this was not checked.
 
