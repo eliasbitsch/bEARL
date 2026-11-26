@@ -71,6 +71,28 @@ def trajectories(seq: str, gt) -> None:
         pd.DataFrame(d).round(4).to_csv(OUT / f"traj_{slug}_{seq}.csv", index=False)
 
 
+def comparisons(seq: str, gt) -> dict:
+    """Same-timestamp comparison and a trivial baseline (review: MASt3R-SLAM is scored on keyframes only).
+
+    vggt_on_mast3r_kf_m: VGGT-Long ATE on the MASt3R-SLAM keyframe timestamps (nearest 10 Hz frame within 60 ms),
+    Sim(3)-aligned on that subset. const_baseline_m: ATE of a constant position, i.e. the RMS distance of the ground
+    truth to its centroid (Sim(3) alignment of a constant estimate collapses to the centroid).
+    """
+    rmse = lambda e: float(np.sqrt(np.mean(np.square(e))))
+    p = gt.positions_xyz
+    out = {"sequence": seq, "const_baseline_m": rmse(np.linalg.norm(p - p.mean(0), axis=1))}
+    m = file_interface.read_tum_trajectory_file(
+        str(ROOT / "results" / "mast3r_slam" / seq / rep_run("mast3r_slam", seq) / "trajectory_tum.txt"))
+    v = file_interface.read_tum_trajectory_file(
+        str(ROOT / "results" / "vggt_long" / seq / rep_run("vggt_long", seq) / "trajectory_tum.txt"))
+    vs, _ = sync.associate_trajectories(v, m, max_diff=0.06)
+    vs, _ = align_full(gt, vs, True, CFG["evaluation"]["t_max_diff"])
+    r, e = sync.associate_trajectories(gt, vs, max_diff=CFG["evaluation"]["t_max_diff"])
+    out.update(vggt_on_mast3r_kf_m=rmse(np.linalg.norm(r.positions_xyz - e.positions_xyz, axis=1)),
+               n_common=r.num_poses)
+    return out
+
+
 def voxel(p: np.ndarray) -> np.ndarray:
     _, i = np.unique(np.floor(p / VOXEL).astype(np.int64), axis=0, return_index=True)
     return p[i]
@@ -94,12 +116,15 @@ def slices(seq: str, gt) -> None:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    comp = []
     for seq in SEQS:
         gt = file_interface.read_tum_trajectory_file(str(DATA / seq / "gt_tum.txt"))
         light(seq).round(4).to_csv(OUT / f"light_{seq}.csv", index=False)
         trajectories(seq, gt)
         slices(seq, gt)
+        comp.append(comparisons(seq, gt))
         print(seq, "done")
+    pd.DataFrame(comp).round(4).to_csv(OUT / "comparisons.csv", index=False)
     pd.DataFrame([(s, q, rep_run(s, q)) for s in SYSTEMS for q in SEQS], columns=["slug", "sequence", "run"]) \
         .to_csv(OUT / "runs.csv", index=False)
 

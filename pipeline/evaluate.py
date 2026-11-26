@@ -42,6 +42,7 @@ def evaluate_run(gt: PoseTrajectory3D, est_file: Path, alignment: str, ev: dict)
     ate_sim3, scale_sim3 = _ape(ref, est, correct_scale=True)
 
     gt_duration = gt.timestamps[-1] - gt.timestamps[0]
+    # Time span from the first to the last matched pose, not gap-aware: gaps inside the run are not counted.
     tracked = (ref.timestamps[-1] - ref.timestamps[0]) / gt_duration if ref.num_poses > 1 else 0.0
     return {
         "matched_poses": ref.num_poses,

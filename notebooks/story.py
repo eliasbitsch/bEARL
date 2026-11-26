@@ -64,7 +64,8 @@ def _(CACHE, RES, SEQS, pd):
     traj = {(slug, s): pd.read_csv(CACHE / f"traj_{slug}_{s}.csv")
             for slug in ("vggt_long", "mast3r_slam", "fast_lio2") for s in SEQS
             if (CACHE / f"traj_{slug}_{s}.csv").exists()}
-    return gt, light, maps, metrics, runs, traj
+    comp = pd.read_csv(CACHE / "comparisons.csv").set_index("sequence")
+    return comp, gt, light, maps, metrics, runs, traj
 
 
 @app.cell
@@ -135,7 +136,10 @@ def _(DARK, RES, SEQS, light, np, pd, re, runs):
     relocs = {s: mast3r_relocs(s) for s in SEQS}
     conf = {s: vggt_conf(s) for s in SEQS}
     vggt_msgs = {s: vggt_messages(s) for s in SEQS}
-    return conf, links, relocs, vggt_msgs
+    # share of the run the system itself reports as lost: MASt3R-SLAM relocalising (blocks of ~1 s), VGGT-Long never
+    lost_pct = {("mast3r_slam", s): 100 * (relocs[s].failed > 0).sum() / light[s].t_rel.iloc[-1] for s in SEQS}
+    lost_pct.update({("vggt_long", s): 0.0 for s in SEQS})
+    return conf, links, lost_pct, relocs, vggt_msgs
 
 
 @app.cell
@@ -178,8 +182,9 @@ def _(mo):
 
 
 @app.cell
-def _(CORE, SEQS, maps, metrics, pd):
+def _(CORE, SEQS, lost_pct, maps, metrics, pd):
     def results_table():
+        """Long format; maps come from run_00 (only run with a stored map for every system)."""
         rows = []
         for slug, name in CORE.items():
             for s in SEQS:
@@ -190,9 +195,11 @@ def _(CORE, SEQS, maps, metrics, pd):
                 rows.append({"system": name, "sequence": s,
                              "ATE RMSE [m]": q[0.5], "IQR [m]": q[0.75] - q[0.25],
                              "success": f"{int(m.success.sum())}/{len(m)}",
-                             "tracked [%]": 100 * m.tracked_fraction.median(),
+                             "time span [%]": 100 * m.tracked_fraction.median(),
+                             "reported lost [%]": lost_pct[(slug, s)],
                              "map accuracy [m]": mm.accuracy_median_m.median(),
-                             "F-score @10 cm": mm.fscore_10cm.median()})
+                             "F-score @10 cm": mm.fscore_10cm.median(),
+                             "ICP accepted": bool(mm.icp_accepted.all())})
         return pd.DataFrame(rows).set_index(["system", "sequence"])
 
     table = results_table()
@@ -355,7 +362,40 @@ def _(CACHE, CORE, STYLE, fig_timeline, gt, light, mo, plt, slices, t_slider, tr
 
 
 @app.cell
-def _(conf, links, mo, relocs, table, vggt_msgs):
+def _(DARK, SEQS, comp, conf, light, np, pd, traj):
+    def rmse(e):
+        return float(np.sqrt(np.mean(np.square(e))))
+
+    def dark_lit_rmse():
+        """ATE RMSE restricted to dark / lit frames (same statistic as the ATE, review M1)."""
+        rows = []
+        for (slug, s), d in traj.items():
+            if slug == "fast_lio2":
+                continue
+            l = light[s]
+            dk = np.interp(d.t_rel, l.t_rel, l.black_fraction) > DARK
+            rows.append({"slug": slug, "sequence": s, "rmse_dark_m": rmse(d.error_m[dk]) if dk.any() else np.nan,
+                         "rmse_lit_m": rmse(d.error_m[~dk]), "last_pose_s": d.t_rel.iloc[-1]})
+        return pd.DataFrame(rows).set_index(["slug", "sequence"])
+
+    darklit = dark_lit_rmse()
+    conf_lit = {s: conf[s][~conf[s].dark].depth_conf_mean.median() for s in SEQS if conf[s] is not None}
+    checks = comp.join(pd.Series(conf_lit, name="conf_lit_median"))
+    return checks, darklit
+
+
+@app.cell
+def _(checks, darklit, mo):
+    mo.vstack([mo.md(r"""
+    **Fairness checks.** MASt3R-SLAM is scored on its keyframes only; VGGT-Long on every frame. `vggt_on_mast3r_kf_m`
+    scores VGGT-Long on the same timestamps. `const_baseline_m` is the ATE of a robot that never moves (the RMS
+    distance of the ground truth to its centroid). `conf_lit_median`: VGGT confidence in lit frames.
+    """), checks.round(3), darklit.round(3)])
+    return
+
+
+@app.cell
+def _(checks, conf, darklit, links, lost_pct, mo, relocs, table, vggt_msgs):
     _s = "Varying-illu01"
     _v, _m = table.loc[("VGGT-Long", _s)], table.loc[("MASt3R-SLAM", _s)]
     _c = conf[_s]
@@ -363,18 +403,24 @@ def _(conf, links, mo, relocs, table, vggt_msgs):
                  f" VGGT's own depth confidence drops from a median of {_c[~_c.dark].depth_conf_mean.median():.1f} in lit"
                  f" frames to {_c[_c.dark].depth_conf_mean.median():.2f} in dark frames (95th percentile"
                  f" {_c[_c.dark].depth_conf_mean.quantile(0.95):.2f}). The confidence is 1 + e^x, so 1.0 is the lowest"
-                 " value the model can output: it does register the darkness. VGGT-Long, however, only drops points"
-                 " below 10 % of the median confidence of each chunk pair, a relative threshold that a pair of dark"
-                 " chunks passes, and never rejects a chunk.")
+                 " value the model can output: it flags the dark input. VGGT-Long only drops points below 10 % of the"
+                 " lower of the two chunk medians, a relative threshold that a pair of dark chunks passes. In lit frames"
+                 f" after the blackouts the confidence is back at {checks.loc[_s, 'conf_lit_median']:.1f}"
+                 f" (Dynamic01: {checks.loc['Dynamic01', 'conf_lit_median']:.1f}) while the pose is wrong: nothing flags"
+                 " the wrong trajectory.")
     mo.md(f"""
-    **RQ2.** The two systems fail in opposite ways.
-    VGGT-Long keeps producing a pose for every frame ({_v['tracked [%]']:.1f} % tracked) and ends at an ATE of
-    {_v['ATE RMSE [m]']:.2f} m: dark chunks are still joined to their neighbours, the chunk scale jumps
-    (cumulative factor between {links[_s].cumulative_scale.min():.2f} and {links[_s].cumulative_scale.max():.2f}),
-    and the whole trajectory shrinks towards the room centre. Its log contains {vggt_msgs[_s]} failure messages.
-    MASt3R-SLAM stops adding keyframes in the dark, tries to relocalise {int(relocs[_s].failed.sum())} times without
-    success (from the second dark phase on; in the first one it neither adds keyframes nor relocalises), covers
-    {_m['tracked [%]']:.0f} % of the run and ends at {_m['ATE RMSE [m]']:.2f} m.{_conf_txt}
+    **RQ2.** VGGT-Long outputs a pose for every frame and ends at an ATE of {_v['ATE RMSE [m]']:.2f} m, no better than a
+    robot that never moves ({checks.loc[_s, 'const_baseline_m']:.2f} m). Dark chunks are still joined to their
+    neighbours; the chained chunk scale ends at {links[_s].cumulative_scale.iloc[-1]:.3f} (lit sequences:
+    {links['Dynamic01'].cumulative_scale.iloc[-1]:.2f}, {links['Sha-turn01'].cumulative_scale.iloc[-1]:.2f}), and the
+    trajectory shrinks towards the room centre. The error is larger in lit frames
+    ({darklit.loc[('vggt_long', _s), 'rmse_lit_m']:.2f} m) than in dark ones
+    ({darklit.loc[('vggt_long', _s), 'rmse_dark_m']:.2f} m). Its log contains {vggt_msgs[_s]} failure messages.
+    MASt3R-SLAM stops adding keyframes in the dark and relocalises without success during
+    {lost_pct[('mast3r_slam', _s)]:.0f} % of the run ({int(relocs[_s].failed.sum())} attempts, from the second dark
+    phase on; in the first one it neither adds keyframes nor relocalises). Its last keyframe is at
+    {darklit.loc[('mast3r_slam', _s), 'last_pose_s']:.0f} s. On its keyframes its ATE is {_m['ATE RMSE [m]']:.2f} m,
+    VGGT-Long's on the same timestamps {checks.loc[_s, 'vggt_on_mast3r_kf_m']:.2f} m.{_conf_txt}
     """)
     return
 
@@ -386,7 +432,7 @@ def _(mo):
 
 
 @app.cell
-def _(CORE, SEQS, conf, metrics, pd, relocs, vggt_msgs):
+def _(CORE, SEQS, conf, lost_pct, metrics, pd, relocs, vggt_msgs):
     def detect_table():
         rows = []
         for slug, name in CORE.items():
@@ -396,7 +442,8 @@ def _(CORE, SEQS, conf, metrics, pd, relocs, vggt_msgs):
                 rows.append({
                     "system": name, "sequence": s,
                     "ATE [m]": m.ate_rmse_m.median(),
-                    "tracked [%]": 100 * m.tracked_fraction.median(),
+                    "time span [%]": 100 * m.tracked_fraction.median(),
+                    "reported lost [%]": lost_pct[(slug, s)],
                     "failure messages in log": vggt_msgs[s] if slug == "vggt_long" else int(relocs[s].failed.sum()),
                     "median depth conf. (dark frames)": (c[c.dark].depth_conf_mean.median()
                                                          if slug == "vggt_long" and c is not None and c.dark.any()
@@ -411,12 +458,11 @@ def _(CORE, SEQS, conf, metrics, pd, relocs, vggt_msgs):
 @app.cell
 def _(mo):
     mo.md(r"""
-    **RQ3.** The tracked fraction does not reveal VGGT-Long's failure: it is 99.9 % on all three sequences, including
-    the one with a 2.3 m error. MASt3R-SLAM's failure is visible twice - as a gap in the trajectory and as failed
-    relocalisations in its log, which appear only on `Varying-illu01`. VGGT's confidence carries the signal
-    (see the timeline), but the pipeline does not act on it. Caveat: MASt3R-SLAM exports keyframes only, so its
-    tracked fraction mixes keyframe density with tracking loss (Thomas et al. 2026 drop that measure for this reason);
-    the relocalisation log is the cleaner signal. Related work: learned trackers trade explicit tracking
+    **RQ3.** A run counts as visibly failed when the system itself reports it (log message, relocalisation state).
+    VGGT-Long reports nothing on any sequence; MASt3R-SLAM reports being lost for 0 % of the lit sequences and for
+    most of the dark time of `Varying-illu01`. The "time span" column (first to last matched pose) is not
+    gap-aware and is shown for transparency only; it cannot show tracking loss inside a run. VGGT's confidence flags
+    the dark input but not the wrong trajectory that follows. Related work: learned trackers trade explicit tracking
     loss for silent drift (Thomas et al. 2026); VGGT's pose errors are only partly predicted by its confidence
     (Srinivasan and Nordström 2026); 3D foundation models produce dense geometry even for noise (Paul et al. 2026).
     """)
@@ -433,16 +479,18 @@ def _(metrics, mo, pd):
         mo.md(r"""
         ## 5. Repeatability and side results
 
-        **Repeatability.** Five runs per sequence are bit-identical except MASt3R-SLAM on `Varying-illu01`, which
+        **Repeatability.** Five runs per sequence agree within 0.1 mm except MASt3R-SLAM on `Varying-illu01`, which
         alternates between two outcomes while it relocalises. Repetitions therefore show determinism, not robustness.
         """),
         _det,
         mo.md(r"""
         **Side results (one sentence each in the paper).** FAST-LIO2 (LiDAR + IMU) reproduces the published M3DGR
         value on Dynamic01 (0.14 m vs. 0.13 m) and serves as a pipeline check; its error is mostly the unknown
-        offset between the mocap body and the LiDAR. Map-Long (VGGT-Long with the "metric" MapAnything) gets the scale
-        wrong by a factor of 3 to 10 indoors. The 16 GB variant of VGGT-Long (chunks of 30) loses accuracy on the
-        sharp turns of Sha-turn01.
+        offset between the mocap body and the LiDAR; on `Varying-illu01` it stays at 0.14 m, so scene and ground truth
+        are fine there. Map-Long (VGGT-Long with the "metric" MapAnything, `map_long`) gets the scale wrong by a factor
+        of 4 to 14 indoors (`scale_sim3`). The 16 GB variant of VGGT-Long (chunks of 30) loses accuracy on the sharp
+        turns of Sha-turn01 and fails on `Varying-illu01` just like the default, so the failure does not hinge on the
+        chunk length.
         """),
         _side,
     ])
@@ -466,11 +514,17 @@ def _(FIG, SEQS, fig_maps, fig_timeline, fig_trajectories, plt, table):
             f = make()
             f.savefig(FIG / f"{name}.pdf")
             plt.close(f)
-        lines = [r"\begin{tabular}{@{}llccc@{}}", r"\toprule",
-                 r"System & Sequence & ATE [m] & Tracked [\%] & F@10\,cm \\", r"\midrule"]
-        for (sys_, seq), r in table.iterrows():
-            lines.append(f"{sys_ if seq == SEQS[0] else ''} & {seq} & {r['ATE RMSE [m]']:.2f} & "
-                         f"{r['tracked [%]']:.1f} & {r['F-score @10 cm']:.2f} \\\\")
+        # one row per system, so the table stays short once all members' systems are in
+        lines = [r"\setlength{\tabcolsep}{3.5pt}", r"\begin{tabular}{@{}lccccccc@{}}", r"\toprule",
+                 r" & \multicolumn{3}{c}{ATE RMSE [m]} & \multicolumn{3}{c}{F-score @10\,cm} & Lost \\",
+                 r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(l){8-8}",
+                 r"System & D & S & V & D & S & V & V [\%] \\", r"\midrule"]
+        for sys_ in table.index.get_level_values(0).unique():
+            r = table.loc[sys_]
+            f = [f"{r.loc[s, 'F-score @10 cm']:.2f}" + ("$^\\dagger$" if not r.loc[s, "ICP accepted"] else "")
+                 for s in SEQS]
+            lines.append(f"{sys_} & " + " & ".join(f"{r.loc[s, 'ATE RMSE [m]']:.2f}" for s in SEQS) + " & "
+                         + " & ".join(f) + f" & {r.loc[SEQS[2], 'reported lost [%]']:.0f} \\\\")
         lines += [r"\bottomrule", r"\end{tabular}"]
         (FIG.parent / "tables" / "results.tex").write_text(
             "% Generated by notebooks/story.py - do not edit by hand.\n" + "\n".join(lines) + "\n")

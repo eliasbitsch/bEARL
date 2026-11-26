@@ -1,0 +1,4 @@
+sequence,const_baseline_m,vggt_on_mast3r_kf_m,n_common
+Dynamic01,2.3348,0.1451,100
+Sha-turn01,2.1319,0.2616,110
+Varying-illu01,2.3884,1.5022,73
