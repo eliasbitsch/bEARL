@@ -55,7 +55,7 @@ Excluded: Newer College, Hilti, TUM-VI, ETH3D (handheld), GrandTour (legged), KI
 |---|---|---|---|---|
 | nominal | `Dynamic01` | 175 s / 71 m | well lit (126/255, 2 %) | normal operation, people walking through the scene |
 | motion | `Sha-turn01` | 139 s / 98 m | well lit (129/255, 2 %) | sharp turns: wheel slip (odometry), fast rotation and motion blur (cameras) |
-| illumination | `Varying-illu01` | 154 s / 72 m | light switched on and off (≈ 45 % near-black, black phases up to 10 s) | cameras without light; does tracking recover when the light returns? |
+| illumination | `Varying-illu01` | 154 s / 72 m | light switched on and off (≈ 45 % near-black, five black phases of 12-16 s) | cameras without light; does tracking recover when the light returns? |
 
 Why this selection: a robot mostly operates in normal light, so two of three sequences are well lit; darkness is included **once** as a targeted stress test. `Varying-illu01` was preferred over `Dark03` (94 % near-black frames), because a camera system's failure on `Dark03` is predictable, whereas the on/off pattern shows whether a system loses and regains tracking. `Dark03` is downloaded and checked as a reserve (`reserve_sequences` in `config/sequences.yaml`). The sequences still stress each modality differently: cameras need light and texture, odometry needs traction, LiDAR is unaffected by light (all three are in the same room, so LiDAR geometry is similar throughout).
 

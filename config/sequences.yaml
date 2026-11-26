@@ -4,7 +4,7 @@
 # GT height constant 0.84 m), checksums match M3DGR checksums.txt.
 # Selection: two well-lit sequences (normal operation) + one with the light switched on and off
 # (stress test for cameras). Mean image brightness (0-255) / share of near-black frames:
-#   Dynamic01 126 / 2 %, Sha-turn01 129 / 2 %, Varying-illu01 ~70 / ~45 % (black phases up to 10 s).
+#   Dynamic01 126 / 2 %, Sha-turn01 129 / 2 %, Varying-illu01 ~70 / ~45 % (five black phases of 12-16 s).
 
 dataset: M3DGR
 data_root: data/M3DGR          # git-ignored, see README "Data"
