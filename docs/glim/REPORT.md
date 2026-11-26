@@ -54,6 +54,34 @@ Note: `resources.csv` from the pipeline only sees the `docker` CLI process, not 
 
 ![Map slice 0.15-2 m above the floor with the GLIM trajectory](fig_map_topdown.png)
 
+## Results: Dynamic01 and Sha-turn01 (2026-11-26)
+
+Same image (digest), config and evaluation as above; 5/5 runs successful on both sequences.
+
+| Sequence | ATE RMSE median [m] | IQR [m] | max [m] | Sim(3) scale | tracked | wall time median [s] | submaps |
+|---|---|---|---|---|---|---|---|
+| Varying-illu01 | 0.1385 | 0.0001 | 0.32 | 1.034 | 99.2 % | 69.7 | 1 |
+| Dynamic01 | 0.1416 | < 0.0001 | 0.31 | 1.034 | 99.3 % | 89.0 | 1 |
+| Sha-turn01 | 0.1999 | < 0.0001 | 0.27 | 1.002 | 99.1 % | 70.8 | 2 |
+
+Diagnostic lever-arm fit (run 0, same method as below; uses the GT, not a result):
+
+| Sequence | fitted offset in IMU frame [m] | \|l\| [m] | ATE after fit [m] |
+|---|---|---|---|
+| Varying-illu01 | (-0.138, -0.127, -0.076) | 0.202 | 0.004 |
+| Dynamic01 | (-0.142, -0.126, -0.079) | 0.205 | 0.007 |
+| Sha-turn01 | (-0.139, -0.129, -0.074) | 0.203 | 0.008 |
+
+- **The offset is a property of the rig, not of the sequence.** It is fitted independently on three sequences and agrees to about 4 mm. This supports the group decision to treat it as a documented limitation (`gt_to_base_extrinsic` identity), and it means the GLIM error proper is below 1 cm on all three sequences.
+- **Sha-turn01 has the highest ATE (0.20 m), but not because GLIM is worse there.** After the offset fit, the error is 0.008 m, like on the other sequences. The sharp turns and the changing motion pattern project the constant offset into a larger position error, for example the step at about 90 s in the ATE-over-time figure. The Sim(3) scale is close to 1 here because the offset no longer looks like a radius change on uniform loops.
+- **Sha-turn01 is the first sequence with two submaps,** so the global optimisation contributes at least one submap-to-submap factor there. With only one overlap, the effect is still small.
+- Path length: Dynamic01 GT 71.1 m / GLIM 69.7 m, Sha-turn01 GT 97.4 m / GLIM 97.4 m.
+- Wall time scales with sequence length: about 0.45-0.51 s per second of data on all three sequences (Dynamic01 is the longest at 175 s).
+
+Figures: `fig_trajectory_<seq>.png`, `fig_ate_over_time_<seq>.png`, `fig_map_topdown_<seq>.png`; paper figures `paper/figures/glim_map_<seq>.pdf`.
+
+![ATE over time, Sha-turn01](fig_ate_over_time_Sha-turn01.png)
+
 ## Key finding: the ground-truth frame
 
 The ATE error oscillates with every loop the robot drives (blue curve). This is the signature of a **constant lever arm** between the tracked frame (GLIM: MID-360 IMU) and the mocap rigid body (`/vrpn_client_node/UGV/pose`).
@@ -106,10 +134,10 @@ Group:
 - [ ] Do not commit `results/metrics.csv` / `summary.csv` per branch (merge conflicts). Generate them once on `main`.
 
 Me (GLIM):
-- [ ] Download `Dynamic01` and `Dark03` (links in `docker/glim/README.md`), run `tools/glim_prepare_bag.py` on each, then 5 runs per sequence.
-- [ ] Switch the evaluated trajectory frame according to the group decision (`config/systems/glim.yaml` → `glim.trajectory`).
-- [ ] Write the theory paragraph in `paper/main.tex` (draft below).
-- [ ] Map figure for the paper (`docs/glim/make_figures.py` → PDF in `paper/figures/`).
+- [x] ~~Dynamic01 and Dark03~~ Dynamic01 and Sha-turn01 (the evaluated set changed on `main`), 5 runs each (2026-11-26).
+- [x] Trajectory frame: the group decided on identity (`config/sequences.yaml`), so `traj_imu.txt` stays.
+- [ ] Write the theory paragraph in `paper/members/` after merging `main` (text checked, see below).
+- [x] Map figures for the paper: `paper/figures/glim_map_<seq>.pdf` for all three sequences.
 
 ## Draft: theory paragraph (for `paper/main.tex`)
 
