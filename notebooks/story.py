@@ -62,7 +62,7 @@ def _(CACHE, RES, SEQS, pd):
     light = {s: pd.read_csv(CACHE / f"light_{s}.csv") for s in SEQS}
     gt = {s: pd.read_csv(CACHE / f"gt_{s}.csv") for s in SEQS}
     traj = {(slug, s): pd.read_csv(CACHE / f"traj_{slug}_{s}.csv")
-            for slug in ("vggt_long", "mast3r_slam", "fast_lio2") for s in SEQS
+            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "vggt_long_lit_only") for s in SEQS
             if (CACHE / f"traj_{slug}_{s}.csv").exists()}
     comp = pd.read_csv(CACHE / "comparisons.csv").set_index("sequence")
     return comp, gt, light, maps, metrics, runs, traj
@@ -210,7 +210,7 @@ def _(CORE, SEQS, lost_pct, maps, metrics, pd):
 @app.cell
 def _(CORE, SEQS, STYLE, gt, plt, traj):
     def fig_trajectories():
-        fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.6), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.5), sharex=True, sharey=True)
         for ax, s in zip(axes, SEQS):
             ax.plot(gt[s].x, gt[s].y, lw=1.2, label="ground truth", **STYLE["gt"])
             for slug, name in CORE.items():
@@ -295,7 +295,7 @@ def _(CORE, DARK, STYLE, conf, light, links, np, plt, relocs, traj):
         l = light[seq]
         c = conf[seq]
         n = 3 if c is not None else 2
-        fig, axes = plt.subplots(n, 1, figsize=(7.16, 0.72 * n + 0.35), sharex=True)
+        fig, axes = plt.subplots(n, 1, figsize=(7.16, 0.64 * n + 0.35), sharex=True)
         axes = [None, *axes]   # dark phases are shown as grey bands, no separate brightness panel
         for ax in axes[1:]:
             ax.fill_between(l.t_rel, 0, 1, where=l.black_fraction > DARK, color="0.88",
@@ -358,6 +358,47 @@ def _(CACHE, CORE, STYLE, fig_timeline, gt, light, mo, plt, slices, t_slider, tr
                    map_at(_seq, t_slider.value)], justify="start"),
         fig_timeline(_seq, cursor=t_slider.value),
     ])
+    return
+
+
+@app.cell
+def _(SEQS, light, np, pd, traj):
+    from scipy.spatial.transform import Rotation
+
+    # OpenLORIS (Shi et al. 2020) correct rate: pose k is correct if ATE <= EPS and orientation error <= AOE;
+    # it counts for min(t_{k+1} - t_k, SIGMA). Values as suggested there for meter-size scenes (office: 1 m, 30 deg).
+    EPS, AOE, SIGMA = 1.0, 30.0, 1.0
+
+    def _rot(d, p):
+        return Rotation.from_quat(d[[f"{p}_qx", f"{p}_qy", f"{p}_qz", f"{p}_qw"]].values)
+
+    def body_to_camera(slug):
+        """Constant mocap-body -> camera rotation (not given by M3DGR), estimated once on Dynamic01."""
+        d = traj[(slug, "Dynamic01")]
+        return (_rot(d, "gt").inv() * _rot(d, "est")).mean()
+
+    def correct_rate(slug, seq):
+        d = traj[(slug, seq)]
+        aoe = np.degrees(((_rot(d, "gt") * body_to_camera(slug)).inv() * _rot(d, "est")).magnitude())
+        ok = (d.error_m <= EPS) & (aoe <= AOE)
+        t = d.t_rel.values
+        t_max = light[seq].t_rel.iloc[-1]
+        dt = np.minimum(np.diff(np.append(t, t_max)), SIGMA)
+        return {"slug": slug, "sequence": seq, "CR": float((dt * ok).sum() / t_max),
+                "median_AOE_deg": float(np.median(aoe))}
+
+    cr = pd.DataFrame([correct_rate(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS]) \
+        .set_index(["slug", "sequence"])
+    return (cr,)
+
+
+@app.cell
+def _(cr, mo):
+    mo.vstack([mo.md(r"""
+    **Correct rate** (OpenLORIS, $\epsilon$ = 1 m, 30°, $\sigma$ = 1 s): share of the sequence time covered by a
+    correct pose. It counts wrong poses and gaps against a system. MASt3R-SLAM exports keyframes only, so gaps between
+    keyframes longer than 1 s also lower its value on the lit sequences.
+    """), cr.round(3)])
     return
 
 
@@ -470,6 +511,21 @@ def _(mo):
 
 
 @app.cell
+def _(darklit, mo, np, traj):
+    _d = traj[("vggt_long_lit_only", "Varying-illu01")]
+    lit_only_ate = float(np.sqrt(np.mean(_d.error_m ** 2)))
+    mo.md(f"""
+    **Diagnostic: VGGT-Long without the dark frames.** Same defaults, near-black frames removed from the input
+    (`cluster/run_vggt_long_lit_only.sh`). ATE {lit_only_ate:.2f} m on the remaining lit frames, compared with
+    {darklit.loc[('vggt_long', 'Varying-illu01'), 'rmse_lit_m']:.2f} m of the default run on the lit frames. Dropping
+    the dark input does not help: across each 12-16 s gap the robot moves several metres, and VGGT-Long joins chunks
+    that hardly overlap, again without any warning. The dark chunk links are therefore not the only cause; VGGT-Long
+    has no check that two chunks actually fit together.
+    """)
+    return (lit_only_ate,)
+
+
+@app.cell
 def _(metrics, mo, pd):
     _det = metrics[metrics.slug.isin(["vggt_long", "mast3r_slam"])].pivot_table(
         index=["slug", "sequence"], columns="run", values="ate_rmse_m").round(3)
@@ -505,7 +561,7 @@ def _(mo):
 
 
 @app.cell
-def _(FIG, SEQS, fig_maps, fig_timeline, fig_trajectories, plt, table):
+def _(FIG, SEQS, cr, fig_maps, fig_timeline, fig_trajectories, plt, table):
     def write_paper():
         """Figures and the results table for paper/; also callable without the UI."""
         FIG.mkdir(parents=True, exist_ok=True)
@@ -515,16 +571,19 @@ def _(FIG, SEQS, fig_maps, fig_timeline, fig_trajectories, plt, table):
             f.savefig(FIG / f"{name}.pdf")
             plt.close(f)
         # one row per system, so the table stays short once all members' systems are in
-        lines = [r"\setlength{\tabcolsep}{3.5pt}", r"\begin{tabular}{@{}lccccccc@{}}", r"\toprule",
-                 r" & \multicolumn{3}{c}{ATE RMSE [m]} & \multicolumn{3}{c}{F-score @10\,cm} & Lost \\",
-                 r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(l){8-8}",
-                 r"System & D & S & V & D & S & V & V [\%] \\", r"\midrule"]
+        slugs = {"VGGT-Long": "vggt_long", "MASt3R-SLAM": "mast3r_slam"}
+        lines = [r"\setlength{\tabcolsep}{2.6pt}", r"\begin{tabular}{@{}lccccccccc@{}}", r"\toprule",
+                 r" & \multicolumn{3}{c}{ATE RMSE [m]} & \multicolumn{3}{c}{F-score @10\,cm}"
+                 r" & \multicolumn{3}{c}{Correct rate} \\",
+                 r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(l){8-10}",
+                 r"System & D & S & V & D & S & V & D & S & V \\", r"\midrule"]
         for sys_ in table.index.get_level_values(0).unique():
             r = table.loc[sys_]
             f = [f"{r.loc[s, 'F-score @10 cm']:.2f}" + ("$^\\dagger$" if not r.loc[s, "ICP accepted"] else "")
                  for s in SEQS]
+            c = [f"{cr.loc[(slugs[sys_], s), 'CR']:.2f}" for s in SEQS]
             lines.append(f"{sys_} & " + " & ".join(f"{r.loc[s, 'ATE RMSE [m]']:.2f}" for s in SEQS) + " & "
-                         + " & ".join(f) + f" & {r.loc[SEQS[2], 'reported lost [%]']:.0f} \\\\")
+                         + " & ".join(f) + " & " + " & ".join(c) + r" \\")
         lines += [r"\bottomrule", r"\end{tabular}"]
         (FIG.parent / "tables" / "results.tex").write_text(
             "% Generated by notebooks/story.py - do not edit by hand.\n" + "\n".join(lines) + "\n")

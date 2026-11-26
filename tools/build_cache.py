@@ -22,7 +22,8 @@ CFG = load_sequences()
 DATA = ROOT / CFG["data_root"]
 SEQS = [s["name"] for s in CFG["sequences"]]
 OUT = ROOT / "results" / "cache"
-SYSTEMS = {"vggt_long": True, "mast3r_slam": True, "fast_lio2": False}   # slug -> Sim(3) alignment
+SYSTEMS = {"vggt_long": True, "mast3r_slam": True, "fast_lio2": False,   # slug -> Sim(3) alignment
+           "vggt_long_lit_only": True}   # diagnostic, Varying-illu01 only
 BLACK = 20            # grey value below which a pixel counts as near-black (same as 00_story)
 THUMB_STEP = 15       # every 15th frame = 2 Hz
 SLICE_Z = (0.9, 1.3)  # wall slice above furniture, same as the paper's map overlay
@@ -67,8 +68,11 @@ def trajectories(seq: str, gt) -> None:
         r, e = sync.associate_trajectories(gt, est, max_diff=CFG["evaluation"]["t_max_diff"])
         d = {"t_rel": r.timestamps - t0, **{f"gt_{a}": r.positions_xyz[:, i] for i, a in enumerate("xyz")},
              **{f"est_{a}": e.positions_xyz[:, i] for i, a in enumerate("xyz")},
-             "error_m": np.linalg.norm(r.positions_xyz - e.positions_xyz, axis=1)}
-        pd.DataFrame(d).round(4).to_csv(OUT / f"traj_{slug}_{seq}.csv", index=False)
+             "error_m": np.linalg.norm(r.positions_xyz - e.positions_xyz, axis=1),
+             # orientations (w, x, y, z) for the OpenLORIS orientation-error criterion
+             **{f"gt_q{a}": r.orientations_quat_wxyz[:, i] for i, a in enumerate("wxyz")},
+             **{f"est_q{a}": e.orientations_quat_wxyz[:, i] for i, a in enumerate("wxyz")}}
+        pd.DataFrame(d).round(6).to_csv(OUT / f"traj_{slug}_{seq}.csv", index=False)
 
 
 def comparisons(seq: str, gt) -> dict:

@@ -8,3 +8,6 @@ mast3r_slam,Varying-illu01,run_01
 fast_lio2,Dynamic01,run_01
 fast_lio2,Sha-turn01,run_00
 fast_lio2,Varying-illu01,run_00
+vggt_long_lit_only,Dynamic01,run_00
+vggt_long_lit_only,Sha-turn01,run_00
+vggt_long_lit_only,Varying-illu01,run_00
