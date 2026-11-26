@@ -134,7 +134,7 @@ EOF
 fi
 
 # Output only, the algorithm is unchanged: log VGGT's mean depth confidence per frame and chunk to frame_confidence.csv
-# (the model's own quality signal, which VGGT-Long does not use for chunk alignment). SAVE_CONF=False disables it.
+# (the model's own quality signal, VGGT-Long only uses it relative to each chunk pair, never as an absolute check). SAVE_CONF=False disables it.
 if [ "${SAVE_CONF:-True}" = "True" ]; then
 python - <<'EOF'
 p = "vggt_long.py"
