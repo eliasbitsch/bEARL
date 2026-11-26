@@ -1,20 +1,32 @@
 # Shared, fixed evaluation sequences. Identical for every system - do not change per system.
 # Dataset: M3DGR (Zhang et al., IROS 2025), https://github.com/sjtuyinjie/M3DGR
-# TODO (data owner): confirm names, durations and that GT is motion capture before downloading.
+# Checked 2026-10-25: all are indoor OptiTrack sequences (~300 Hz GT, same room approx. 6.5 m x 3 m,
+# GT height constant 0.84 m), checksums match M3DGR checksums.txt.
+# Selection: two well-lit sequences (normal operation) + one with the light switched on and off
+# (stress test for cameras). Mean image brightness (0-255) / share of near-black frames:
+#   Dynamic01 126 / 2 %, Sha-turn01 129 / 2 %, Varying-illu01 ~70 / ~45 % (five black phases of 12-16 s).
 
 dataset: M3DGR
 data_root: data/M3DGR          # git-ignored, see README "Data"
 
 sequences:
-  - name: Varying-illu01
-    difficulty: easy
-    ground_truth: data/M3DGR/Varying-illu01/gt_tum.txt
-  - name: Dynamic01
-    difficulty: medium
+  - name: Dynamic01             # 175 s, 71 m, well lit, people walking through the scene
+    difficulty: nominal
     ground_truth: data/M3DGR/Dynamic01/gt_tum.txt
-  - name: Dark03                # alternative: Sha-turn01
-    difficulty: hard
+  - name: Sha-turn01            # 139 s, 98 m, well lit, sharp turns (wheel slip, fast rotation)
+    difficulty: motion
+    ground_truth: data/M3DGR/Sha-turn01/gt_tum.txt
+  - name: Varying-illu01        # 154 s, 72 m, light switched on and off
+    difficulty: illumination
+    ground_truth: data/M3DGR/Varying-illu01/gt_tum.txt
+
+# Not part of the evaluation, kept as a checked reserve (e.g. outlook / appendix):
+reserve_sequences:
+  - name: Dark03                # 170 s, 66 m, 94 % of frames near-black; cameras see almost nothing
     ground_truth: data/M3DGR/Dark03/gt_tum.txt
+
+# RealSense D435i colour camera (calibration.md, section 2): pinhole, no distortion, 640 x 480
+rgb_intrinsics: {fx: 607.79772949218, fy: 607.83526613281, cx: 328.79772949218, cy: 245.53321838378, w: 640, h: 480}
 
 # Topics in the original bags (ROS 1). Extracted/converted data lives next to each bag.
 topics:
@@ -25,10 +37,27 @@ topics:
   depth: /camera/aligned_depth_to_color/image_raw/compressedDepth
   camera_imu: /camera/imu
 
-# Ground-truth body frame -> robot base frame. Fill from the dataset's calibration.md.
+# Ground-truth body frame -> robot base frame. calibration.md gives no mocap -> sensor transform,
+# and M3DGR evaluates directly against the GT file with evo (README, Section 6), so we do the same:
+# identity, alignment absorbs the constant offset. Limitation for the paper: the lever arm between
+# mocap body and sensor frame is not compensated.
 gt_to_base_extrinsic:
-  translation: [0.0, 0.0, 0.0]          # TODO
-  rotation_xyzw: [0.0, 0.0, 0.0, 1.0]   # TODO
+  translation: [0.0, 0.0, 0.0]
+  rotation_xyzw: [0.0, 0.0, 0.0, 1.0]
+
+# Pseudo-ground-truth map (pipeline/reference_map.py): MID-360 scans accumulated along the mocap poses.
+# body_T_base is estimated by maximising map consistency (Levinson & Thrun 2010 style), independently on
+# three sequences (2026-10-25); the rig agrees to 0.07 deg / 5 mm (std), so the mean is used for all:
+#   Dynamic01      roll 1.659  pitch -0.702  yaw 184.462  x 0.025  y -0.092  dt 0.0176
+#   Sha-turn01     roll 1.656  pitch -0.842  yaw 184.592  x 0.015  y -0.099  dt 0.0074
+#   Varying-illu01 roll 1.664  pitch -0.748  yaw 184.570  x 0.017  y -0.093  dt 0.0109
+# z is unobservable for planar motion (0). The LiDAR-mocap time offset differs per recording (software sync).
+reference_map:
+  body_T_base: {roll_deg: 1.660, pitch_deg: -0.764, yaw_deg: 184.542, x_m: 0.019, y_m: -0.094}
+  time_offset_s: {Dynamic01: 0.0176, Sha-turn01: 0.0074, Varying-illu01: 0.0109}
+  voxel_m: 0.02
+  static_bin_s: 10.0          # people filter: a 10 cm cell must be hit in >= static_min_bins of these windows
+  static_min_bins: 6
 
 evaluation:
   runs_per_system: 5          # N repetitions per system and sequence (10 if time allows)

@@ -1,8 +1,10 @@
 """Figures for docs/glim/REPORT.md (Philip Stix). Run from the repo root after the pipeline runs:
 
-    python docs/glim/make_figures.py [--sequence Varying-illu01] [--run 0]
+    python docs/glim/make_figures.py [--sequence Varying-illu01] [--run 0] [--paper]
 
-Writes docs/glim/fig_*.png and prints the numbers used in the report. Uses paper/ieee.mplstyle.
+Writes docs/glim/fig_*.png (suffixed with the sequence for sequences other than Varying-illu01) and prints
+the numbers used in the report. With --paper, the map figure is also written as a vector PDF to
+paper/figures/glim_map_<sequence>.pdf (point cloud rasterised). Uses paper/ieee.mplstyle.
 The lever-arm fit is a DIAGNOSTIC (it uses the ground truth), never a result for the paper.
 """
 from __future__ import annotations
@@ -59,7 +61,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sequence", default="Varying-illu01")
     ap.add_argument("--run", type=int, default=0)
+    ap.add_argument("--paper", action="store_true", help="also write the map figure as PDF to paper/figures/")
     a = ap.parse_args()
+    # keep the original file names for Varying-illu01, they are linked from REPORT.md
+    sfx = "" if a.sequence == "Varying-illu01" else f"_{a.sequence}"
 
     plt.style.use(str(ROOT / "paper" / "ieee.mplstyle"))
     plt.rcParams.update({"savefig.format": "png", "savefig.dpi": 200})
@@ -94,7 +99,7 @@ def main() -> None:
     ax.plot(pe_al[:, 0], pe_al[:, 1], label="GLIM (SE(3)-aligned)", marker="")
     ax.set_xlabel("x [m]"), ax.set_ylabel("y [m]"), ax.set_aspect("equal")
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2, fontsize=8)
-    fig.savefig(OUT / "fig_trajectory.png"), plt.close(fig)
+    fig.savefig(OUT / f"fig_trajectory{sfx}.png"), plt.close(fig)
 
     # 2) ATE over time, before / after the lever-arm diagnostic
     fig, ax = plt.subplots(figsize=(3.5, 2.4))
@@ -102,7 +107,7 @@ def main() -> None:
     ax.plot(t, err2, label=f"marker offset removed (RMSE {rmse(err2):.3f} m)", marker="")
     ax.set_xlabel("time [s]"), ax.set_ylabel("position error [m]")
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), fontsize=8)
-    fig.savefig(OUT / "fig_ate_over_time.png"), plt.close(fig)
+    fig.savefig(OUT / f"fig_ate_over_time{sfx}.png"), plt.close(fig)
 
     # 3) top-down map with trajectory (map frame of GLIM)
     pts = read_ply_xyz(run_dir / "map.ply")
@@ -118,7 +123,12 @@ def main() -> None:
     ax.set_xlabel("x [m]"), ax.set_ylabel("y [m]"), ax.set_aspect("equal")
     fig.colorbar(sc, ax=ax, label="height above floor [m]", shrink=0.8)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), fontsize=8)
-    fig.savefig(OUT / "fig_map_topdown.png"), plt.close(fig)
+    fig.savefig(OUT / f"fig_map_topdown{sfx}.png")
+    if a.paper:
+        pdf = ROOT / "paper" / "figures" / f"glim_map_{a.sequence}.pdf"
+        fig.savefig(pdf, format="pdf", dpi=300)
+        print(f"paper figure: {pdf.relative_to(ROOT)}")
+    plt.close(fig)
     print(f"map: {len(pts)} points, extent x {np.ptp(pts[:, 0]):.1f} m, y {np.ptp(pts[:, 1]):.1f} m, "
           f"z {np.ptp(pts[:, 2]):.1f} m")
 

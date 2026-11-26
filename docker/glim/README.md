@@ -15,9 +15,12 @@ into `data/M3DGR/` (git-ignored):
 |---|---|---|
 | Varying-illu01 (1.84 GB, 154 s) | [bag](https://1drv.ms/u/c/2b4bfc0edf421186/EYYRQt8O_EsggCvwDwAAAAABxWIYcPmhqIz9obJGlAJe_g?e=n9QZa1) | [gt](https://1drv.ms/t/c/2b4bfc0edf421186/EYYRQt8O_EsggCsREAAAAAAB46eVZ0ErQZ9r1OS348S_5Q?e=qlUyK7) |
 | Dynamic01 (2.14 GB, 175 s) | [bag](https://1drv.ms/u/c/2b4bfc0edf421186/EYYRQt8O_EsggCv0DwAAAAAB-86r95z48cuIi_MTyIoq8A?e=IiMGzk) | [gt](https://1drv.ms/t/c/2b4bfc0edf421186/EYYRQt8O_EsggCsOEAAAAAABoct7u6wv4vWo3w3qZMOmtg?e=Lv6zoE) |
-| Dark03 (2.01 GB, 170 s) | [bag](https://1drv.ms/u/c/2b4bfc0edf421186/EYYRQt8O_EsggCvtDwAAAAABaYJ_eK1OpYXLC_kXjU67nQ?e=fdMMHJ) | [gt](https://1drv.ms/t/c/2b4bfc0edf421186/EYYRQt8O_EsggCsUEAAAAAABKHLQ0e1-Vp2saX0_ZDNYig?e=rrsULa) |
+| Sha-turn01 (1.68 GB, 138 s) | [bag](https://1drv.ms/u/c/2b4bfc0edf421186/EYYRQt8O_EsggCvmDwAAAAABXAH70zlPA_WM_RmYHzA3qQ?e=rPiaoG) | [gt](https://1drv.ms/t/c/2b4bfc0edf421186/EYYRQt8O_EsggCsnEAAAAAABGoIOUZq0Q0klHryLhxJUag?e=2nWv4X) |
+| Dark03 (2.01 GB, 170 s, reserve only) | [bag](https://1drv.ms/u/c/2b4bfc0edf421186/EYYRQt8O_EsggCvtDwAAAAABaYJ_eK1OpYXLC_kXjU67nQ?e=fdMMHJ) | [gt](https://1drv.ms/t/c/2b4bfc0edf421186/EYYRQt8O_EsggCsUEAAAAAABKHLQ0e1-Vp2saX0_ZDNYig?e=rrsULa) |
 
-Links copied from the M3DGR README on 2026-10-08. If they break, take the current ones from there.
+The evaluated sequences are Dynamic01, Sha-turn01 and Varying-illu01 (`config/sequences.yaml`); Dark03 is a reserve.
+Store each bag as `data/M3DGR/<seq>.bag` and its GT as `data/M3DGR/<seq>/gt_tum.txt`.
+Links copied from the M3DGR README on 2026-10-08 (Sha-turn01: 2026-11-26). If they break, take the current ones from there.
 
 ## 2. Convert the bag (once per sequence, pure Python, no ROS needed)
 

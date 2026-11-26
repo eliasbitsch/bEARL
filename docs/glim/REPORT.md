@@ -113,9 +113,9 @@ Me (GLIM):
 
 ## Draft: theory paragraph (for `paper/main.tex`)
 
-> GLIM [koide2024glim] is a range-inertial SLAM framework whose scan-matching factors are evaluated on the GPU. Its odometry combines fixed-lag smoothing over IMU preintegration with keyframe-based scan matching, which lets it bridge short phases of geometrically degenerate range data. Consecutive keyframes are merged into submaps. A global module then optimises the submap poses by directly minimising the registration error between all overlapping submaps, instead of relying on explicit place recognition. Because it is a metric LiDAR-inertial system, the trajectory is evaluated with SE(3) alignment.
+> GLIM [koide2024glim] is a tightly coupled range-inertial localization and mapping framework whose scan-matching (VGICP) cost factors are evaluated on the GPU. Its odometry combines fixed-lag smoothing with IMU preintegration factors and matches each new frame against a set of spatially distributed keyframes as well as the most recent frames, which makes it robust to a few seconds of completely degenerate range data. Frames leaving the odometry window are passed to a local mapping module that merges them into submaps, refining each submap through batch factor-graph optimisation over all frame pairs. A global mapping module then optimises the submap poses by directly minimising the registration errors between every pair of sufficiently overlapping submaps, so that loops are closed implicitly without explicit place recognition. Because it is a metric LiDAR-inertial system, the trajectory is evaluated with SE(3) alignment.
 
-Check this against the paper before submitting; it is a summary, not a quotation.
+Checked against arXiv 2407.10344 on 2026-11-26 (Sec. III-C VGICP; IV-B odometry, keyframes and last frames, iSAM2; V-A local mapping, batch LM optimisation over all frame pairs; V-B global mapping, overlap > ~5 %, implicit loop closure). Sections VI-D to VIII were not checked. The last sentence is our evaluation choice, not a claim from the paper. It is a summary, not a quotation.
 
 ## Reproduce
 
