@@ -133,6 +133,28 @@ print("LOW_DISK: chunk files trimmed and deleted after use")
 EOF
 fi
 
+# Output only, the algorithm is unchanged: log VGGT's mean depth confidence per frame and chunk to frame_confidence.csv
+# (the model's own quality signal, which VGGT-Long does not use for chunk alignment). SAVE_CONF=False disables it.
+if [ "${SAVE_CONF:-True}" = "True" ]; then
+python - <<'EOF'
+p = "vggt_long.py"
+src = open(p).read()
+a1 = "            self.all_camera_poses.append((chunk_range, extrinsics))\n"
+a2 = "        self.save_camera_poses()\n"
+if src.count(a1) != 1 or src.count(a2) != 1:
+    raise SystemExit("SAVE_CONF: patch location not found in vggt_long.py")
+src = src.replace(a1, a1 + "            import numpy as _np  # SAVE_CONF\n"
+                  "            self.__dict__.setdefault('frame_conf', []).append((chunk_range, _np.asarray(predictions['depth_conf']).reshape(len(extrinsics), -1).mean(1)))\n")
+src = src.replace(a2, "        with open(os.path.join(self.output_dir, 'frame_confidence.csv'), 'w') as _f:  # SAVE_CONF\n"
+                  "            _f.write('chunk,frame,image,depth_conf_mean\\n')\n"
+                  "            for _k, (_r, _c) in enumerate(getattr(self, 'frame_conf', [])):\n"
+                  "                for _i, _v in enumerate(_c):\n"
+                  "                    _f.write(f'{_k},{_r[0] + _i},{os.path.basename(str(self.img_list[_r[0] + _i]))},{float(_v):.4f}\\n')\n" + a2)
+open(p, "w").write(src)
+print("SAVE_CONF: per-frame depth confidence goes to frame_confidence.csv")
+EOF
+fi
+
 # VGGT-Long writes to ./exps/<image_dir>/<datetime>/ -> put that on the mounted output disk (or a mounted volume)
 mkdir -p /out/exps && rm -rf /out/exps/* exps && ln -sfn /out/exps exps
 
@@ -143,6 +165,7 @@ RUN_DIR=$(ls -d /out/exps/*/* | tail -1)
 cp "$RUN_DIR/camera_poses.txt" /out/camera_poses.txt
 [ -f "$RUN_DIR/pcd/combined_pcd.ply" ] && cp "$RUN_DIR/pcd/combined_pcd.ply" /out/combined_pcd.ply
 [ -f "$RUN_DIR/loop_closures.txt" ] && cp "$RUN_DIR/loop_closures.txt" /out/loop_closures.txt
+[ -f "$RUN_DIR/frame_confidence.csv" ] && cp "$RUN_DIR/frame_confidence.csv" /out/frame_confidence.csv
 echo "poses: $(wc -l < /out/camera_poses.txt)"
 
 if [ -n "${HOST_UID:-}" ]; then

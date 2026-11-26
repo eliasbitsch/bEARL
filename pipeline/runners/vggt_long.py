@@ -147,5 +147,7 @@ def run(sequence: dict, out_dir: Path, run_idx: int, cfg: dict, data_root: Path)
     n = poses_to_tum(work / "camera_poses.txt", image_dir, out_dir / "trajectory_tum.txt")
     if (work / "combined_pcd.ply").exists():
         shutil.move(work / "combined_pcd.ply", out_dir / "map.ply")
+    if (work / "frame_confidence.csv").exists():
+        shutil.move(work / "frame_confidence.csv", out_dir / "frame_confidence.csv")
     shutil.rmtree(work / "exps", ignore_errors=True)              # per-chunk point clouds, large
     print(f"VGGT-Long {sequence['name']} run {run_idx}: {n} poses")
