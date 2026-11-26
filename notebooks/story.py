@@ -203,7 +203,7 @@ def _(CORE, SEQS, maps, metrics, pd):
 @app.cell
 def _(CORE, SEQS, STYLE, gt, plt, traj):
     def fig_trajectories():
-        fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.9), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.6), sharex=True, sharey=True)
         for ax, s in zip(axes, SEQS):
             ax.plot(gt[s].x, gt[s].y, lw=1.2, label="ground truth", **STYLE["gt"])
             for slug, name in CORE.items():
@@ -218,7 +218,7 @@ def _(CORE, SEQS, STYLE, gt, plt, traj):
         axes[1].set_xlabel("x [m]")
         h, l = axes[0].get_legend_handles_labels()
         fig.legend(h, l, loc="upper center", ncol=3, fontsize=6, frameon=False)
-        fig.tight_layout(rect=(0, 0, 1, 0.9))
+        fig.tight_layout(rect=(0, 0, 1, 0.88), w_pad=0.3)
         return fig
 
     fig_trajectories()
@@ -227,17 +227,24 @@ def _(CORE, SEQS, STYLE, gt, plt, traj):
 
 @app.cell
 def _(CORE, plt, slices):
+    # one map per system is required; slots of systems without results yet stay as labelled placeholders
+    MAP_SLOTS = [*CORE.items(), ("glim", "GLIM"), ("orb_slam3", "ORB-SLAM3"), ("tbd", "5th system")]
+
     def fig_maps(seq="Dynamic01"):
         sl = slices[seq]
-        fig, axes = plt.subplots(1, 2, figsize=(7.16, 1.9), sharex=True, sharey=True)
-        for ax, (slug, name) in zip(axes, CORE.items()):
-            ax.scatter(*sl["reference"].T, s=0.01, c="0.72", rasterized=True, label="pseudo-GT (LiDAR + mocap)")
-            ax.scatter(*sl[slug].T, s=0.01, c="k", alpha=0.6, rasterized=True, label=name)
+        fig, axes = plt.subplots(1, len(MAP_SLOTS), figsize=(7.16, 1.15), sharex=True, sharey=True)
+        for ax, (slug, name) in zip(axes, MAP_SLOTS):
+            ax.scatter(*sl["reference"].T, s=0.005, c="0.75", rasterized=True)
+            if slug in sl:
+                ax.scatter(*sl[slug].T, s=0.005, c="k", alpha=0.6, rasterized=True)
+            else:
+                ax.text(0.5, 0.5, "pending", transform=ax.transAxes, ha="center", va="center", fontsize=7)
             ax.set_aspect("equal")
-            ax.set_title(f"{name} (black) vs. pseudo-GT (grey), {seq}, z = 0.9-1.3 m", fontsize=7)
-            ax.tick_params(labelsize=6)
+            ax.set_title(name, fontsize=7)
+            ax.tick_params(labelsize=5)
         axes[0].set_xlim(-6, 8.5)
         axes[0].set_ylim(-4.5, 3.5)
+        fig.tight_layout(w_pad=0.2)
         return fig
 
     fig_maps()
@@ -280,15 +287,14 @@ def _(CORE, DARK, STYLE, conf, light, links, np, plt, relocs, traj):
     def fig_timeline(seq="Varying-illu01", cursor=None):
         l = light[seq]
         c = conf[seq]
-        n = 4 if c is not None else 3
-        fig, axes = plt.subplots(n, 1, figsize=(7.16, 0.95 * n + 0.4), sharex=True)
-        for ax in axes:
+        n = 3 if c is not None else 2
+        fig, axes = plt.subplots(n, 1, figsize=(7.16, 0.72 * n + 0.35), sharex=True)
+        axes = [None, *axes]   # dark phases are shown as grey bands, no separate brightness panel
+        for ax in axes[1:]:
             ax.fill_between(l.t_rel, 0, 1, where=l.black_fraction > DARK, color="0.88",
                             transform=ax.get_xaxis_transform(), lw=0)
             if cursor is not None:
                 ax.axvline(cursor, color="k", lw=0.6)
-        axes[0].plot(l.t_rel, l.brightness, color="0.2", lw=0.6)
-        axes[0].set_ylabel("brightness", fontsize=7)
         v = traj[("vggt_long", seq)]
         axes[1].plot(v.t_rel, v.error_m, lw=0.8, label="VGGT-Long (every frame)", **STYLE["vggt_long"])
         m = traj[("mast3r_slam", seq)]   # keyframes only: markers, so gaps stay visible
@@ -312,8 +318,8 @@ def _(CORE, DARK, STYLE, conf, light, links, np, plt, relocs, traj):
         h = [a.get_legend_handles_labels() for a in (axes[1], axes[2], ax2)]
         fig.legend(sum((x[0] for x in h), []), sum((x[1] for x in h), []), loc="upper center", ncol=4,
                    fontsize=6, frameon=False, bbox_to_anchor=(0.5, 1.0))
-        axes[-1].set_xlabel("time [s]")
-        fig.tight_layout(rect=(0, 0, 1, 0.95))
+        axes[-1].set_xlabel("time [s]", fontsize=7)
+        fig.tight_layout(rect=(0, 0, 1, 0.93), h_pad=0.3)
         return fig
 
     return (fig_timeline,)
