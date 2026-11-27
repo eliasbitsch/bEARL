@@ -1,0 +1,29 @@
+# Diagnostic variant of map_long: Sim(3) instead of SE(3) chunk alignment, so per-chunk scale errors of
+# MapAnything can be absorbed. Separates "wrong metric scale" from "wrong geometry within a chunk".
+slug: map_long_sim3
+system: Map-Long Sim(3) (diagnostic)
+member: Elias Bitsch
+
+source:
+  repository: https://github.com/DengKaiCQ/VGGT-Long
+  commit: c160869d1d99c96bb227f414afb3bc68c29c9a76
+  model_repository: https://github.com/facebookresearch/map-anything (commit 3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9)
+  container: docker/vggt_long/vggt_long.def
+  weights: huggingface.co/facebook/map-anything (CC BY-NC 4.0, non-commercial use); SALAD + DINOv2 for loop detection
+
+sensors: [rgb]
+
+# chunk scale is free, so the global scale is too -> evaluated like a monocular system
+alignment: sim3
+
+parameter_file: configs/base_config.yaml of the upstream repo (weights paths set by docker/vggt_long/run.sh)
+parameters:
+  model: Mapanything
+  using_sim3: true
+  frame_step: 3
+deviations_from_defaults:
+  - "using_sim3: True although upstream prescribes SE(3) for MapAnything; diagnostic only, not a competing system."
+  - "Input frame rate 10 Hz (frame_step 3), as for VGGT-Long."
+
+execution:
+  mode: offline

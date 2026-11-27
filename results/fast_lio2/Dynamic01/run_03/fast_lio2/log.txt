@@ -1,0 +1,65 @@
+M3DGR commit: 5fc892c84defef42feb2418f7d38897bef40f490
+Multi thread started 
+p_pre->lidar_type 1
+~~~~/opt/M3DGR/baseline_systems/Fast_LIO2_M3DGR/src/fast_lio2/ file opened
+[33m[WARN] [1794066908.039157531]: No point, skip this scan!
+[0m
+[33m[WARN] [1794067086.231830191]: catch sig 2[0m
+[0m[INFO] [1794066908.037948474]: IMU Initial Done[0m
+current scan saved to /PCD/scans.pcd
+Rebuild thread terminated normally
+... logging to /root/.ros/log/976f198a-dac3-11f1-9376-0a86587398b6/roslaunch-cff4afbe60ca-94.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/opt/M3DGR/baseline_systems/Fast_LIO2_M3DGR/src/fast_lio2/launch/mapping_mid360.launch
+[1mstarted roslaunch server http://cff4afbe60ca:35589/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /common/imu_topic: /livox/mid360/imu
+ * /common/lid_topic: /livox/mid360/lidar
+ * /common/time_offset_lidar_to_imu: 0.0
+ * /common/time_sync_en: False
+ * /cube_side_length: 1000.0
+ * /feature_extract_enable: False
+ * /filter_size_map: 0.5
+ * /filter_size_surf: 0.5
+ * /mapping/acc_cov: 0.1
+ * /mapping/b_acc_cov: 0.0001
+ * /mapping/b_gyr_cov: 0.0001
+ * /mapping/det_range: 100.0
+ * /mapping/extrinsic_R: [1, 0, 0, 0, 1, 0...
+ * /mapping/extrinsic_T: [-0.011, -0.02329...
+ * /mapping/extrinsic_est_en: False
+ * /mapping/fov_degree: 360
+ * /mapping/gyr_cov: 0.1
+ * /max_iteration: 3
+ * /pcd_save/interval: -1
+ * /pcd_save/pcd_save_en: True
+ * /point_filter_num: 3
+ * /preprocess/blind: 0.5
+ * /preprocess/lidar_type: 1
+ * /preprocess/scan_line: 4
+ * /publish/dense_publish_en: True
+ * /publish/path_en: False
+ * /publish/scan_bodyframe_pub_en: True
+ * /publish/scan_publish_en: True
+ * /rosdistro: noetic
+ * /rosversion: 1.17.4
+ * /runtime_pos_log_enable: False
+
+NODES
+  /
+    laserMapping (fast_lio/fastlio_mapping)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/opt/M3DGR/baseline_systems/Fast_LIO2_M3DGR/src/fast_lio2/launch/mapping_mid360.launch http://localhost:11311
+[1mprocess[laserMapping-1]: started with pid [136][0m
+[laserMapping-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+poses: 1748

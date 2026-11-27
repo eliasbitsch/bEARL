@@ -1,0 +1,1 @@
+apptainer run --nv --bind <repo>/data/M3DGR/Varying-illu01/rgb_step3:/data:ro,<weights>/vggt_long:/weights:ro,<repo>/results/vggt_long/Varying-illu01/run_04/vggt_long:/out --env XFORMERS_DISABLED=1 <repo>/containers/vggt_long.sif

@@ -1,0 +1,32 @@
+# Laptop variant of vggt_long: same system, chunked down to fit a 16 GB RTX 3080 Ti.
+# Not a competing system; measures what the smaller chunks cost in accuracy against the cluster runs.
+slug: vggt_long_16gb
+system: VGGT-Long 16 GB (chunk 30)
+member: Elias Bitsch
+
+source:
+  repository: https://github.com/DengKaiCQ/VGGT-Long
+  commit: c160869d1d99c96bb227f414afb3bc68c29c9a76
+  container: docker/vggt_long/Dockerfile
+  weights: VGGT-1B (huggingface.co/facebook/VGGT-1B, model.pt), SALAD + DINOv2 for loop detection
+           (upstream scripts/download_weights.sh)
+
+sensors: [rgb]
+alignment: sim3
+
+parameter_file: configs/base_config.yaml of the upstream repo (weights paths set by docker/vggt_long/run.sh)
+parameters:
+  frame_step: 3
+  chunk_size: 30
+  overlap: 15
+  loop_chunk_size: 15
+  low_disk: true              # implementation only: temp chunk files trimmed/deleted early, results unchanged
+deviations_from_defaults:
+  - "chunk_size 30 / overlap 15 instead of 60 / 30, to fit 16 GB of GPU memory (upstream was developed on a
+     24 GB RTX 4090; nvidia-smi showed 28-45 GB on the cluster, depending on how much the allocator caches). Overlap kept at half the chunk, as in the default."
+  - "loop_chunk_size 15 instead of 20: a loop chunk holds 2 x loop_chunk_size images, so 40 images ran out of
+     memory after all 115 regular chunks had finished; 30 matches the regular chunk."
+  - "Input frame rate 10 Hz (frame_step 3), as for VGGT-Long."
+
+execution:
+  mode: offline

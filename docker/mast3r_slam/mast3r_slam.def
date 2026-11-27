@@ -1,0 +1,46 @@
+# MASt3R-SLAM as an Apptainer image for the ADA cluster (Blackwell GPUs, SM 12.0).
+# Same upstream commit as the Dockerfile; PyTorch 2.7.1 + CUDA 12.8 because SM 12.0 needs CUDA >= 12.8.
+#
+# Build (no root needed):
+#   apptainer build --fakeroot --ignore-fakeroot-command mast3r_slam.sif docker/mast3r_slam/mast3r_slam.def
+# Run: apptainer run --nv --bind <images>:/data:ro,<checkpoints>:/ckpt:ro,<out>:/out mast3r_slam.sif
+Bootstrap: docker
+From: pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
+
+%files
+    run.sh /opt/run.sh
+
+%environment
+    export PYTHONUNBUFFERED=1
+
+%post
+    set -e
+    export TORCH_CUDA_ARCH_LIST="8.6;12.0" MAX_JOBS=8
+    # root-mapped build namespace: apt must not drop privileges to its _apt user
+    apt-get -o APT::Sandbox::User=root update && apt-get -o APT::Sandbox::User=root install -y --no-install-recommends \
+        git libgl1 libegl1 libglib2.0-0 libglfw3 libusb-1.0-0 && rm -rf /var/lib/apt/lists/*
+    COMMIT=e6f4e3d474fad0e11f561482012be864ba8c3f17
+    cd /opt
+    git clone https://github.com/rmurai0610/MASt3R-SLAM.git && cd MASt3R-SLAM && git checkout $COMMIT
+    # gitlab.com (eigen submodule) sometimes refuses clones under load
+    for i in 1 2 3 4 5; do git submodule update --init --recursive && break; sleep 120; done
+    git submodule status --recursive | grep -q '^-' && exit 1
+    # setup.py only builds the CUDA backend when a GPU is visible; there is none during the build
+    sed -i 's/^has_cuda = torch.cuda.is_available()/has_cuda = True/' setup.py
+    # setup.py hard-codes -gencode flags up to sm_86 and ignores TORCH_CUDA_ARCH_LIST; add Blackwell (SM 12.0)
+    sed -i 's/"-gencode=arch=compute_86,code=sm_86",/"-gencode=arch=compute_86,code=sm_86", "-gencode=arch=compute_120,code=sm_120",/' setup.py
+    grep -q compute_120 setup.py
+    # Tensor.type() no longer converts to ScalarType in PyTorch >= 2.6
+    sed -i 's/tokens\.type()/tokens.scalar_type()/' thirdparty/mast3r/dust3r/croco/models/curope/kernels.cu
+    sed -i 's/D11\.type()/D11.scalar_type()/' mast3r_slam/backend/src/matching_kernels.cu
+    # torch::linalg:: is gone from the C++ API; plain 2-norm of the flattened step is the same thing
+    sed -i 's/torch::linalg::linalg_norm(dx, std::optional<c10::Scalar>(), {}, false, {})/dx.norm()/' mast3r_slam/backend/src/gn_kernels.cu
+    pip install --no-cache-dir --no-build-isolation -e thirdparty/mast3r
+    pip install --no-cache-dir -e thirdparty/in3d
+    pip install --no-cache-dir --no-build-isolation -e .
+    chmod +x /opt/run.sh
+    python -c "import torch, mast3r_slam_backends, lietorch; print('backends ok, torch', torch.__version__)"
+    python -c "import mast3r_slam.dataloader, mast3r_slam.evaluate, mast3r_slam.visualization; print('MASt3R-SLAM imports ok')"
+
+%runscript
+    exec /opt/run.sh "$@"

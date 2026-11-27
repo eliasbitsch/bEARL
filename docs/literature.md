@@ -23,7 +23,9 @@ Each member adds the paper(s) for their own chosen system here and to `paper/ref
 
 | Reference | System |
 |---|---|
-| ⭐ Murai, Dexheimer, Davison, *MASt3R-SLAM: Real-Time Dense SLAM with 3D Reconstruction Priors*, CVPR 2025 (`murai2025mast3rslam`) | Monocular, 3D foundation-model prior, dense (Elias) |
+| ⭐ Deng, Ti, Xu, Yang, Xie, *VGGT-Long: Chunk it, Loop it, Align it*, ICRA 2026 (`deng2026vggtlong`) | Monocular, VGGT on overlapping chunks + loop closure (Elias, main) |
+| Wang et al., *VGGT: Visual Geometry Grounded Transformer*, CVPR 2025 (`wang2025vggt`) | The foundation model behind VGGT-Long |
+| Murai, Dexheimer, Davison, *MASt3R-SLAM: Real-Time Dense SLAM with 3D Reconstruction Priors*, CVPR 2025 (`murai2025mast3rslam`) | Monocular, 3D foundation-model prior, dense (Elias, deep dive) |
 | Leroy, Cabon, Revaud, *Grounding Image Matching in 3D with MASt3R*, ECCV 2024 (`leroy2024mast3r`) | The foundation model behind MASt3R-SLAM |
 | Wang et al., *DUSt3R: Geometric 3D Vision Made Easy*, CVPR 2024 (`wang2024dust3r`) | Predecessor of MASt3R |
 | *(system chosen by Philip Stix)* | |
@@ -82,6 +84,24 @@ Each member adds the paper(s) for their own chosen system here and to `paper/ref
 |---|---|
 | Wang et al., *TartanAir*, IROS 2020, arXiv:2003.14338 | Argument about the sim-to-real gap |
 | TartanGround, arXiv:2505.10696, 2025 **[verify]** | Simulated ground-robot trajectories with GT |
+
+## H. Silent failure, introspection and model confidence (research question, added 2026-11-26)
+
+Gap these papers leave: nobody evaluates **foundation-model SLAM** (VGGT-Long, MASt3R-SLAM) under a **real** light on/off change with motion-capture ground truth, and asks whether the failure is visible.
+
+| Paper | What it shows | How we use it |
+|---|---|---|
+| Thomas, Agnihotri, Keuper 2026, *Failure or Drift?* (NeuSLAM @ ECCV) `thomas2026failure` | Learned trackers (DPVO, DROID-SLAM) replace ORB-SLAM2's explicit tracking loss with sustained, sometimes severe drift ("silent degradation"). A simple synthetic illumination proxy reverses the real-world ranking, rain/fog proxies do not. They separate valid-run rate from conditional APE and reject "poses / frames" as coverage because it mixes keyframe density with tracking loss. | Closest related work; motivates a **real** illumination change (Varying-illu01) instead of synthetic darkening; same failure-vs-drift lens, extended to foundation-model SLAM. Caveat for MASt3R-SLAM's keyframe-only trajectory. |
+| Srinivasan, Nordström 2026, *Does VGGT Know What It Does Not Know?* `srinivasan2026vggtknow` | VGGT reports no pose uncertainty; its point-map confidence predicts pose failure with ROC-AUC 79.7 %, a probe on frozen features 93.5 %. | RQ3: the model's own confidence carries failure information that the pipeline does not use. |
+| Paul, Kaushik, Yuille 2026, *Can These Views Be One Scene?* `paul2026onescene` | VGGT, MASt3R, DUSt3R, Fast3R hallucinate dense geometry and cross-view support for unrelated scenes, repeated images and random noise. | Explains why near-black frames still yield confident-looking poses and point maps. |
+| Hillemann et al. 2026, *Uncertainty Quality of VGGT* (ISPRS Annals) `hillemann2026vggtuncertainty` | VGGT's confidence is useful for filtering; an effective threshold exists on DTU. | Supports an **absolute** confidence threshold as a failure check (VGGT-Long only uses a threshold relative to the chunk pair). |
+| Kumar, Deepak, Kumar 2026, UAV multi-paradigm study `kumar2026uavslam` | Under synthetic low light, haze and blur, ORB-SLAM3 fails (62 % tracking success), MASt3R and DUSt3R stay robust by ATE and success rate. | Counterpoint: "robust" by success rate can hide silent failure; they do not check detectability. |
+| Kendall, Gal 2017 `kendall2017uncertainties` | Aleatoric vs. epistemic uncertainty. VGGT's depth confidence is trained with the aleatoric-uncertainty loss (VGGT Sec. 3, following DUSt3R). | Theory: aleatoric confidence models noise in data like the training data; it is not guaranteed to flag out-of-distribution input such as darkness (epistemic). |
+| Daftry et al. 2016 (IROS) `daftry2016introspective`; Rabiee, Biswas 2020, IV-SLAM (CoRL) `rabiee2020ivslam`; Rahman, Corke, Dayoub 2021 survey (IEEE Access) `rahman2021runtime` | Introspection / run-time monitoring: a perception system should predict its own failures. | Framing of RQ3 in introduction and discussion. |
+| Cadena et al. 2016 `cadena2016past` (already cited) | Failure detection and recovery as an open problem of the "robust-perception age". | One-sentence motivation. |
+| Xu et al. 2024 `xu2024perturbation`; Prokhorov et al. 2019 `prokhorov2019robustness` (already cited) | Robustness benchmarks with synthetic perturbations. | Related work: synthetic vs. real stress tests. |
+
+Code fact (VGGT-Long, `vggt_long.py`, chunk alignment): points in the overlap are weighted by confidence and dropped below `0.1 x min(median(conf1), median(conf2))`. The threshold is **relative to the chunk pair**, so a pair of dark chunks passes. VGGT-Long logs the estimated scale of every chunk link ("Estimated Scale"), so scale jumps can be plotted from existing logs.
 
 ## Key takeaways for the methodology
 

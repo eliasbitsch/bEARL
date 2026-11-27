@@ -1,3 +1,9 @@
+@IEEEtranBSTCTL{IEEEexample:BSTcontrol,
+  CTLuse_forced_etal       = "yes",
+  CTLmax_names_forced_etal = "3",
+  CTLnames_show_etal       = "1"
+}
+
 % References for the SLAM comparison paper.
 % Entries marked "TODO verify" must be checked before submission.
 % DOIs/pages of the dataset papers (M2DGR, OpenLORIS) were not checked online yet -- verify via doi.org.
@@ -113,7 +119,40 @@
   year      = {2021}
 }
 
+% ---------- Elias: main system and backup ----------
+@inproceedings{deng2026vggtlong,
+  author    = {Deng, Kai and Ti, Zexin and Xu, Jiawei and Yang, Jian and Xie, Jin},
+  title     = {{VGGT-Long}: Chunk it, Loop it, Align it -- Pushing {VGGT}'s Limits on Kilometer-scale Long {RGB} Sequences},
+  booktitle = {Proc. IEEE Int. Conf. on Robotics and Automation (ICRA)},
+  year      = {2026}
+}
+
+@inproceedings{wang2025vggt,
+  author    = {Wang, Jianyuan and Chen, Minghao and Karaev, Nikita and Vedaldi, Andrea and Rupprecht, Christian and Novotny, David},
+  title     = {{VGGT}: Visual Geometry Grounded Transformer},
+  booktitle = {Proc. IEEE/CVF Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2025}
+}
+
+@article{xu2022fastlio2,
+  author    = {Xu, Wei and Cai, Yixi and He, Dongjiao and Lin, Jiarong and Zhang, Fu},
+  title     = {{FAST-LIO2}: Fast Direct {LiDAR}-Inertial Odometry},
+  journal   = {IEEE Transactions on Robotics},
+  volume    = {38},
+  number    = {4},
+  pages     = {2053--2073},
+  year      = {2022}
+}
+
 % ---------- RGB-only deep dive ----------
+@inproceedings{keetha2025mapanything,
+  author  = {Keetha, Nikhil and M{\"u}ller, Norman and Sch{\"o}nberger, Johannes and Porzi, Lorenzo and Zhang, Yuchen and Fischer, Tobias and Knapitsch, Arno and Zauss, Duncan and Weber, Ethan and Antunes, Nelson and Luiten, Jonathon and Lopez-Antequera, Manuel and Rota Bul{\`o}, Samuel and Richardt, Christian and Ramanan, Deva and Scherer, Sebastian and Kontschieder, Peter},
+  title   = {{MapAnything}: Universal Feed-Forward Metric {3D} Reconstruction},
+  booktitle = {Proc. Int. Conf. on 3D Vision (3DV)},
+  year    = {2026},
+  note    = {arXiv:2509.13414}
+}
+
 @inproceedings{murai2025mast3rslam,
   author    = {Murai, Riku and Dexheimer, Eric and Davison, Andrew J.},
   title     = {{MASt3R-SLAM}: Real-Time Dense {SLAM} with {3D} Reconstruction Priors},
@@ -172,13 +211,12 @@
 
 % ---------- Datasets ----------
 @inproceedings{zhang2025m3dgr,
-  author    = {Zhang, Deteng and others},
+  author    = {Zhang, Deteng and Zhang, Junjie and Sun, Yan and Li, Tao and Yin, Hao and Xie, Hongzhao and Yin, Jie},
   title     = {Towards Robust Sensor-Fusion Ground {SLAM}: A Comprehensive Benchmark and A Resilient Framework},
   booktitle = {Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)},
   year      = {2025},
   eprint    = {2507.08364},
-  archivePrefix = {arXiv},
-  note      = {TODO verify author list}
+  archivePrefix = {arXiv}
 }
 
 @article{yin2022m2dgr,
@@ -204,7 +242,7 @@
 
 @inproceedings{shi2020openloris,
   author    = {Shi, Xuesong and others},
-  title     = {Are We Ready for Service Robots? The {OpenLORIS-Scene} Datasets for Lifelong {SLAM}},
+  title     = {Are We Ready for Service Robots? {T}he {OpenLORIS-Scene} Datasets for Lifelong {SLAM}},
   booktitle = {Proc. IEEE Int. Conf. on Robotics and Automation (ICRA)},
   pages     = {3139--3145},
   year      = {2020},
@@ -350,4 +388,117 @@
   pages   = {104750},
   year    = {2024},
   doi     = {10.1016/j.robot.2024.104750}
+}
+
+@inproceedings{levinson2010unsupervised,
+  author    = {Levinson, Jesse and Thrun, Sebastian},
+  title     = {Unsupervised Calibration for Multi-beam Lasers},
+  booktitle = {Proc. Int. Symp. on Experimental Robotics (ISER)},
+  year      = {2010}
+}
+
+@inproceedings{razlaw2015evaluation,
+  author    = {Razlaw, Jan and Droeschel, David and Holz, Dirk and Behnke, Sven},
+  title     = {Evaluation of Registration Methods for Sparse {3D} Laser Scans},
+  booktitle = {European Conference on Mobile Robots (ECMR)},
+  pages     = {1--7},
+  year      = {2015},
+  doi       = {10.1109/ECMR.2015.7324196}
+}
+
+@inproceedings{droeschel2014local,
+  author    = {Droeschel, David and St{\"u}ckler, J{\"o}rg and Behnke, Sven},
+  title     = {Local Multi-Resolution Representation for {6D} Motion Estimation and Mapping with a Continuously Rotating {3D} Laser Scanner},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
+  pages     = {5221--5226},
+  year      = {2014}
+}
+
+@inproceedings{mescheder2019occupancy,
+  author    = {Mescheder, Lars and Oechsle, Michael and Niemeyer, Michael and Nowozin, Sebastian and Geiger, Andreas},
+  title     = {Occupancy Networks: Learning {3D} Reconstruction in Function Space},
+  booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {4460--4470},
+  year      = {2019}
+}
+
+@article{hu2024mapeval,
+  author  = {Hu, Xiangcheng and others},
+  title   = {{MapEval}: Towards Unified, Robust and Efficient {SLAM} Map Evaluation Framework},
+  journal = {arXiv preprint arXiv:2411.17928},
+  year    = {2024}
+}
+
+% --- Failure detection, introspection and confidence of learned 3D models (added 2026-11-26) ---
+@inproceedings{thomas2026failure,
+  author    = {Thomas, Abhay Skaria and Agnihotri, Shashank and Keuper, Margret},
+  title     = {Failure or Drift? Evaluating Monocular {SLAM} under Synthetic and Real-World Corruptions},
+  booktitle = {3rd NeuSLAM Workshop at the European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}
+@misc{srinivasan2026vggtknow,
+  author        = {Srinivasan, Adityan Thirumani and Nordstr{\"o}m, David},
+  title         = {Does {VGGT} Know What It Does Not Know?},
+  year          = {2026},
+  eprint        = {2610.35806},
+  archivePrefix = {arXiv},
+  note          = {arXiv:2610.35806}
+}
+@misc{paul2026onescene,
+  author        = {Paul, Soumava and Kaushik, Prakhar and Yuille, Alan},
+  title         = {Can These Views Be One Scene? {E}valuating Multiview {3D} Consistency when {3D} Foundation Models Hallucinate},
+  year          = {2026},
+  eprint        = {2605.18754},
+  archivePrefix = {arXiv},
+  note          = {arXiv:2605.18754}
+}
+@article{hillemann2026vggtuncertainty,
+  author  = {Hillemann, Markus and Langend{\"o}rfer, Robert and Landgraf, Steven and Ulrich, Markus},
+  title   = {Uncertainty Quality of {VGGT}: An Analysis on the {DTU} Benchmark Dataset},
+  journal = {ISPRS Ann. Photogramm. Remote Sens. Spatial Inf. Sci.},
+  year    = {2026}
+}
+@misc{kumar2026uavslam,
+  author        = {Kumar, Prasoon and Deepak, Akshay and Kumar, Sandeep},
+  title         = {Robust Visual {SLAM} for {UAV} Navigation in {GPS}-Denied and Degraded Environments: A Multi-Paradigm Evaluation and Deployment Study},
+  year          = {2026},
+  eprint        = {2605.03678},
+  archivePrefix = {arXiv},
+  note          = {arXiv:2605.03678}
+}
+@inproceedings{rabiee2020ivslam,
+  author    = {Rabiee, Sadegh and Biswas, Joydeep},
+  title     = {{IV-SLAM}: Introspective Vision for Simultaneous Localization and Mapping},
+  booktitle = {Conference on Robot Learning (CoRL)},
+  year      = {2020}
+}
+@inproceedings{daftry2016introspective,
+  author    = {Daftry, Shreyansh and Zeng, Sam and Bagnell, J. Andrew and Hebert, Martial},
+  title     = {Introspective Perception: Learning to Predict Failures in Vision Systems},
+  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages     = {1743--1750},
+  year      = {2016},
+  doi       = {10.1109/IROS.2016.7759279}
+}
+@article{rahman2021runtime,
+  author  = {Rahman, Quazi Marufur and Corke, Peter and Dayoub, Feras},
+  title   = {Run-Time Monitoring of Machine Learning for Robotic Perception: A Survey of Emerging Trends},
+  journal = {IEEE Access},
+  volume  = {9},
+  pages   = {20067--20075},
+  year    = {2021},
+  doi     = {10.1109/ACCESS.2021.3055015}
+}
+@inproceedings{kendall2017uncertainties,
+  author    = {Kendall, Alex and Gal, Yarin},
+  title     = {What Uncertainties Do We Need in {B}ayesian Deep Learning for Computer Vision?},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2017}
+}
+@misc{xu2024perturbation,
+  author        = {Xu, Xiaohao and Zhang, Tianyi and Wang, Sibo and Li, Xiang},
+  title         = {Customizable Perturbation Synthesis for Robust {SLAM} Benchmarking},
+  year          = {2024},
+  eprint        = {2402.08125},
+  archivePrefix = {arXiv}
 }

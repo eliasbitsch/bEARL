@@ -1,0 +1,33 @@
+# Configuration of one SLAM system. Copied by tools/register_system.py.
+slug: vggt_long
+system: VGGT-Long
+member: Elias Bitsch
+
+# Where the system comes from - pin an exact version for reproducibility.
+source:
+  repository: https://github.com/DengKaiCQ/VGGT-Long
+  commit: c160869d1d99c96bb227f414afb3bc68c29c9a76
+  container: docker/vggt_long/Dockerfile
+  weights: VGGT-1B (huggingface.co/facebook/VGGT-1B, model.pt), SALAD + DINOv2 for loop detection
+           (upstream scripts/download_weights.sh)
+
+# Inputs taken from the shared sequences (subset of: lidar3d, imu, wheel_odom, rgb, depth)
+sensors: [rgb]
+
+# Monocular -> scale is unobservable -> Sim(3) alignment (Zhang & Scaramuzza 2018)
+alignment: sim3
+
+# Parameters: use the authors' defaults. Only calibration / topic names may be adapted.
+# Document EVERY deviation from the defaults here.
+parameter_file: configs/base_config.yaml of the upstream repo (weights paths set by docker/vggt_long/run.sh)
+parameters:
+  frame_step: 3               # every 3rd image = 10 Hz (see deviations)
+  # chunk_size / overlap / loop_chunk_size / loop_enable: not set = upstream defaults (60 / 30 / 20 / True)
+deviations_from_defaults:
+  - "Input frame rate 10 Hz instead of the recorded 30 Hz (frame_step 3). Upstream README, 'Possible problems' d:
+     very dense input with small motion between frames increases drift, extract frames at a lower rate. The
+     authors' own benchmarks (KITTI) are 10 Hz. Evaluation matches poses by timestamp, so ATE stays comparable."
+
+# How the system is executed (file-based offline run, or ROS bag replay)
+execution:
+  mode: offline               # reads the extracted RGB image folder

@@ -1,0 +1,34 @@
+{
+  "system": "VGGT-Long",
+  "slug": "vggt_long",
+  "member": "Elias Bitsch",
+  "sequence": "Varying-illu01",
+  "run": 4,
+  "started": "2026-10-25T22:35:25",
+  "system_source": {
+    "repository": "https://github.com/DengKaiCQ/VGGT-Long",
+    "commit": "c160869d1d99c96bb227f414afb3bc68c29c9a76",
+    "container": "docker/vggt_long/Dockerfile",
+    "weights": "VGGT-1B (huggingface.co/facebook/VGGT-1B, model.pt), SALAD + DINOv2 for loop detection (upstream scripts/download_weights.sh)"
+  },
+  "alignment": "sim3",
+  "deviations_from_defaults": [
+    "Input frame rate 10 Hz instead of the recorded 30 Hz (frame_step 3). Upstream README, 'Possible problems' d: very dense input with small motion between frames increases drift, extract frames at a lower rate. The authors' own benchmarks (KITTI) are 10 Hz. Evaluation matches poses by timestamp, so ATE stays comparable."
+  ],
+  "pipeline_commit": null,
+  "hardware": {
+    "platform": "Linux-5.14.0-611.49.1.el9_7.x86_64-x86_64-with-glibc2.34",
+    "cpu": "x86_64",
+    "cpu_cores_logical": 64,
+    "ram_gib": 377.6,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 1207.6176545610651,
+  "resources": {
+    "cpu_mean_percent": 8.32099117322545,
+    "ram_peak_mib": 9277.16015625,
+    "gpu_mem_peak_mib": 31522.0
+  }
+}

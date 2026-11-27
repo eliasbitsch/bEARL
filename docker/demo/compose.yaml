@@ -1,0 +1,21 @@
+# Presentation replay: Lichtblick (open-source Foxglove Studio fork) with the bEARL layout preloaded, plus a
+# file server for the MCAP replays in results/. Start with `python tools/demo.py`, which also builds the replay.
+x-image: &image ghcr.io/lichtblick-suite/lichtblick:1.30.0
+
+services:
+  lichtblick:
+    image: *image
+    network_mode: host
+    command: ["caddy", "file-server", "--listen", ":8081"]
+    volumes:
+      - ../../tools/lichtblick_layout.json:/lichtblick/default-layout.json:ro
+    restart: "no"
+
+  files:
+    image: *image                  # same image, it ships Caddy: Range requests + CORS, which Lichtblick needs
+    network_mode: host
+    entrypoint: ["caddy", "run", "--config", "/etc/caddy/Caddyfile.demo", "--adapter", "caddyfile"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile.demo:ro
+      - ../../results:/srv/results:ro
+    restart: "no"

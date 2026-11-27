@@ -1,0 +1,32 @@
+# Map-Long: the VGGT-Long pipeline (chunking, chunk alignment, loop closure) with MapAnything as the
+# 3D foundation model instead of VGGT. Part of the RGB deep dive (docs/PLAN.md, Section 3.2).
+slug: map_long_calib
+system: Map-Long calibrated (VGGT-Long + MapAnything + intrinsics)
+member: Elias Bitsch
+
+source:
+  repository: https://github.com/DengKaiCQ/VGGT-Long
+  commit: c160869d1d99c96bb227f414afb3bc68c29c9a76
+  model_repository: https://github.com/facebookresearch/map-anything (commit 3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9)
+  container: docker/vggt_long/vggt_long.def
+  weights: huggingface.co/facebook/map-anything (CC BY-NC 4.0, non-commercial use); SALAD + DINOv2 for loop detection
+
+sensors: [rgb]
+
+# MapAnything predicts metric scale -> SE(3) alignment like the metric systems (Zhang & Scaramuzza 2018).
+# pipeline.evaluate also reports Sim(3) for every system, so the scale error stays visible.
+alignment: se3
+
+parameter_file: configs/base_config.yaml of the upstream repo (weights paths set by docker/vggt_long/run.sh)
+parameters:
+  model: Mapanything
+  using_sim3: false           # upstream config: "mapanything need se3"
+  frame_step: 3               # same input as VGGT-Long (10 Hz), see vggt_long.yaml
+  calib: true                 # D435i intrinsics from config/sequences.yaml (rgb_intrinsics) as MapAnything input
+deviations_from_defaults:
+  - "Input frame rate 10 Hz instead of 30 Hz (frame_step 3), identical to VGGT-Long; see config/systems/vggt_long.yaml."
+  - "calib: True: the D435i intrinsics (calibration.md) are given to MapAnything instead of its own estimate
+     (upstream default False). Same as map_long otherwise, so the two rows show the effect of known intrinsics."
+
+execution:
+  mode: offline

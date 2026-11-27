@@ -1,0 +1,2361 @@
+/data
+{'use_calib': False, 'single_thread': False, 'dataset': {'subsample': 1, 'img_downsample': 1, 'center_principle_point': True}, 'matching': {'max_iter': 10, 'lambda_init': 1e-08, 'convergence_thresh': 1e-06, 'dist_thresh': 0.1, 'radius': 3, 'dilation_max': 5}, 'tracking': {'min_match_frac': 0.05, 'max_iters': 50, 'C_conf': 0.0, 'Q_conf': 1.5, 'rel_error': 0.001, 'delta_norm': 0.001, 'huber': 1.345, 'match_frac_thresh': 0.333, 'sigma_ray': 0.003, 'sigma_dist': 10.0, 'sigma_pixel': 1.0, 'sigma_depth': 10.0, 'sigma_point': 0.05, 'pixel_border': -10, 'depth_eps': 1e-06, 'filtering_mode': 'weighted_pointmap', 'filtering_score': 'median'}, 'local_opt': {'pin': 1, 'window_size': 1000000.0, 'C_conf': 0.0, 'Q_conf': 1.5, 'min_match_frac': 0.1, 'pixel_border': -10, 'depth_eps': 1e-06, 'max_iters': 10, 'sigma_ray': 0.003, 'sigma_dist': 10.0, 'sigma_pixel': 1.0, 'sigma_depth': 10.0, 'sigma_point': 0.05, 'delta_norm': 1e-08, 'use_cuda': True}, 'retrieval': {'k': 3, 'min_thresh': 0.005}, 'reloc': {'min_match_frac': 0.3, 'strict': True}}
+... loading model from checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+/opt/MASt3R-SLAM/thirdparty/mast3r/mast3r/model.py:24: UserWarning: Environment variable TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD detected, since the`weights_only` argument was not explicitly passed to `torch.load`, forcing weights_only=False.
+  ckpt = torch.load(model_path, map_location='cpu')
+instantiating : AsymmetricMASt3R(enc_depth=24, dec_depth=12, enc_embed_dim=1024, dec_embed_dim=768, enc_num_heads=16, dec_num_heads=12, pos_embed='RoPE100',img_size=(512, 512), head_type='catmlp+dpt', output_mode='pts3d+desc24', depth_mode=('exp', -inf, inf), conf_mode=('exp', 1, inf), patch_embed_cls='PatchEmbedDust3R', two_confs=True, desc_conf_mode=('exp', 0, inf), landscape_only=False)
+<All keys matched successfully>
+/tmp/mast3r-slam.kredmj/mast3r_slam/frame.py:116: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:203.)
+  uimg = torch.from_numpy(img["unnormalized_img"]) / 255.0
+Loading retrieval model from checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric_retrieval_trainingfree.pth
+/opt/MASt3R-SLAM/thirdparty/mast3r/mast3r/retrieval/processor.py:70: UserWarning: Environment variable TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD detected, since the`weights_only` argument was not explicitly passed to `torch.load`, forcing weights_only=False.
+  ckpt = torch.load(modelname, 'cpu')  # TODO from pretrained to download it automatically
+FPS: 9.220460082412423
+FPS: 11.756733423478575
+FPS: 12.963978645362765
+FPS: 13.149941418968341
+FPS: 13.464041416678304
+FPS: 13.534206566873499
+Database retrieval 3 :  {1}
+FPS: 13.633651059893337
+FPS: 13.816022583530021
+FPS: 13.932843022733145
+FPS: 14.043791735105472
+Database retrieval 7 :  {5}
+FPS: 14.125008232918935
+Skipped frame 359
+FPS: 14.129925345735993
+FPS: 13.084052026449712
+FPS: 12.275513672190945
+FPS: 11.613224550498247
+FPS: 11.084409806877495
+FPS: 10.690975475332188
+FPS: 10.35960182413037
+FPS: 10.091573746084796
+FPS: 9.867283288226185
+FPS: 9.67677830048616
+FPS: 9.4800244567479
+FPS: 9.310165083810006
+FPS: 9.164949569526872
+FPS: 9.047917516654103
+FPS: 8.942050220601844
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+FPS: 8.859566244321327
+FPS: 8.784633457156929
+FPS: 8.710895764032545
+FPS: 8.640609454608214
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [7]
+Failed to relocalize
+FPS: 8.564203041205726
+FPS: 8.502886780617146
+FPS: 8.45424708177003
+FPS: 8.407165978180235
+FPS: 8.358728062754764
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+FPS: 8.319415024675347
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  8  and  [1]
+Success! Relocalized
+FPS: 8.324380708185606
+Database retrieval 11 :  {9}
+Database retrieval 12 :  {9, 10}
+Database retrieval 13 :  {10, 11}
+Database retrieval 14 :  {11, 12}
+Database retrieval 15 :  {12, 13}
+Database retrieval 16 :  {13, 14}
+Database retrieval 17 :  {14, 15}
+FPS: 8.2985399999345
+Database retrieval 18 :  {16, 15}
+Database retrieval 19 :  {16, 17}
+Database retrieval 20 :  {17, 18}
+Database retrieval 21 :  {18, 19}
+Database retrieval 22 :  {19, 20}
+Database retrieval 23 :  {20, 21}
+Database retrieval 24 :  {20, 22}
+Database retrieval 25 :  {22, 23}
+Database retrieval 26 :  {24, 23}
+Database retrieval 27 :  {24, 25}
+Database retrieval 28 :  {24, 25}
+Database retrieval 29 :  {24, 27}
+Database retrieval 30 :  {24, 25, 26}
+Database retrieval 31 :  {27, 28, 29}
+FPS: 8.1383234205152
+Database retrieval 32 :  {26, 28}
+Database retrieval 33 :  {26, 30}
+Database retrieval 34 :  {24, 32, 31}
+Database retrieval 35 :  {32, 26, 31}
+Database retrieval 36 :  {32, 26}
+Database retrieval 37 :  {26, 35}
+Database retrieval 38 :  {28, 29, 31}
+Database retrieval 39 :  {28, 31}
+Database retrieval 40 :  {38, 31}
+Database retrieval 41 :  {39, 31}
+FPS: 7.990253816095996
+Database retrieval 42 :  {40, 31}
+Database retrieval 43 :  {41, 31, 39}
+Database retrieval 44 :  {41, 31}
+Database retrieval 45 :  {31, 38, 39}
+Skipped frame 1209
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+FPS: 7.908351967776881
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+FPS: 7.85509666706051
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+FPS: 7.802868103957671
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 25]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 17, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 17, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+FPS: 7.759930004563973
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+FPS: 7.712385491655357
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 17, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+FPS: 7.666701528478129
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 18, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+FPS: 7.627015032042925
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+FPS: 7.5902046129934915
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 16]
+FPS: 7.552104294977735
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 16, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 14, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 19, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+FPS: 7.516788553712049
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 16, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [17, 19, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 22, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 16, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+FPS: 7.4823960231137905
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [16, 17, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+FPS: 7.4504874816215265
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 22, 16]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 22, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 17, 19]
+FPS: 7.419091656974346
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 16]
+Failed to relocalize
+FPS: 7.4118441327894695
+FPS: 7.406137026833208
+FPS: 7.3999704502354735
+FPS: 7.395248135839114
+FPS: 7.3904321510624
+FPS: 7.383783223553264
+FPS: 7.3770343961309734
+FPS: 7.374346279901757
+FPS: 7.368779579098086
+FPS: 7.365818845150529
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+FPS: 7.363669968349664
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [7]
+Failed to relocalize
+FPS: 7.349416984063907
+FPS: 7.348532053521223
+FPS: 7.343943278232596
+FPS: 7.339575032301959
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+FPS: 7.329710303720762
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [1]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [9]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [9]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [9]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [9]
+Failed to relocalize
+FPS: 7.320912193252249
+RELOCALIZING against kf  56  and  [18, 17, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 17, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 17, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 19, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [18, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+FPS: 7.300936684595341
+RELOCALIZING against kf  56  and  [20, 18, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [31, 40, 29]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [31, 40, 28]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [25, 35, 32]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [25, 44, 24]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [25, 24, 35]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [35, 40, 44]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [24, 25, 44]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [24, 25, 32]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [32, 44, 45]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [25, 24, 32]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [32, 35, 24]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [25, 24, 35]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [22, 24, 32]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+FPS: 7.281826326798306
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 14, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+FPS: 7.262431042380829
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 14, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+FPS: 7.246598266787313
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+FPS: 7.229659076242098
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+FPS: 7.212791710082483
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 12, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+FPS: 7.195507645106651
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 12, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [11, 10, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [10, 11, 12]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 10]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 10, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 13]
+FPS: 7.181119694188052
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 11, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [12, 13, 11]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [14, 13, 15]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [15, 14, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [15, 13, 14]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [15, 14, 13]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 19]
+FPS: 7.166611545053266
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [21, 20, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 23]
+FPS: 7.152018937221239
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 20, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 21, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 20, 21]
+FPS: 7.136875505178862
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [30, 20, 26]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 30, 19]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [19, 20, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 23]
+FPS: 7.12137335610981
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 22]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 30]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 17]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [20, 19, 23]
+Failed to relocalize
+RELOCALIZING against kf  56  and  [2]
+Success! Relocalized
+Database retrieval 46 :  {44, 31}
+Database retrieval 47 :  {31, 45, 47}
+Database retrieval 48 :  {48, 45, 31}
+FPS: 7.101142910498137
+Database retrieval 49 :  {49, 31}
+Database retrieval 50 :  {48, 50, 45}
+Database retrieval 51 :  {24, 26, 23}
+Database retrieval 52 :  {19, 52, 20}
+Database retrieval 53 :  {19, 53}
+Database retrieval 54 :  {52, 54}
+Database retrieval 55 :  {53, 55}
+FPS: 7.097882904081778
+FPS: 7.145294475704663
+Database retrieval 57 :  {3, 4, 46}
+FPS: 7.183979576195802
+FPS: 7.230503190758981
+Database retrieval 58 :  {3, 4}
+FPS: 7.2711591713264925
+FPS: 7.317493141347945
+FPS: 7.363317145303065
+Database retrieval 59 :  {4, 5, 7}
+FPS: 7.402141542875697
+FPS: 7.444985218359385
+FPS: 7.489123666770793
+Database retrieval 60 :  {6, 7}
+FPS: 7.525830056038495
+FPS: 7.567183349343709
+Database retrieval 61 :  {7}
+FPS: 7.604911440434725
+FPS: 7.64716673702233
+Database retrieval 62 :  {60}
+FPS: 7.685320777164105
+Database retrieval 63 :  {61}
+FPS: 7.723439499847646
+FPS: 7.764719305464246
+Database retrieval 64 :  {62}
+FPS: 7.799631119214881
+Skipped frame 3033
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [12]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [14, 13, 16]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [16, 17, 18]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [17, 18, 16]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 16]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 16]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [17, 18, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 16]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 20]
+Failed to relocalize
+FPS: 7.786930809627856
+RELOCALIZING against kf  65  and  [17, 18, 21]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 17, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [19, 20, 17]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [21, 18, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 21, 19]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [18, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [21, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [19, 21, 20]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [25, 24, 30]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 33, 35]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 30, 26]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 29, 44]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [26, 30, 35]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 35, 33]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 26, 33]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 35, 26]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 35, 33]
+FPS: 7.766704941838749
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 35, 33]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 30, 26]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 26, 30]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 26, 33]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 26, 30]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 30, 26]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [30, 26, 33]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [35, 26, 30]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.747285404895735
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.7274859518798555
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+FPS: 7.708644978239295
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.6888990262464025
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.669774020409835
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.652565739340298
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+FPS: 7.635821116106043
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.618236521730901
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.603485981772369
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.587441028234093
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.571018110863848
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+FPS: 7.554489164673083
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+FPS: 7.539365459964474
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 56]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [54, 53, 55]
+Failed to relocalize
+FPS: 7.527812886575691
+FPS: 7.525026854171619
+FPS: 7.522123649695435
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Failed to relocalize
+RELOCALIZING against kf  65  and  [8]
+Success! Relocalized
+FPS: 7.527083760490946
+Database retrieval 66 :  {8, 1}
+FPS: 7.556729110585451
+Database retrieval 67 :  {1, 2}
+FPS: 7.585804581071795
+FPS: 7.618353449545407
+FPS: 7.651682587144068
+Database retrieval 68 :  {1, 2}
+FPS: 7.6787437230325555
+FPS: 7.708471308589696
+Database retrieval 69 :  {57, 2}
+FPS: 7.734074531004406
+Database retrieval 70 :  {57, 58, 4}
+FPS: 7.760487032866439
+Database retrieval 71 :  {58, 4, 5}
+FPS: 7.787528229259816
+Database retrieval 72 :  {59, 5}
+FPS: 7.814473128971912
+FPS: 7.845433231181841
+Database retrieval 73 :  {59, 60, 7}
+FPS: 7.870684618682278
+Skipped frame 3966
+RELOCALIZING against kf  74  and  [17, 19, 16]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [19, 20, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [18, 20, 19]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 18, 19]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 18]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 17]
+FPS: 7.865278170511111
+Failed to relocalize
+RELOCALIZING against kf  74  and  [20, 19, 21]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [28, 31, 39]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [29, 31, 28]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 28, 35]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [31, 28, 40]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 31, 41]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 31, 29]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 28, 39]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [44, 28, 31]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 45, 28]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 44, 51]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [45, 50, 28]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 31, 39]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [50, 45, 40]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 52, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+FPS: 7.849160876061379
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+FPS: 7.83263831608714
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+FPS: 7.817346709639058
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 53]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 53, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+FPS: 7.80170745024565
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 56, 55]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+FPS: 7.78558584425868
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+FPS: 7.771236513411075
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+FPS: 7.756509606676624
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 53]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 14]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 53]
+FPS: 7.742435302541789
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+FPS: 7.727703691697775
+Failed to relocalize
+RELOCALIZING against kf  74  and  [54, 55, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+FPS: 7.713608731259352
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+FPS: 7.699588637827812
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 55, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 54, 56]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [56, 54, 55]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [55, 56, 54]
+Failed to relocalize
+FPS: 7.689709906311246
+FPS: 7.686117931557623
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 7]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 7]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 7, 61]
+FPS: 7.678381568807688
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 7, 61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61, 60]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 7, 61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [60, 61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+RELOCALIZING against kf  74  and  [61]
+Failed to relocalize
+FPS: 7.668236025569734
+FPS: 7.662852981549402
+FPS: 7.658891265460545
+FPS: 7.65463968982236
+FPS: 7.6495022216444095
+FPS: 7.644752900302238
+done

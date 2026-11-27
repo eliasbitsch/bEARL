@@ -2,7 +2,7 @@
 
     python -m pipeline.run_all                       # all systems in team.yaml
     python -m pipeline.run_all --system mast3r_slam  # only one system (e.g. on your own machine)
-    python -m pipeline.run_all --system mast3r_slam --sequence Dark03 --run 3   # one job (cluster)
+    python -m pipeline.run_all --system mast3r_slam --sequence Dynamic01 --run 3   # one job (cluster)
 
 Finished runs are skipped, so the script can be restarted. Each run writes
 results/<slug>/<sequence>/run_<k>/{trajectory_tum.txt, map.*, resources.csv, meta.json}.

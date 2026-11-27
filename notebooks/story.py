@@ -1,0 +1,789 @@
+import marimo
+
+__generated_with = "0.26.0"
+app = marimo.App(width="medium", app_title="bEARL - silent vs. visible failure")
+
+
+@app.cell
+def _():
+    import re
+    import sys
+    from pathlib import Path
+
+    import marimo as mo
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
+    from cycler import cycler
+
+    ROOT = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(ROOT))
+    RES = ROOT / "results"
+    CACHE = RES / "cache"
+    FIG = ROOT / "paper" / "figures"
+    plt.style.use(ROOT / "paper" / "ieee.mplstyle")
+    # the paper style cycles markers; dense time series become blobs with them
+    plt.rcParams["axes.prop_cycle"] = cycler(color=["#0072B2", "#D55E00", "#009E73", "#000000"]) + cycler(
+        linestyle=["-", "--", "-.", ":"])
+    SEQS = ["Dynamic01", "Sha-turn01", "Varying-illu01"]
+    CORE = {"vggt_long": "VGGT-Long", "mast3r_slam": "MASt3R-SLAM"}
+    STYLE = {"vggt_long": dict(color="#D55E00", ls="-"), "mast3r_slam": dict(color="#0072B2", ls="--"),
+             "gt": dict(color="0.65", ls="-")}
+    DARK = 0.8   # frame counts as dark when more than 80 % of its pixels are near-black
+    return CACHE, CORE, DARK, FIG, Path, RES, SEQS, STYLE, mo, np, pd, plt, re
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    # When the light goes out: silent vs. visible failure of foundation-model SLAM
+
+    Two monocular SLAM systems built on 3D foundation models run on the same M3DGR ground-robot sequences:
+    **VGGT-Long** (chunks of VGGT predictions joined by Sim(3), loop closure) and **MASt3R-SLAM** (MASt3R on image
+    pairs, keyframe graph, relocalisation). Two sequences are well lit, in `Varying-illu01` the light is switched on
+    and off.
+
+    - **RQ1 - accuracy:** how accurate are trajectory and map in normal light?
+    - **RQ2 - failure mode:** what happens when the light switches on and off?
+    - **RQ3 - detectability:** does the run show that it failed, or does it look complete while it is wrong?
+
+    This notebook only reads files in the repository (`results/`, `results/cache/`); it runs no SLAM system and
+    needs no GPU and no dataset. SLAM runs: `pipeline/run_all.py` (ADA cluster), metrics: `pipeline/evaluate.py`,
+    `pipeline/map_eval.py`, small derivatives of images and maps: `tools/build_cache.py`.
+    """)
+    return
+
+
+@app.cell
+def _(RES, mo, pd):
+    _m = pd.read_csv(RES / "metrics.csv")
+    _runs = _m[_m.slug.isin(["vggt_long", "mast3r_slam", "fast_lio2"])].groupby(["slug", "sequence"]).size() \
+        .unstack().fillna(0).astype(int)
+    mo.vstack([
+        mo.md("## 0. Pipeline\nWhere every number and figure in this notebook comes from. The SLAM runs (grey) "
+              "ran on the ADA cluster; the cache and replay builders need `data/` but no GPU; the notebook "
+              "(dashed arrows) only reads files in `results/`."),
+        mo.mermaid("""
+flowchart TD
+    A[M3DGR bags + OptiTrack GT<br/>data/M3DGR] --> B[pipeline/prepare_data.py<br/>images, GT in TUM, reference map]
+    B --> C[pipeline/run_all.py<br/>ADA cluster, Apptainer, 5 runs each]
+    C --> D[results/slug/seq/run_NN<br/>trajectory_tum.txt, map.ply, logs, resources]
+    D --> E[pipeline/evaluate.py<br/>ATE RMSE, evo, Umeyama Sim3 / SE3]
+    D --> F[pipeline/map_eval.py<br/>F-score at 10 cm vs. LiDAR map]
+    E --> G[results/metrics.csv]
+    F --> G
+    D --> H[tools/build_cache.py<br/>results/cache: small CSV, thumbnails, map slices]
+    D --> R[tools/build_replay.py<br/>results/replay/seq.mcap]
+    G -.-> N[notebooks/story.py<br/>this notebook, reads files only]
+    H -.-> N
+    R -.-> V[tools/viewer.py<br/>Lichtblick 3D replay, section 6]
+    V -.-> N
+    N --> P[paper/figures + tables/results.tex<br/>section 7]
+    classDef heavy fill:#e5e5e5,stroke:#999
+    class A,B,C,D heavy
+"""),
+        mo.md("Runs found per system and sequence (`results/metrics.csv`):"),
+        _runs,
+    ])
+    return
+
+
+@app.cell
+def _(CACHE, RES, SEQS, pd):
+    metrics = pd.read_csv(RES / "metrics.csv")
+    maps = pd.read_csv(RES / "map_metrics.csv")
+    runs = pd.read_csv(CACHE / "runs.csv")
+    light = {s: pd.read_csv(CACHE / f"light_{s}.csv") for s in SEQS}
+    gt = {s: pd.read_csv(CACHE / f"gt_{s}.csv") for s in SEQS}
+    traj = {(slug, s): pd.read_csv(CACHE / f"traj_{slug}_{s}.csv")
+            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "vggt_long_lit_only", "vggt_long_noloop",
+                         "vggt_long_lit_noloop") for s in SEQS
+            if (CACHE / f"traj_{slug}_{s}.csv").exists()}
+    comp = pd.read_csv(CACHE / "comparisons.csv").set_index("sequence")
+    return comp, gt, light, maps, metrics, runs, traj
+
+
+@app.cell
+def _(CACHE, SEQS, np):
+    slices = {s: dict(np.load(CACHE / f"slices_{s}.npz")) for s in SEQS}
+    return (slices,)
+
+
+@app.cell
+def _(DARK, RES, SEQS, light, np, pd, re, runs):
+    def frame_time(seq, frame):
+        """Full-rate frame index (30 Hz) -> seconds since the first image."""
+        l = light[seq]
+        return np.interp(frame, l.frame, l.t_rel)
+
+    def vggt_links(seq):
+        """Scale of each sequential chunk link from VGGT-Long's log; link a joins chunks a and a+1.
+
+        Chunks are 60 frames with 30 overlap on the 10 Hz input, so link a sits on 10 Hz frames 30(a+1)...30(a+1)+29.
+        """
+        log = (RES / "vggt_long" / seq / "run_00" / "vggt_long" / "log.txt").read_text(errors="ignore").splitlines()
+        rows, cur = [], None
+        for line in log:
+            if m := re.match(r"Aligning (\d+) and (\d+)", line):
+                cur = int(m.group(1))
+            elif cur is not None and (m := re.match(r"Estimated Scale: ([0-9.eE+-]+)", line)):
+                rows.append((cur, float(m.group(1))))
+                cur = None
+        d = pd.DataFrame(rows, columns=["link", "scale"])
+        d["t_rel"] = frame_time(seq, 3 * (30 * (d.link + 1) + 15))
+        d["cumulative_scale"] = d.scale.cumprod()
+        return d
+
+    def vggt_messages(seq):
+        """Failure-like messages in VGGT-Long's log, without the xFormers start-up notices."""
+        log = (RES / "vggt_long" / seq / "run_00" / "vggt_long" / "log.txt").read_text(errors="ignore")
+        # library notices (xFormers, FutureWarning) are not run-time reports of the system
+        skip = ("xFormers", "FutureWarning", "warnings.warn", "UserWarning")
+        # "error" is left out: every link prints routine "Alignment error statistics"
+        return sum(1 for l in log.splitlines() if re.search(r"warn|fail|lost", l, re.I)
+                   and not any(k in l for k in skip))
+
+    def mast3r_relocs(seq):
+        """Failed relocalisations per block of about 30 frames (MASt3R-SLAM prints its FPS every 30 frames)."""
+        run = runs[(runs.slug == "mast3r_slam") & (runs.sequence == seq)].run.iloc[0]
+        log = (RES / "mast3r_slam" / seq / run / "mast3r_slam" / "log.txt").read_text(errors="ignore").splitlines()
+        block, fails = 0, {}
+        for line in log:
+            if line.startswith("FPS:"):
+                block += 1
+            elif line.startswith("Failed to relocalize"):
+                fails[block] = fails.get(block, 0) + 1
+        d = pd.DataFrame({"block": range(block + 1)})
+        d["failed"] = d.block.map(fails).fillna(0).astype(int)
+        d["t_rel"] = frame_time(seq, 30 * d.block + 15)
+        return d
+
+    def vggt_conf(seq):
+        """Mean VGGT depth confidence per frame (mean over the chunks that contain it); None until the run exists."""
+        f = RES / "vggt_long" / seq / "run_00" / "frame_confidence.csv"
+        if not f.exists():
+            return None
+        c = pd.read_csv(f)
+        c["t"] = c.image.str.replace(".jpg", "", regex=False).astype(float)
+        c = c.groupby("t", as_index=False).depth_conf_mean.mean()
+        l = light[seq]
+        c["t_rel"] = c.t - l.t.iloc[0]
+        c["dark"] = np.interp(c.t_rel, l.t_rel, l.black_fraction) > DARK
+        return c
+
+    links = {s: vggt_links(s) for s in SEQS}
+    relocs = {s: mast3r_relocs(s) for s in SEQS}
+    conf = {s: vggt_conf(s) for s in SEQS}
+    vggt_msgs = {s: vggt_messages(s) for s in SEQS}
+    # share of the run the system itself reports as lost: MASt3R-SLAM relocalising (blocks of ~1 s), VGGT-Long never
+    lost_pct = {("mast3r_slam", s): 100 * (relocs[s].failed > 0).sum() / light[s].t_rel.iloc[-1] for s in SEQS}
+    lost_pct.update({("vggt_long", s): 0.0 for s in SEQS})
+    return conf, links, lost_pct, relocs, vggt_msgs
+
+
+@app.cell
+def _(DARK, SEQS, gt, light, mo, np, pd):
+    seq_table = pd.DataFrame([{
+        "sequence": s,
+        "duration [s]": round(gt[s].t_rel.iloc[-1], 0),
+        "path [m]": round(float(np.linalg.norm(np.diff(gt[s][["x", "y"]].values, axis=0), axis=1).sum()), 0),
+        "mean brightness (0-255)": round(light[s].brightness.mean(), 0),
+        "dark frames [%]": round(100 * (light[s].black_fraction > DARK).mean(), 0),
+    } for s in SEQS]).set_index("sequence")
+    mo.vstack([mo.md("## 1. Data\nThree M3DGR indoor sequences in one 6.5 m x 3 m room, motion-capture ground truth."),
+               seq_table])
+    return
+
+
+@app.cell
+def _(DARK, SEQS, light, plt):
+    def fig_light():
+        fig, axes = plt.subplots(3, 1, figsize=(3.5, 2.6), sharex=True)
+        for ax, s in zip(axes, SEQS):
+            l = light[s]
+            ax.plot(l.t_rel, l.brightness, color="0.2", lw=0.6)
+            ax.fill_between(l.t_rel, 0, 1, where=l.black_fraction > DARK, color="0.85",
+                            transform=ax.get_xaxis_transform(), lw=0)
+            ax.set_ylim(0, 255)
+            ax.set_ylabel(s, fontsize=7)
+        axes[-1].set_xlabel("time [s]")
+        fig.supylabel("image brightness", fontsize=8)
+        return fig
+
+    fig_light()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## 2. RQ1 - accuracy in normal light""")
+    return
+
+
+@app.cell
+def _(CORE, SEQS, lost_pct, maps, metrics, pd):
+    def results_table():
+        """Long format; maps come from run_00 (only run with a stored map for every system)."""
+        rows = []
+        for slug, name in CORE.items():
+            for s in SEQS:
+                m = metrics[(metrics.slug == slug) & (metrics.sequence == s)]
+                mm = maps[(maps.slug == slug) & (maps.sequence == s) & (maps.stage == "icp_refined")
+                          & (maps.region == "common")]
+                q = m.ate_rmse_m.quantile([0.25, 0.5, 0.75])
+                rows.append({"system": name, "sequence": s,
+                             "ATE RMSE [m]": q[0.5], "IQR [m]": q[0.75] - q[0.25],
+                             "success": f"{int(m.success.sum())}/{len(m)}",
+                             "time span [%]": 100 * m.tracked_fraction.median(),
+                             "reported lost [%]": lost_pct[(slug, s)],
+                             "map accuracy [m]": mm.accuracy_median_m.median(),
+                             "F-score @10 cm": mm.fscore_10cm.median(),
+                             "ICP accepted": bool(mm.icp_accepted.all())})
+        return pd.DataFrame(rows).set_index(["system", "sequence"])
+
+    table = results_table()
+    table.round(3)
+    return (table,)
+
+
+@app.cell
+def _(CORE, SEQS, STYLE, gt, plt, traj):
+    def fig_trajectories():
+        fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.5), sharex=True, sharey=True)
+        for ax, s in zip(axes, SEQS):
+            ax.plot(gt[s].x, gt[s].y, lw=1.2, label="ground truth", **STYLE["gt"])
+            for slug, name in CORE.items():
+                d = traj[(slug, s)]
+                ax.plot(d.est_x, d.est_y, lw=0.7, label=name, **STYLE[slug])
+            ax.set_aspect("equal")
+            ax.set_title(s, fontsize=8)
+            ax.tick_params(labelsize=6)
+        axes[0].set_xlim(-4, 4)
+        axes[0].set_ylim(-2.5, 2.5)
+        axes[0].set_ylabel("y [m]")
+        axes[1].set_xlabel("x [m]")
+        h, l = axes[0].get_legend_handles_labels()
+        fig.legend(h, l, loc="upper center", ncol=3, fontsize=6, frameon=False)
+        fig.tight_layout(rect=(0, 0, 1, 0.88), w_pad=0.3)
+        return fig
+
+    fig_trajectories()
+    return (fig_trajectories,)
+
+
+@app.cell
+def _(CORE, plt, slices):
+    # one map per system is required; slots of systems without results yet stay as labelled placeholders
+    MAP_SLOTS = [*CORE.items(), ("glim", "GLIM"), ("orb_slam3", "ORB-SLAM3"), ("tbd", "5th system")]
+
+    def fig_maps(seq="Dynamic01"):
+        sl = slices[seq]
+        fig, axes = plt.subplots(1, len(MAP_SLOTS), figsize=(7.16, 1.15), sharex=True, sharey=True)
+        for ax, (slug, name) in zip(axes, MAP_SLOTS):
+            ax.scatter(*sl["reference"].T, s=0.005, c="0.75", rasterized=True)
+            if slug in sl:
+                ax.scatter(*sl[slug].T, s=0.005, c="k", alpha=0.6, rasterized=True)
+            else:
+                ax.text(0.5, 0.5, "pending", transform=ax.transAxes, ha="center", va="center", fontsize=7)
+            ax.set_aspect("equal")
+            ax.set_title(name, fontsize=7)
+            ax.tick_params(labelsize=5)
+        axes[0].set_xlim(-6, 8.5)
+        axes[0].set_ylim(-4.5, 3.5)
+        fig.tight_layout(w_pad=0.2)
+        return fig
+
+    fig_maps()
+    return (fig_maps,)
+
+
+@app.cell
+def _(mo, table):
+    _v, _m = table.loc["VGGT-Long"], table.loc["MASt3R-SLAM"]
+    mo.md(f"""
+    **RQ1.** In normal light both systems track the whole run. VGGT-Long is more accurate
+    (ATE {_v.loc['Dynamic01', 'ATE RMSE [m]']:.2f} / {_v.loc['Sha-turn01', 'ATE RMSE [m]']:.2f} m vs.
+    {_m.loc['Dynamic01', 'ATE RMSE [m]']:.2f} / {_m.loc['Sha-turn01', 'ATE RMSE [m]']:.2f} m), but a lower ATE does
+    not mean a better map: on Sha-turn01 MASt3R-SLAM's map scores higher (F-score
+    {_m.loc['Sha-turn01', 'F-score @10 cm']:.2f} vs. {_v.loc['Sha-turn01', 'F-score @10 cm']:.2f}).
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 3. RQ2 - what happens when the light goes out?
+
+    Move the slider through `Varying-illu01`. Grey bands are dark phases (more than 80 % near-black pixels).
+    """)
+    return
+
+
+@app.cell
+def _(light, mo):
+    t_slider = mo.ui.slider(0.0, float(light["Varying-illu01"].t_rel.iloc[-1]), step=0.5, value=60.0,
+                            label="time [s]", full_width=True)
+    t_slider
+    return (t_slider,)
+
+
+@app.cell
+def _(CORE, DARK, STYLE, conf, light, links, np, plt, relocs, traj):
+    def fig_timeline(seq="Varying-illu01", cursor=None):
+        l = light[seq]
+        c = conf[seq]
+        n = 3 if c is not None else 2
+        fig, axes = plt.subplots(n, 1, figsize=(7.16, 0.64 * n + 0.35), sharex=True)
+        axes = [None, *axes]   # dark phases are shown as grey bands, no separate brightness panel
+        for ax in axes[1:]:
+            ax.fill_between(l.t_rel, 0, 1, where=l.black_fraction > DARK, color="0.88",
+                            transform=ax.get_xaxis_transform(), lw=0)
+            if cursor is not None:
+                ax.axvline(cursor, color="k", lw=0.6)
+        v = traj[("vggt_long", seq)]
+        axes[1].plot(v.t_rel, v.error_m, lw=0.8, label="VGGT-Long (every frame)", **STYLE["vggt_long"])
+        m = traj[("mast3r_slam", seq)]   # keyframes only: markers, so gaps stay visible
+        axes[1].plot(m.t_rel, m.error_m, "o", ms=1.8, color=STYLE["mast3r_slam"]["color"],
+                     label="MASt3R-SLAM (keyframes)")
+        axes[1].set_ylabel("position\nerror [m]", fontsize=7)
+        k = links[seq]
+        axes[2].step(k.t_rel, np.log10(k.cumulative_scale), where="mid", lw=0.9, ls="-.",
+                     color=STYLE["vggt_long"]["color"], label="VGGT-Long: chained chunk scale")
+        axes[2].set_ylabel("log10 chunk\nscale", fontsize=7)
+        r = relocs[seq]
+        ax2 = axes[2].twinx()
+        ax2.bar(r.t_rel, r.failed, width=0.9, color=STYLE["mast3r_slam"]["color"], alpha=0.45,
+                label="MASt3R-SLAM: failed relocalisations")
+        ax2.set_ylabel("failed\nrelocs / s", fontsize=7)
+        ax2.grid(False)
+        if c is not None:
+            axes[3].plot(c.t_rel, c.depth_conf_mean, lw=0.7, **STYLE["vggt_long"])
+            axes[3].axhline(1.0, color="0.4", lw=0.5, ls=":")
+            axes[3].set_ylabel("VGGT depth\nconfidence", fontsize=7)
+        h = [a.get_legend_handles_labels() for a in (axes[1], axes[2], ax2)]
+        fig.legend(sum((x[0] for x in h), []), sum((x[1] for x in h), []), loc="upper center", ncol=4,
+                   fontsize=6, frameon=False, bbox_to_anchor=(0.5, 1.0))
+        axes[-1].set_xlabel("time [s]", fontsize=7)
+        fig.tight_layout(rect=(0, 0, 1, 0.93), h_pad=0.3)
+        return fig
+
+    return (fig_timeline,)
+
+
+@app.cell
+def _(CACHE, CORE, STYLE, fig_timeline, gt, light, mo, plt, slices, t_slider, traj):
+    def map_at(seq, t):
+        fig, ax = plt.subplots(figsize=(3.0, 1.9))
+        ax.scatter(*slices[seq]["reference"].T, s=0.02, c="0.8", rasterized=True)
+        g = gt[seq]
+        ax.plot(g.x, g.y, lw=0.5, **STYLE["gt"])
+        i = (g.t_rel - t).abs().idxmin()
+        ax.plot(g.x[i], g.y[i], "o", color="0.3", ms=5, label="true position")
+        for slug, name in CORE.items():
+            d = traj[(slug, seq)]
+            j = (d.t_rel - t).abs().idxmin()
+            ax.plot(d.est_x[j], d.est_y[j], "x", ms=6, mew=1.5, color=STYLE[slug]["color"], label=name)
+        ax.set_aspect("equal")
+        ax.tick_params(labelsize=6)
+        ax.legend(fontsize=6, loc="upper right")
+        return fig
+
+    _seq = "Varying-illu01"
+    _l = light[_seq]
+    _frame = int(_l.frame[(_l.t_rel - t_slider.value).abs().idxmin()]) // 15 * 15
+    mo.vstack([
+        mo.hstack([mo.image(str(CACHE / "thumbs" / _seq / f"{_frame:05d}.jpg"), width=240),
+                   map_at(_seq, t_slider.value)], justify="start"),
+        fig_timeline(_seq, cursor=t_slider.value),
+    ])
+    return
+
+
+@app.cell
+def _(SEQS, light, np, pd, traj):
+    from scipy.spatial.transform import Rotation
+
+    # OpenLORIS (Shi et al. 2020) correct rate: pose k is correct if ATE <= EPS and orientation error <= AOE;
+    # it counts for min(t_{k+1} - t_k, SIGMA). Values as suggested there for meter-size scenes (office: 1 m, 30 deg).
+    EPS, AOE, SIGMA = 1.0, 30.0, 1.0
+
+    def _rot(d, p):
+        return Rotation.from_quat(d[[f"{p}_qx", f"{p}_qy", f"{p}_qz", f"{p}_qw"]].values)
+
+    def body_to_camera(slug):
+        """Constant mocap-body -> camera rotation (not given by M3DGR), estimated once on Dynamic01."""
+        d = traj[(slug, "Dynamic01")]
+        return (_rot(d, "gt").inv() * _rot(d, "est")).mean()
+
+    def correct_rate(slug, seq):
+        d = traj[(slug, seq)]
+        aoe = np.degrees(((_rot(d, "gt") * body_to_camera(slug)).inv() * _rot(d, "est")).magnitude())
+        ok = (d.error_m <= EPS) & (aoe <= AOE)
+        t = d.t_rel.values
+        t_max = light[seq].t_rel.iloc[-1]
+        dt = np.minimum(np.diff(np.append(t, t_max)), SIGMA)
+        return {"slug": slug, "sequence": seq, "CR": float((dt * ok).sum() / t_max),
+                "median_AOE_deg": float(np.median(aoe))}
+
+    cr = pd.DataFrame([correct_rate(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS]) \
+        .set_index(["slug", "sequence"])
+    return EPS, SIGMA, cr
+
+
+@app.cell
+def _(cr, mo):
+    mo.vstack([mo.md(r"""
+    **Correct rate** (OpenLORIS, $\epsilon$ = 1 m, 30°, $\sigma$ = 1 s): share of the sequence time covered by a
+    correct pose. It counts wrong poses and gaps against a system. MASt3R-SLAM exports keyframes only, so gaps between
+    keyframes longer than 1 s also lower its value on the lit sequences.
+    """), cr.round(3)])
+    return
+
+
+@app.cell
+def _(DARK, SEQS, comp, conf, light, np, pd, traj):
+    def rmse(e):
+        return float(np.sqrt(np.mean(np.square(e))))
+
+    def dark_lit_rmse():
+        """ATE RMSE restricted to dark / lit frames (same statistic as the ATE, review M1)."""
+        rows = []
+        for (slug, s), d in traj.items():
+            if slug == "fast_lio2":
+                continue
+            l = light[s]
+            dk = np.interp(d.t_rel, l.t_rel, l.black_fraction) > DARK
+            rows.append({"slug": slug, "sequence": s, "rmse_dark_m": rmse(d.error_m[dk]) if dk.any() else np.nan,
+                         "rmse_lit_m": rmse(d.error_m[~dk]), "last_pose_s": d.t_rel.iloc[-1]})
+        return pd.DataFrame(rows).set_index(["slug", "sequence"])
+
+    darklit = dark_lit_rmse()
+    conf_lit = {s: conf[s][~conf[s].dark].depth_conf_mean.median() for s in SEQS if conf[s] is not None}
+    checks = comp.join(pd.Series(conf_lit, name="conf_lit_median"))
+    return checks, darklit
+
+
+@app.cell
+def _(DARK, EPS, RES, SIGMA, SEQS, gt, light, np, pd, re, relocs, runs, traj):
+    def _umeyama_rmse(a, b):
+        """RMSE of b after Sim(3) Umeyama alignment onto a (positions only)."""
+        ma, mb = a.mean(0), b.mean(0)
+        A, B = a - ma, b - mb
+        U, S, Vt = np.linalg.svd(A.T @ B / len(a))
+        D = np.eye(3)
+        D[2, 2] = np.sign(np.linalg.det(U @ Vt))
+        R = U @ D @ Vt
+        s = np.trace(np.diag(S) @ D) / B.var(0).sum()
+        return float(np.sqrt(np.mean(np.sum((A - s * B @ R.T) ** 2, 1))))
+
+    def dark_phases(seq, min_len=5.0):
+        l = light[seq]
+        dk = (l.black_fraction > DARK).astype(int).to_numpy()
+        d = np.diff(np.r_[0, dk, 0])
+        return [(l.t_rel.iloc[a], l.t_rel.iloc[b - 1]) for a, b in zip(np.flatnonzero(d == 1), np.flatnonzero(d == -1))
+                if l.t_rel.iloc[b - 1] - l.t_rel.iloc[a] > min_len]
+
+    def review_diagnostics(seq="Varying-illu01"):
+        out = {}
+        l, ph = light[seq], dark_phases(seq)
+        dark_at = lambda t: np.interp(t, l.t_rel, l.black_fraction) > DARK
+        T = l.t_rel.iloc[-1]
+        # MASt3R-SLAM keyframes per dark phase (all five runs give the same counts)
+        k = traj[("mast3r_slam", seq)].t_rel.to_numpy()
+        out["mast3r_kf_per_dark_phase"] = [int(((k >= a) & (k <= b)).sum()) for a, b in ph]
+        out["mast3r_kf_dark"], out["mast3r_kf_lit"] = int(dark_at(k).sum()), int((~dark_at(k)).sum())
+        out["mast3r_kf_gaps_s"] = [(round(a, 1), round(b, 1)) for a, b in zip(k[:-1], k[1:]) if b - a > 10]
+        run = runs[(runs.slug == "mast3r_slam") & (runs.sequence == seq)].run.iloc[0]
+        log = (RES / "mast3r_slam" / seq / run / "mast3r_slam" / "log.txt").read_text(errors="ignore")
+        out["mast3r_reloc_success"] = log.count("Success! Relocalized")
+        # relocalisation vs. darkness, per block of ~1 s
+        r = relocs[seq]
+        rd = dark_at(r.t_rel.to_numpy())
+        out["dark_blocks_with_reloc_pct"] = 100 * float(((r.failed > 0) & rd).sum() / rd.sum())
+        out["reloc_blocks_lit_pct"] = 100 * float(((r.failed > 0) & ~rd).sum() / (r.failed > 0).sum())
+        out["first_reloc_s"] = float(r.t_rel[r.failed > 0].iloc[0])
+        # VGGT-Long: global alignment smears the error, so also per-lit-segment Sim(3) ATE
+        v = traj[("vggt_long", seq)]
+        out["vggt_far_pct"] = 100 * float((v.error_m > EPS).mean())
+        out["vggt_err_before_first_blackout_m"] = float(v[v.t_rel < ph[0][0]].error_m.median())
+        bounds = [0.0] + [x for a, b in ph for x in (a, b)] + [T]
+        seg = []
+        for a, b in zip(bounds[::2], bounds[1::2]):
+            d = v[(v.t_rel >= a) & (v.t_rel < b)]
+            if len(d) > 20:
+                seg.append(_umeyama_rmse(d[["gt_x", "gt_y", "gt_z"]].values, d[["est_x", "est_y", "est_z"]].values))
+        out["vggt_lit_segment_ate_m"] = [round(x, 2) for x in seg]
+        # ground-truth displacement across each dark phase
+        g = gt[seq]
+        pos = lambda t: g[["x", "y"]].values[(g.t_rel - t).abs().idxmin()]
+        out["gt_shift_across_dark_m"] = [round(float(np.linalg.norm(pos(b) - pos(a))), 1) for a, b in ph]
+        # VGGT-Long loop pairs (10 Hz frame indices) that join two dark frames
+        vlog = (RES / "vggt_long" / seq / "run_00" / "vggt_long" / "log.txt").read_text(errors="ignore")
+        pairs = [(int(a), int(b)) for a, b in re.findall(r"^(\d+), (\d+), similarity", vlog, re.M)]
+        ft = lambda f: float(np.interp(3 * f, l.frame, l.t_rel))
+        out["vggt_loop_pairs"] = len(pairs)
+        out["vggt_loop_pairs_dark_dark"] = sum(dark_at(ft(a)) and dark_at(ft(b)) for a, b in pairs)
+        # same timestamps, lit keyframes only (each system under its own global alignment)
+        m = traj[("mast3r_slam", seq)]
+        lit_kf = m[~dark_at(m.t_rel.to_numpy())]
+        vi = np.searchsorted(v.t_rel.values, lit_kf.t_rel.values).clip(1, len(v) - 1)
+        vi = np.where(np.abs(v.t_rel.values[vi - 1] - lit_kf.t_rel.values) < np.abs(v.t_rel.values[vi] - lit_kf.t_rel.values), vi - 1, vi)
+        rms = lambda e: float(np.sqrt(np.mean(np.square(e))))
+        out["lit_kf_n"] = len(lit_kf)
+        out["lit_kf_mast3r_m"], out["lit_kf_vggt_m"] = rms(lit_kf.error_m), rms(v.error_m.values[vi])
+        return out
+
+    def cr_cap(slug, seq):
+        """Highest correct rate the output rate allows (every exported pose correct)."""
+        t = traj[(slug, seq)].t_rel.values
+        T = light[seq].t_rel.iloc[-1]
+        return float(np.minimum(np.diff(np.append(t, T)), SIGMA).sum() / T)
+
+    diag = review_diagnostics()
+    caps = pd.Series({(slug, s): cr_cap(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS}, name="CR_cap")
+    return caps, dark_phases, diag
+
+
+@app.cell
+def _(caps, diag, mo, pd):
+    mo.vstack([mo.md(r"""
+    **Diagnostics (second review).** Keyframes of MASt3R-SLAM per dark phase, its relocalisation timing, the error of
+    VGGT-Long per lit segment (each segment Sim(3)-aligned on its own; the global alignment spreads a global
+    inconsistency over every frame, so the per-frame error alone cannot say when tracking broke), the true
+    displacement across each dark phase, VGGT-Long's loop pairs that join two dark frames, and the highest correct
+    rate each system's output rate allows (`CR_cap`).
+    """), pd.Series(diag, dtype=object).to_frame("value"), caps.round(2).to_frame()])
+    return
+
+
+@app.cell
+def _(checks, darklit, mo):
+    mo.vstack([mo.md(r"""
+    **Fairness checks.** MASt3R-SLAM is scored on its keyframes only; VGGT-Long on every frame. `vggt_on_mast3r_kf_m`
+    scores VGGT-Long on the same timestamps. `const_baseline_m` is the ATE of a robot that never moves (the RMS
+    distance of the ground truth to its centroid). `conf_lit_median`: VGGT confidence in lit frames.
+    """), checks.round(3), darklit.round(3)])
+    return
+
+
+@app.cell
+def _(checks, conf, dark_phases, darklit, diag, links, mo, table, vggt_msgs):
+    _s = "Varying-illu01"
+    _v = table.loc[("VGGT-Long", _s)]
+    _c = conf[_s]
+    _after = _c[(~_c.dark) & (_c.t_rel > dark_phases(_s)[0][1])]
+    conf_after_first_blackout = float(_after.depth_conf_mean.median())
+    mo.md(f"""
+    **RQ2.** VGGT-Long outputs a pose for every 10 Hz input frame and ends at an ATE of {_v['ATE RMSE [m]']:.2f} m. That
+    is close to the ceiling a Sim(3) alignment allows ({checks.loc[_s, 'const_baseline_m']:.2f} m: scale 0 puts every
+    pose on the ground-truth centroid), i.e. the global alignment explains almost nothing; {diag['vggt_far_pct']:.0f} %
+    of its poses are more than 1 m off. The global alignment spreads this inconsistency over every frame (median
+    error {diag['vggt_err_before_first_blackout_m']:.2f} m already before the first blackout). Aligned per lit segment,
+    the error is only {min(diag['vggt_lit_segment_ate_m']):.2f}-{max(diag['vggt_lit_segment_ate_m']):.2f} m: VGGT-Long
+    tracks correctly between blackouts and fails at joining the segments across them, while the robot moves
+    {min(diag['gt_shift_across_dark_m']):.1f}-{max(diag['gt_shift_across_dark_m']):.1f} m during each dark phase.
+    The chained scale of the sequential chunk links (before loop closure) ends at
+    {links[_s].cumulative_scale.iloc[-1]:.3f} (lit sequences: {links['Dynamic01'].cumulative_scale.iloc[-1]:.2f},
+    {links['Sha-turn01'].cumulative_scale.iloc[-1]:.2f}); {diag['vggt_loop_pairs_dark_dark']} of
+    {diag['vggt_loop_pairs']} loop pairs join two dark frames. Its log contains {vggt_msgs[_s]} failure messages.
+
+    MASt3R-SLAM adds no keyframe in the first dark phase and its first relocalisation attempt comes only at
+    {diag['first_reloc_s']:.1f} s, after that phase. At the start of the second dark phase it adds a burst of
+    {diag['mast3r_kf_per_dark_phase'][1]} keyframes on near-black images, then stops (gaps
+    {', '.join(f'{a}-{b} s' for a, b in diag['mast3r_kf_gaps_s'])}); {diag['dark_blocks_with_reloc_pct']:.0f} % of the
+    dark seconds contain a failed relocalisation attempt, {diag['reloc_blocks_lit_pct']:.0f} % of those seconds are lit,
+    and it relocalises successfully {diag['mast3r_reloc_success']} times. Its last keyframe is at
+    {darklit.loc[('mast3r_slam', _s), 'last_pose_s']:.0f} s. On its {diag['lit_kf_n']} lit keyframes its error is
+    {diag['lit_kf_mast3r_m']:.2f} m, VGGT-Long's at the same timestamps {diag['lit_kf_vggt_m']:.2f} m.
+
+    VGGT's depth confidence drops from a median of {_c[~_c.dark].depth_conf_mean.median():.1f} in lit frames to
+    {_c[_c.dark].depth_conf_mean.median():.2f} in dark frames (95th percentile {_c[_c.dark].depth_conf_mean.quantile(0.95):.2f});
+    it is 1 + e^x, so 1.0 is the floor: it flags the dark input. In lit frames after the first blackout it is
+    {conf_after_first_blackout:.1f} (Dynamic01: {checks.loc['Dynamic01', 'conf_lit_median']:.1f}), consistent with the
+    locally correct geometry; nothing reports the wrong join.
+    """)
+    return (conf_after_first_blackout,)
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## 4. RQ3 - does the run show that it failed?""")
+    return
+
+
+@app.cell
+def _(CORE, SEQS, conf, lost_pct, metrics, pd, relocs, vggt_msgs):
+    def detect_table():
+        rows = []
+        for slug, name in CORE.items():
+            for s in SEQS:
+                m = metrics[(metrics.slug == slug) & (metrics.sequence == s)]
+                c = conf[s]
+                rows.append({
+                    "system": name, "sequence": s,
+                    "ATE [m]": m.ate_rmse_m.median(),
+                    "time span [%]": 100 * m.tracked_fraction.median(),
+                    "reported lost [%]": lost_pct[(slug, s)],
+                    "failure messages in log": vggt_msgs[s] if slug == "vggt_long" else int(relocs[s].failed.sum()),
+                    "median depth conf. (dark frames)": (c[c.dark].depth_conf_mean.median()
+                                                         if slug == "vggt_long" and c is not None and c.dark.any()
+                                                         else None),
+                })
+        return pd.DataFrame(rows).set_index(["system", "sequence"])
+
+    detect_table().round(3)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    **RQ3.** A run counts as visibly failed when the system itself reports it (log message, relocalisation state).
+    VGGT-Long reports nothing on any sequence; MASt3R-SLAM reports being lost in none of the lit sequences and in
+    most of the dark seconds of `Varying-illu01`, though late for the first blackout. The "time span" column (first
+    to last matched pose) is not gap-aware and is shown for transparency only. VGGT's confidence flags the dark input
+    but not the wrong join that follows. The correct rate of MASt3R-SLAM is bounded by its keyframe output rate
+    (`CR_cap` in the diagnostics), so on the lit sequences it mostly measures that rate, not accuracy.
+    """)
+    return
+
+
+@app.cell
+def _(darklit, mo, np, traj):
+    def diag_ate(slug, seq="Varying-illu01"):
+        d = traj.get((slug, seq))
+        return None if d is None else float(np.sqrt(np.mean(d.error_m ** 2)))
+
+    diag_runs = {k: diag_ate(k) for k in ("vggt_long_lit_only", "vggt_long_noloop", "vggt_long_lit_noloop")}
+    _f = lambda x: "pending" if x is None else f"{x:.2f} m"
+    mo.md(f"""
+    **Diagnostics: VGGT-Long without the dark frames and without loop closure** on `Varying-illu01`, otherwise the
+    authors' defaults (`cluster/run_vggt_long_lit_only.sh`, `cluster/run_vggt_long_noloop.sh`). ATE without dark
+    frames {_f(diag_runs['vggt_long_lit_only'])} (default run on the lit frames:
+    {darklit.loc[('vggt_long', 'Varying-illu01'), 'rmse_lit_m']:.2f} m); without loop closure
+    {_f(diag_runs['vggt_long_noloop'])}; without both {_f(diag_runs['vggt_long_lit_noloop'])}. Removing the dark
+    frames also removes time gaps inside chunks and loop candidates, so each run rules a cause out rather than
+    isolating one.
+    """)
+    return (diag_runs,)
+
+
+@app.cell
+def _(metrics, mo, pd):
+    _det = metrics[metrics.slug.isin(["vggt_long", "mast3r_slam"])].pivot_table(
+        index=["slug", "sequence"], columns="run", values="ate_rmse_m").round(3)
+    _side = metrics[metrics.slug.isin(["fast_lio2", "map_long", "map_long_sim3", "vggt_long_16gb"])].groupby(
+        ["slug", "sequence"]).agg(ate_rmse_m=("ate_rmse_m", "median"), scale=("scale_sim3", "median")).round(3)
+    mo.vstack([
+        mo.md(r"""
+        ## 5. Repeatability and side results
+
+        **Repeatability.** The five runs of the two visual systems agree within 0.1 mm (FAST-LIO2 within 0.13 mm),
+        except MASt3R-SLAM on `Varying-illu01`, which ends at one of two values. Repetitions show low run-to-run
+        spread under identical conditions, not robustness.
+        """),
+        _det,
+        mo.md(r"""
+        **Side results (one sentence each in the paper).** FAST-LIO2 (LiDAR + IMU) reproduces the published M3DGR
+        value on Dynamic01 (0.14 m vs. 0.13 m) and serves as a pipeline check; its error is mostly the unknown
+        offset between the mocap body and the LiDAR; on `Varying-illu01` it stays at 0.14 m, so scene and ground truth
+        are fine there. Map-Long (VGGT-Long with the "metric" MapAnything, `map_long`) gets the scale wrong by a factor
+        of 4 to 14 indoors (`scale_sim3`). The 16 GB variant of VGGT-Long (chunk size, overlap and loop chunk size
+        halved, one run) loses accuracy on Sha-turn01 and fails on `Varying-illu01` like the default.
+        """),
+        _side,
+    ])
+    return
+
+
+@app.cell
+def _(RES, SEQS, mo):
+    replay_seq = mo.ui.dropdown(SEQS, value="Varying-illu01", label="Sequence")
+    replay_on = mo.ui.switch(label="Show 3D replay (starts a local server on :8781)")
+    _missing = [s for s in SEQS if not (RES / "replay" / f"{s}.mcap").exists()]
+    mo.vstack([
+        mo.md(r"""
+        ## 6. 3D replay in Lichtblick / Foxglove
+
+        All systems in one scene, played back over time: ground truth (grey), VGGT-Long (orange), MASt3R-SLAM
+        (blue), FAST-LIO2 (green, off by default), the pseudo-GT map, the camera image, the per-pose error, the VGGT
+        confidence and the image brightness. Maps of each system can be switched on in the 3D panel's topic list.
+        The viewer is [Lichtblick](https://github.com/lichtblick-suite/lichtblick), the open-source fork of
+        Foxglove Studio, served locally by `tools/viewer.py` (no Docker, no account). Foxglove itself does not
+        allow being embedded; to use it, open `results/replay/<sequence>.mcap` in Foxglove and import
+        `tools/replay_layout.json`.
+        """),
+        mo.callout(mo.md("Missing replays: " + ", ".join(_missing) + ". Build them with "
+                         "`python tools/build_replay.py` (needs `data/`)."), kind="warn") if _missing else mo.md(""),
+        mo.hstack([replay_seq, replay_on], justify="start", gap=2),
+    ])
+    return replay_on, replay_seq
+
+
+@app.cell
+def _(RES, mo, replay_on, replay_seq):
+    mo.stop(not replay_on.value, mo.md("*Switch the replay on to load it here.*"))
+    mo.stop(not (RES / "replay" / f"{replay_seq.value}.mcap").exists(),
+            mo.md(f"No replay for {replay_seq.value} yet: `python tools/build_replay.py --sequence {replay_seq.value}`"))
+    from tools import viewer
+
+    viewer.serve()
+    _url = viewer.url(replay_seq.value)
+    mo.vstack([
+        mo.Html(f'<iframe src="{_url}" style="width:100%;height:760px;border:1px solid #ccc;border-radius:4px" '
+                'allow="fullscreen"></iframe>'),
+        mo.md(f"[Open in a new tab]({_url}) - the layout is stored in the browser after the first visit; "
+              "*Layouts -> Reset* or a private window brings back `tools/replay_layout.json`."),
+    ])
+    return
+
+
+@app.cell
+def _(mo):
+    export = mo.ui.run_button(label="Write paper figures and table")
+    mo.vstack([mo.md("## 7. Export to `paper/`"), export])
+    return (export,)
+
+
+@app.cell
+def _(FIG, SEQS, cr, fig_maps, fig_timeline, fig_trajectories, plt, table):
+    def write_paper():
+        """Figures and the results table for paper/; also callable without the UI."""
+        FIG.mkdir(parents=True, exist_ok=True)
+        for name, make in (("trajectories", fig_trajectories), ("maps_dynamic01", fig_maps),
+                           ("timeline_varying", fig_timeline)):
+            f = make()
+            f.savefig(FIG / f"{name}.pdf")
+            plt.close(f)
+        # one row per system, so the table stays short once all members' systems are in
+        slugs = {"VGGT-Long": "vggt_long", "MASt3R-SLAM": "mast3r_slam"}
+        lines = [r"\setlength{\tabcolsep}{2.6pt}", r"\begin{tabular}{@{}lccccccccc@{}}", r"\toprule",
+                 r" & \multicolumn{3}{c}{ATE RMSE [m]} & \multicolumn{3}{c}{F-score @10\,cm}"
+                 r" & \multicolumn{3}{c}{Correct rate} \\",
+                 r"\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(l){8-10}",
+                 r"System & D & S & V & D & S & V & D & S & V \\", r"\midrule"]
+        for sys_ in table.index.get_level_values(0).unique():
+            r = table.loc[sys_]
+            f = [f"{r.loc[s, 'F-score @10 cm']:.2f}" + ("$^\\dagger$" if not r.loc[s, "ICP accepted"] else "")
+                 for s in SEQS]
+            c = [f"{cr.loc[(slugs[sys_], s), 'CR']:.2f}" for s in SEQS]
+            lines.append(f"{sys_} & " + " & ".join(f"{r.loc[s, 'ATE RMSE [m]']:.2f}" for s in SEQS) + " & "
+                         + " & ".join(f) + " & " + " & ".join(c) + r" \\")
+        lines += [r"\bottomrule", r"\end{tabular}"]
+        (FIG.parent / "tables" / "results.tex").write_text(
+            "% Generated by notebooks/story.py - do not edit by hand.\n" + "\n".join(lines) + "\n")
+        return ["trajectories.pdf", "maps_dynamic01.pdf", "timeline_varying.pdf", "tables/results.tex"]
+
+    return (write_paper,)
+
+
+@app.cell
+def _(export, mo, write_paper):
+    mo.stop(not export.value)
+    mo.md("Written: " + ", ".join(f"`{f}`" for f in write_paper()))
+    return
+
+
+if __name__ == "__main__":
+    app.run()

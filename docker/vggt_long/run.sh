@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# Run VGGT-Long headless on one image folder inside the container.
+#
+# Container mounts:
+#   /data     image folder (*.jpg / *.png); VGGT-Long processes the files in sorted file-name order
+#   /weights  folder with model.pt (VGGT-1B), dino_salad.ckpt, dinov2_vitb14_pretrain.pth
+#   /out      output folder: camera_poses.txt (one 4x4 camera-to-world matrix per image, row-major),
+#             combined_pcd.ply, the config used, log; also VGGT-Long's temporary files (deleted at the end)
+#
+# Environment (all optional; empty = upstream default from configs/base_config.yaml):
+#   CHUNK_SIZE, OVERLAP, LOOP_CHUNK_SIZE   chunking (defaults 60 / 30 / 20; smaller only for GPU memory)
+#   LOOP_ENABLE                            True / False
+#   MODEL                                  VGGT (default) or Mapanything ("Map-Long", metric; weights in
+#                                          /weights/map_anything = HF snapshot of facebook/map-anything)
+#   USING_SIM3                             True / False chunk alignment; upstream: True for VGGT, False (SE(3))
+#                                          for MapAnything ("mapanything need se3")
+#   CALIB=True, CALIB_W, CALIB_H           MapAnything only: K from /calib.txt (KITTI P2 line) for a W x H image
+#   WEIGHTS_DTYPE=bf16                    aggregator weights in bfloat16 (heads stay fp32); saves ~2 GB for 16 GB cards
+
+#   HOST_UID / HOST_GID                    chown the outputs to this user at the end
+#
+# Host example (WSL2):
+#   docker run --rm --gpus all --ipc=host \
+#     -v /path/to/images:/data:ro -v /path/to/weights:/weights:ro -v /path/to/out:/out \
+#     -e HOST_UID=$(id -u) -e HOST_GID=$(id -g) bearl/vggt_long
+set -euo pipefail
+cd /opt/VGGT-Long
+# Apptainer images are read-only, but VGGT-Long writes next to its code (./exps link, optional patch)
+if [ ! -w . ]; then
+    # own folder per job (array tasks can share a node) and writable copies (image files are read-only)
+    W=$(mktemp -d /tmp/vggt-long.XXXXXX) && cp -a /opt/VGGT-Long/. "$W"/ && chmod -R u+w "$W" && cd "$W"
+fi
+
+python - <<'EOF'
+import os, yaml
+cfg = yaml.safe_load(open("configs/base_config.yaml"))
+w = cfg["Weights"]
+w["VGGT"] = "/weights/model.pt"
+w["SALAD"] = "/weights/dino_salad.ckpt"
+w["DNIO"] = "/weights/dinov2_vitb14_pretrain.pth"
+w["Map"] = "/weights/map_anything"
+if os.environ.get("MODEL"):
+    w["model"] = os.environ["MODEL"]
+m = cfg["Model"]
+if os.environ.get("USING_SIM3"):
+    m["using_sim3"] = os.environ["USING_SIM3"] == "True"
+if os.environ.get("CALIB") == "True":            # K from /calib.txt (KITTI P2 line), image size of that K
+    m["calib"], m["w"], m["h"] = True, int(os.environ["CALIB_W"]), int(os.environ["CALIB_H"])
+for env, key, typ in (("CHUNK_SIZE", "chunk_size", int), ("OVERLAP", "overlap", int),
+                      ("LOOP_CHUNK_SIZE", "loop_chunk_size", int)):
+    if os.environ.get(env):
+        m[key] = typ(os.environ[env])
+if os.environ.get("LOOP_ENABLE"):
+    m["loop_enable"] = os.environ["LOOP_ENABLE"] == "True"
+yaml.safe_dump(cfg, open("/out/config_used.yaml", "w"), sort_keys=False)
+print("config:", {"model": w["model"], **{k: m[k] for k in ("chunk_size", "overlap", "loop_chunk_size", "loop_enable", "using_sim3", "calib")}})
+EOF
+
+# Upstream loads the fp32 state dict straight onto the GPU next to the model (2 x 5 GB peak, OOM on 16 GB).
+# Loading on the CPU gives the same weights.
+python - <<'EOF'
+p = "base_models/base_model.py"
+src = open(p).read()
+old = "torch.load(url, map_location='cuda')"
+if old not in src:
+    raise SystemExit("CPU weight loading: patch location not found in base_models/base_model.py")
+open(p, "w").write(src.replace(old, "torch.load(url, map_location='cpu')", 1))
+EOF
+
+if [ "${WEIGHTS_DTYPE:-}" = "bf16" ]; then
+    # Only the aggregator (most of the weights, already run under bf16 autocast); the heads stay fp32 as upstream
+    # runs them with autocast disabled, so their input tokens are cast back to fp32.
+    python - <<'EOF'
+import re
+p = "base_models/base_model.py"
+src = open(p).read()
+src, n1 = re.subn(r"^(\s*)(self\.model = self\.model\.to\(self\.device\))[ \t]*$",
+                  r"\1self.model.aggregator.to(torch.bfloat16)  # bEARL: WEIGHTS_DTYPE=bf16\n\1\2",
+                  src, count=1, flags=re.M)
+open(p, "w").write(src)
+p = "base_models/vggt/models/vggt.py"
+src = open(p).read()
+src, n2 = re.subn(r"^(\s*)(aggregated_tokens_list, patch_start_idx = self\.aggregator\(images\))[ \t]*$",
+                  r"\1\2\n\1aggregated_tokens_list = [t.float() for t in aggregated_tokens_list]  # bEARL: bf16",
+                  src, count=1, flags=re.M)
+open(p, "w").write(src)
+if (n1, n2) != (1, 1):
+    raise SystemExit("WEIGHTS_DTYPE=bf16: patch location not found")
+print("bf16 weights: aggregator in bf16, heads in fp32")
+EOF
+fi
+
+if [ "${MODEL:-}" = "Mapanything" ]; then
+    # VGGT-Long's loop detector imports its own (older) `dinov2`; MapAnything's encoder then gets that cached module
+    # from torch.hub and fails on dinov2.hub.cell_dino. The loop detector is done and freed by then, so drop it.
+    python - <<'EOF'
+import re
+p = "base_models/base_model.py"
+src = open(p).read()
+new, n = re.subn(r"^(\s*)(from mapanything\.models import MapAnything)[ \t]*$",
+                 r"\1import sys  # bEARL: MODEL=Mapanything\n"
+                 r"\1for _k in [k for k in sys.modules if k == 'dinov2' or k.startswith('dinov2.')]:\n"
+                 r"\1    del sys.modules[_k]\n\1\2", src, count=1, flags=re.M)
+if n != 1:
+    raise SystemExit("MODEL=Mapanything: patch location not found in base_models/base_model.py")
+open(p, "w").write(new)
+print("MapAnything: dropping the loop detector's dinov2 module before loading")
+EOF
+fi
+
+if [ "${LOW_DISK:-}" = "True" ]; then
+    # Upstream keeps every chunk on disk twice (unaligned + aligned, ~90 GB peak for 1750 frames). Same results with
+    # less disk: skip fields that are never read back, and drop each chunk file once its point cloud is written.
+    python - <<'EOF'
+p = "vggt_long.py"
+src = open(p).read()
+old_save = "        np.save(save_path, predictions)\n"
+new_save = ("        np.save(save_path, {k: v for k, v in predictions.items()  # bEARL: LOW_DISK\n"
+            "                            if k not in ('depth', 'depth_conf', 'pose_enc')})\n")
+anchor = "ply_path = os.path.join(self.pcd_dir, f'{chunk_idx + 1}_pcd.ply')"
+i = src.find(anchor)
+j = src.find("\n            )\n", i) + len("\n            )\n")
+drop = ("            for _d in (self.result_unaligned_dir, self.result_aligned_dir):  # bEARL: LOW_DISK\n"
+        "                for _n in [f'chunk_{chunk_idx + 1}.npy'] + (['chunk_0.npy'] if chunk_idx == 0 else []):\n"
+        "                    if os.path.exists(os.path.join(_d, _n)):\n"
+        "                        os.remove(os.path.join(_d, _n))\n")
+if src.count(old_save) != 1 or i < 0 or j < len("\n            )\n"):
+    raise SystemExit("LOW_DISK: patch location not found in vggt_long.py")
+src = src.replace(old_save, new_save)
+j = src.find("\n            )\n", src.find(anchor)) + len("\n            )\n")
+open(p, "w").write(src[:j] + drop + src[j:])
+print("LOW_DISK: chunk files trimmed and deleted after use")
+EOF
+fi
+
+# Output only, the algorithm is unchanged: log VGGT's mean depth confidence per frame and chunk to frame_confidence.csv
+# (the model's own quality signal, VGGT-Long only uses it relative to each chunk pair, never as an absolute check). SAVE_CONF=False disables it.
+if [ "${SAVE_CONF:-True}" = "True" ]; then
+python - <<'EOF'
+p = "vggt_long.py"
+src = open(p).read()
+a1 = "            self.all_camera_poses.append((chunk_range, extrinsics))\n"
+a2 = "        self.save_camera_poses()\n"
+if src.count(a1) != 1 or src.count(a2) != 1:
+    raise SystemExit("SAVE_CONF: patch location not found in vggt_long.py")
+src = src.replace(a1, a1 + "            import numpy as _np  # SAVE_CONF\n"
+                  "            self.__dict__.setdefault('frame_conf', []).append((chunk_range, _np.asarray(predictions['depth_conf']).reshape(len(extrinsics), -1).mean(1)))\n")
+src = src.replace(a2, "        with open(os.path.join(self.output_dir, 'frame_confidence.csv'), 'w') as _f:  # SAVE_CONF\n"
+                  "            _f.write('chunk,frame,image,depth_conf_mean\\n')\n"
+                  "            for _k, (_r, _c) in enumerate(getattr(self, 'frame_conf', [])):\n"
+                  "                for _i, _v in enumerate(_c):\n"
+                  "                    _f.write(f'{_k},{_r[0] + _i},{os.path.basename(str(self.img_list[_r[0] + _i]))},{float(_v):.4f}\\n')\n" + a2)
+open(p, "w").write(src)
+print("SAVE_CONF: per-frame depth confidence goes to frame_confidence.csv")
+EOF
+fi
+
+# VGGT-Long writes to ./exps/<image_dir>/<datetime>/ -> put that on the mounted output disk (or a mounted volume)
+mkdir -p /out/exps && rm -rf /out/exps/* exps && ln -sfn /out/exps exps
+
+echo "VGGT-Long commit: $(cat UPSTREAM_COMMIT 2>/dev/null || git rev-parse HEAD)"
+python vggt_long.py --image_dir /data --config /out/config_used.yaml 2>&1 | tee /out/log.txt
+
+RUN_DIR=$(ls -d /out/exps/*/* | tail -1)
+cp "$RUN_DIR/camera_poses.txt" /out/camera_poses.txt
+[ -f "$RUN_DIR/pcd/combined_pcd.ply" ] && cp "$RUN_DIR/pcd/combined_pcd.ply" /out/combined_pcd.ply
+[ -f "$RUN_DIR/loop_closures.txt" ] && cp "$RUN_DIR/loop_closures.txt" /out/loop_closures.txt
+[ -f "$RUN_DIR/frame_confidence.csv" ] && cp "$RUN_DIR/frame_confidence.csv" /out/frame_confidence.csv
+echo "poses: $(wc -l < /out/camera_poses.txt)"
+
+if [ -n "${HOST_UID:-}" ]; then
+    chown -R "${HOST_UID}:${HOST_GID:-$HOST_UID}" /out
+fi

@@ -1,0 +1,36 @@
+{
+  "system": "Map-Long (VGGT-Long + MapAnything)",
+  "slug": "map_long",
+  "member": "Elias Bitsch",
+  "sequence": "Sha-turn01",
+  "run": 0,
+  "started": "2026-10-26T12:46:13",
+  "system_source": {
+    "repository": "https://github.com/DengKaiCQ/VGGT-Long",
+    "commit": "c160869d1d99c96bb227f414afb3bc68c29c9a76",
+    "model_repository": "https://github.com/facebookresearch/map-anything (commit 3d10cf7a3016fc0f9bb13a071ee66c47b10be0d9)",
+    "container": "docker/vggt_long/vggt_long.def",
+    "weights": "huggingface.co/facebook/map-anything (CC BY-NC 4.0, non-commercial use); SALAD + DINOv2 for loop detection"
+  },
+  "alignment": "se3",
+  "deviations_from_defaults": [
+    "Input frame rate 10 Hz instead of 30 Hz (frame_step 3), identical to VGGT-Long; see config/systems/vggt_long.yaml.",
+    "calib: False (upstream default): MapAnything estimates the intrinsics itself, like VGGT. The M3DGR intrinsics could be passed (calib: True) as an extra experiment."
+  ],
+  "pipeline_commit": null,
+  "hardware": {
+    "platform": "Linux-5.14.0-611.49.1.el9_7.x86_64-x86_64-with-glibc2.34",
+    "cpu": "x86_64",
+    "cpu_cores_logical": 64,
+    "ram_gib": 377.6,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 1091.0038268892094,
+  "resources": {
+    "cpu_mean_percent": 7.880897060309122,
+    "ram_peak_mib": 11484.7265625,
+    "gpu_mem_peak_mib": 83892.0
+  }
+}

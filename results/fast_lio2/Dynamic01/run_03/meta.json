@@ -1,0 +1,32 @@
+{
+  "system": "FAST-LIO2",
+  "slug": "fast_lio2",
+  "member": "Elias Bitsch",
+  "sequence": "Dynamic01",
+  "run": 3,
+  "started": "2026-11-07T16:55:00",
+  "system_source": {
+    "repository": "https://github.com/sjtuyinjie/M3DGR (baseline_systems/Fast_LIO2_M3DGR)",
+    "commit": "5fc892c84defef42feb2418f7d38897bef40f490",
+    "upstream": "https://github.com/hku-mars/FAST_LIO",
+    "container": "docker/fast_lio2/Dockerfile"
+  },
+  "alignment": "se3",
+  "deviations_from_defaults": [],
+  "pipeline_commit": "47ecf8aad1da48a7b11ea12ac6926bec6e5db533",
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "cpu_cores_logical": 20,
+    "ram_gib": 63.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU, 16384 MiB"
+  },
+  "success": true,
+  "error": null,
+  "wall_time_s": 199.17089839999971,
+  "resources": {
+    "cpu_mean_percent": 15.797955145118735,
+    "ram_peak_mib": 751.74609375,
+    "gpu_mem_peak_mib": 276.0
+  }
+}
