@@ -1,0 +1,47 @@
+# Configuration of one SLAM system. Copied by tools/register_system.py.
+slug: glim
+system: GLIM
+member: Philip Stix
+
+# Where the system comes from - pin an exact version for reproducibility.
+source:
+  repository: https://github.com/koide3/glim   # ROS 2 wrapper: https://github.com/koide3/glim_ros2
+  commit: 2262aafa2369acff6afab2268a7743aec7a7fa49   # glim inside the image (glim_ros2: 4d4ec524ccf1b02aa09b0af2af767ecc54343798)
+  container: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc
+
+# Inputs taken from the shared sequences (subset of: lidar3d, imu, wheel_odom, rgb, depth)
+sensors: [lidar3d, imu]
+
+# se3 for metric systems (LiDAR, RGB-D, stereo, visual-inertial), sim3 for monocular systems
+alignment: se3
+
+# Parameters: use the authors' defaults. Only calibration / topic names may be adapted.
+# Document EVERY deviation from the defaults here.
+parameter_file: docker/glim/config   # full GLIM config dir (defaults identical to the image's 2262aaf + changes below)
+deviations_from_defaults:
+  - "config_ros.json: imu_topic / points_topic -> M3DGR MID-360 topics (topic names)"
+  - "config_ros.json: acc_scale 0 (auto) -> 9.80665, Livox IMU reports g; value recommended by the GLIM docs for Livox"
+  - "config_ros.json: extension_modules without standard_viewer / rviz_viewer (headless run, no effect on the estimate)"
+  - "config_sensors.json: T_lidar_imu -> MID-360 LiDAR-IMU extrinsic from M3DGR calibration.md (calibration)"
+  - "input: Livox CustomMsg converted to PointCloud2 with per-point times (tools/glim_prepare_bag.py), no points removed"
+
+# How the system is executed (file-based offline run, or ROS bag replay)
+execution:
+  mode: offline               # glim_rosbag reads the bag itself and throttles so no scan is dropped
+  rosbag_rate: null
+
+# Runs in Docker: run_all.py names the container, pipeline/resources.py measures it with docker stats
+docker: true
+
+# Map for map_eval / build_cache: all scans on GLIM's trajectory (tools/glim_dense_map.py), comparable to
+# FAST-LIO2's map. map.ply is GLIM's own thinned submap export (~1 % of the points), kept for reference.
+map_file: map.dense.ply
+
+# Used by pipeline/runners/glim.py
+glim:
+  image: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc   # CPU fallback: koide3/glim_ros2:jazzy + *_cpu.json in config.json (document it!)
+  gpus: true
+  config_dir: docker/glim/config
+  # TUM output in the IMU frame with loop closure. Check against the GT body frame once
+  # gt_to_base_extrinsic in config/sequences.yaml is known (alternative: traj_lidar.txt).
+  trajectory: traj_imu.txt

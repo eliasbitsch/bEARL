@@ -138,6 +138,16 @@ def map_entropy_plane_variance(p: np.ndarray, radius: float = MME_RADIUS, sample
     return (float(np.mean(ent)), float(np.mean(var))) if ent else (float("nan"), float("nan"))
 
 
+def map_file(slug: str) -> str:
+    """Map evaluated for a system: map.ply, unless its config names another file (`map_file`), e.g. GLIM's dense
+    map with all scans on its trajectory instead of its thinned submap export. Slugs without a config (diagnostic
+    variants such as vggt_long_lit_only) use map.ply."""
+    try:
+        return load_system_config(slug).get("map_file", "map.ply")
+    except FileNotFoundError:
+        return "map.ply"
+
+
 def evaluate_map(slug: str, seq: str, run: str = "run_00", export: bool = False) -> list[dict]:
     cfg = load_sequences()
     run_dir = RESULTS_DIR / slug / seq / run
@@ -147,7 +157,7 @@ def evaluate_map(slug: str, seq: str, run: str = "run_00", export: bool = False)
     _, (s, r, t) = align_full(gt, est_traj, sim3, cfg["evaluation"]["t_max_diff"])
 
     ref = voxel_thin(_read_ply_xyzrgb(ROOT / cfg["data_root"] / seq / "reference_map.ply")[0])
-    raw = s * _read_ply_xyzrgb(run_dir / "map.ply")[0] @ r.T + t        # thin only once, after the final transform
+    raw = s * _read_ply_xyzrgb(run_dir / map_file(slug))[0] @ r.T + t   # thin only once, after the final transform
     est = voxel_thin(raw)
     tree = cKDTree(ref)
     raw_icp, (s_i, r_i, t_i) = icp(raw, tree, ref, with_scale=sim3)
@@ -190,7 +200,7 @@ def main() -> None:
         for seq in load_sequences()["sequences"]:
             if a.sequence not in (None, seq["name"]):
                 continue
-            if (RESULTS_DIR / system["slug"] / seq["name"] / "run_00" / "map.ply").exists():
+            if (RESULTS_DIR / system["slug"] / seq["name"] / "run_00" / map_file(system["slug"])).exists():
                 rows += evaluate_map(system["slug"], seq["name"], export=a.export)
                 print(f"{system['slug']} {seq['name']}: done")
     df = pd.DataFrame(rows)

@@ -98,7 +98,7 @@ Known pitfalls (resolve in week 1):
 |---|---|---|---|---|---|
 | Elias Bitsch | **VGGT-Long** (Deng et al., ICRA 2026) | monocular RGB | 3D foundation model (VGGT), chunked + Sim(3) chunk alignment | yes | RTX 3080 Ti / GPU cluster |
 | Elias Bitsch (backup) | **FAST-LIO2** (Xu et al., T-RO 2022), M3DGR authors' MID-360 version | MID-360 LiDAR + IMU | tightly coupled iterated Kalman filter | no | CPU (ROS 1 container) |
-| Philip Stix | *your choice* | | | | |
+| Philip Stix | **GLIM** (Koide et al., RAS 2024) | MID-360 LiDAR + IMU | tightly coupled LiDAR-inertial factor graph, GPU scan matching (VGICP), submaps | yes (implicit, overlapping submaps) | RTX 3050 Ti Laptop 4 GB, i7-11370H, Docker Desktop (WSL2) |
 | Viktoriia Ovdiienko | *your choice* | | | | |
 | Jiayi Zhou | **ORB-SLAM3** (C Campos et al., IEEE Transactions on Robotics 2020) | RGB-D + IMU | classic geometry + ORB feature extraction, bundle adjustment (BA) with pose graph optimization | yes | CPU |
 

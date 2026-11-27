@@ -2,6 +2,8 @@
 % sota: 2-3 sentences on GLIM (paradigm, sensors, loop closure), with a citation in references.bib.
 % methods: configuration and any deviation from the defaults (config/systems/glim.yaml).
 % results: 1-2 sentences per research question; expected role: control, unaffected by light.
-\newcommand{\stixSota}{\todo{Philip: GLIM in 2--3 sentences (LiDAR--IMU, factor graph, loop closure).}}
-\newcommand{\stixMethods}{\todo{Philip: GLIM configuration and deviations from the defaults.}}
-\newcommand{\stixResults}{\todo{Philip: GLIM results on the three sequences; does the light change matter?}}
+% Sources of the numbers: results/summary.csv (ATE), results/map_metrics.csv (F-score),
+% docs/glim/REPORT.md (offset diagnostic, dark/lit split).
+\newcommand{\stixSota}{GLIM~\cite{koide2024glim} is a tightly coupled LiDAR--inertial SLAM system whose scan-matching factors (voxelised GICP) are evaluated on the GPU. Its odometry matches each scan against spatially distributed keyframes in a fixed-lag smoother with IMU preintegration, which bridges a few seconds of degenerate range data; submaps are refined by batch optimisation and aligned wherever they overlap, which closes loops without explicit place recognition.}
+\newcommand{\stixMethods}{GLIM (the authors' Docker image, glim \texttt{2262aaf}, GPU variant, RTX 3050 Ti laptop GPU) gets the MID-360 point clouds with per-point times and the MID-360 IMU and runs with default parameters; only the topics, the IMU acceleration scale (the Livox IMU reports $g$) and the LiDAR--IMU extrinsic from M3DGR are set. Its IMU-frame trajectory is aligned with SE(3).}
+\newcommand{\stixResults}{GLIM, the LiDAR--inertial control, reaches 0.14, 0.20 and 0.14\,m ATE and, with all scans on its trajectory, a map F-score of 0.80, 0.99 and 0.99; on D, people walking through lower the precision. Most of its ATE is the marker-to-IMU offset: moved into the marker frame with the reference-map calibration, its ATE is 8, 9 and 5\,mm. On V this error does not depend on the light (5.3\,mm lit, 4.1\,mm dark), and GLIM reports no failure, so the room stays trackable in the dark and the camera systems fail because of the images.}
