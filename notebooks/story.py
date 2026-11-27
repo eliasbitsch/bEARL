@@ -96,7 +96,8 @@ def _(CACHE, RES, SEQS, pd):
     light = {s: pd.read_csv(CACHE / f"light_{s}.csv") for s in SEQS}
     gt = {s: pd.read_csv(CACHE / f"gt_{s}.csv") for s in SEQS}
     traj = {(slug, s): pd.read_csv(CACHE / f"traj_{slug}_{s}.csv")
-            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "vggt_long_lit_only") for s in SEQS
+            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "vggt_long_lit_only", "vggt_long_noloop",
+                         "vggt_long_lit_noloop") for s in SEQS
             if (CACHE / f"traj_{slug}_{s}.csv").exists()}
     comp = pd.read_csv(CACHE / "comparisons.csv").set_index("sequence")
     return comp, gt, light, maps, metrics, runs, traj
@@ -136,7 +137,11 @@ def _(DARK, RES, SEQS, light, np, pd, re, runs):
     def vggt_messages(seq):
         """Failure-like messages in VGGT-Long's log, without the xFormers start-up notices."""
         log = (RES / "vggt_long" / seq / "run_00" / "vggt_long" / "log.txt").read_text(errors="ignore")
-        return sum(1 for l in log.splitlines() if re.search(r"warn|fail|lost|error", l, re.I) and "xFormers" not in l)
+        # library notices (xFormers, FutureWarning) are not run-time reports of the system
+        skip = ("xFormers", "FutureWarning", "warnings.warn", "UserWarning")
+        # "error" is left out: every link prints routine "Alignment error statistics"
+        return sum(1 for l in log.splitlines() if re.search(r"warn|fail|lost", l, re.I)
+                   and not any(k in l for k in skip))
 
     def mast3r_relocs(seq):
         """Failed relocalisations per block of about 30 frames (MASt3R-SLAM prints its FPS every 30 frames)."""
@@ -423,7 +428,7 @@ def _(SEQS, light, np, pd, traj):
 
     cr = pd.DataFrame([correct_rate(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS]) \
         .set_index(["slug", "sequence"])
-    return (cr,)
+    return EPS, SIGMA, cr
 
 
 @app.cell
@@ -460,6 +465,99 @@ def _(DARK, SEQS, comp, conf, light, np, pd, traj):
 
 
 @app.cell
+def _(DARK, EPS, RES, SIGMA, SEQS, gt, light, np, pd, re, relocs, runs, traj):
+    def _umeyama_rmse(a, b):
+        """RMSE of b after Sim(3) Umeyama alignment onto a (positions only)."""
+        ma, mb = a.mean(0), b.mean(0)
+        A, B = a - ma, b - mb
+        U, S, Vt = np.linalg.svd(A.T @ B / len(a))
+        D = np.eye(3)
+        D[2, 2] = np.sign(np.linalg.det(U @ Vt))
+        R = U @ D @ Vt
+        s = np.trace(np.diag(S) @ D) / B.var(0).sum()
+        return float(np.sqrt(np.mean(np.sum((A - s * B @ R.T) ** 2, 1))))
+
+    def dark_phases(seq, min_len=5.0):
+        l = light[seq]
+        dk = (l.black_fraction > DARK).astype(int).to_numpy()
+        d = np.diff(np.r_[0, dk, 0])
+        return [(l.t_rel.iloc[a], l.t_rel.iloc[b - 1]) for a, b in zip(np.flatnonzero(d == 1), np.flatnonzero(d == -1))
+                if l.t_rel.iloc[b - 1] - l.t_rel.iloc[a] > min_len]
+
+    def review_diagnostics(seq="Varying-illu01"):
+        out = {}
+        l, ph = light[seq], dark_phases(seq)
+        dark_at = lambda t: np.interp(t, l.t_rel, l.black_fraction) > DARK
+        T = l.t_rel.iloc[-1]
+        # MASt3R-SLAM keyframes per dark phase (all five runs give the same counts)
+        k = traj[("mast3r_slam", seq)].t_rel.to_numpy()
+        out["mast3r_kf_per_dark_phase"] = [int(((k >= a) & (k <= b)).sum()) for a, b in ph]
+        out["mast3r_kf_dark"], out["mast3r_kf_lit"] = int(dark_at(k).sum()), int((~dark_at(k)).sum())
+        out["mast3r_kf_gaps_s"] = [(round(a, 1), round(b, 1)) for a, b in zip(k[:-1], k[1:]) if b - a > 10]
+        run = runs[(runs.slug == "mast3r_slam") & (runs.sequence == seq)].run.iloc[0]
+        log = (RES / "mast3r_slam" / seq / run / "mast3r_slam" / "log.txt").read_text(errors="ignore")
+        out["mast3r_reloc_success"] = log.count("Success! Relocalized")
+        # relocalisation vs. darkness, per block of ~1 s
+        r = relocs[seq]
+        rd = dark_at(r.t_rel.to_numpy())
+        out["dark_blocks_with_reloc_pct"] = 100 * float(((r.failed > 0) & rd).sum() / rd.sum())
+        out["reloc_blocks_lit_pct"] = 100 * float(((r.failed > 0) & ~rd).sum() / (r.failed > 0).sum())
+        out["first_reloc_s"] = float(r.t_rel[r.failed > 0].iloc[0])
+        # VGGT-Long: global alignment smears the error, so also per-lit-segment Sim(3) ATE
+        v = traj[("vggt_long", seq)]
+        out["vggt_far_pct"] = 100 * float((v.error_m > EPS).mean())
+        out["vggt_err_before_first_blackout_m"] = float(v[v.t_rel < ph[0][0]].error_m.median())
+        bounds = [0.0] + [x for a, b in ph for x in (a, b)] + [T]
+        seg = []
+        for a, b in zip(bounds[::2], bounds[1::2]):
+            d = v[(v.t_rel >= a) & (v.t_rel < b)]
+            if len(d) > 20:
+                seg.append(_umeyama_rmse(d[["gt_x", "gt_y", "gt_z"]].values, d[["est_x", "est_y", "est_z"]].values))
+        out["vggt_lit_segment_ate_m"] = [round(x, 2) for x in seg]
+        # ground-truth displacement across each dark phase
+        g = gt[seq]
+        pos = lambda t: g[["x", "y"]].values[(g.t_rel - t).abs().idxmin()]
+        out["gt_shift_across_dark_m"] = [round(float(np.linalg.norm(pos(b) - pos(a))), 1) for a, b in ph]
+        # VGGT-Long loop pairs (10 Hz frame indices) that join two dark frames
+        vlog = (RES / "vggt_long" / seq / "run_00" / "vggt_long" / "log.txt").read_text(errors="ignore")
+        pairs = [(int(a), int(b)) for a, b in re.findall(r"^(\d+), (\d+), similarity", vlog, re.M)]
+        ft = lambda f: float(np.interp(3 * f, l.frame, l.t_rel))
+        out["vggt_loop_pairs"] = len(pairs)
+        out["vggt_loop_pairs_dark_dark"] = sum(dark_at(ft(a)) and dark_at(ft(b)) for a, b in pairs)
+        # same timestamps, lit keyframes only (each system under its own global alignment)
+        m = traj[("mast3r_slam", seq)]
+        lit_kf = m[~dark_at(m.t_rel.to_numpy())]
+        vi = np.searchsorted(v.t_rel.values, lit_kf.t_rel.values).clip(1, len(v) - 1)
+        vi = np.where(np.abs(v.t_rel.values[vi - 1] - lit_kf.t_rel.values) < np.abs(v.t_rel.values[vi] - lit_kf.t_rel.values), vi - 1, vi)
+        rms = lambda e: float(np.sqrt(np.mean(np.square(e))))
+        out["lit_kf_n"] = len(lit_kf)
+        out["lit_kf_mast3r_m"], out["lit_kf_vggt_m"] = rms(lit_kf.error_m), rms(v.error_m.values[vi])
+        return out
+
+    def cr_cap(slug, seq):
+        """Highest correct rate the output rate allows (every exported pose correct)."""
+        t = traj[(slug, seq)].t_rel.values
+        T = light[seq].t_rel.iloc[-1]
+        return float(np.minimum(np.diff(np.append(t, T)), SIGMA).sum() / T)
+
+    diag = review_diagnostics()
+    caps = pd.Series({(slug, s): cr_cap(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS}, name="CR_cap")
+    return caps, dark_phases, diag
+
+
+@app.cell
+def _(caps, diag, mo, pd):
+    mo.vstack([mo.md(r"""
+    **Diagnostics (second review).** Keyframes of MASt3R-SLAM per dark phase, its relocalisation timing, the error of
+    VGGT-Long per lit segment (each segment Sim(3)-aligned on its own; the global alignment spreads a global
+    inconsistency over every frame, so the per-frame error alone cannot say when tracking broke), the true
+    displacement across each dark phase, VGGT-Long's loop pairs that join two dark frames, and the highest correct
+    rate each system's output rate allows (`CR_cap`).
+    """), pd.Series(diag, dtype=object).to_frame("value"), caps.round(2).to_frame()])
+    return
+
+
+@app.cell
 def _(checks, darklit, mo):
     mo.vstack([mo.md(r"""
     **Fairness checks.** MASt3R-SLAM is scored on its keyframes only; VGGT-Long on every frame. `vggt_on_mast3r_kf_m`
@@ -470,34 +568,42 @@ def _(checks, darklit, mo):
 
 
 @app.cell
-def _(checks, conf, darklit, links, lost_pct, mo, relocs, table, vggt_msgs):
+def _(checks, conf, dark_phases, darklit, diag, links, mo, table, vggt_msgs):
     _s = "Varying-illu01"
-    _v, _m = table.loc[("VGGT-Long", _s)], table.loc[("MASt3R-SLAM", _s)]
+    _v = table.loc[("VGGT-Long", _s)]
     _c = conf[_s]
-    _conf_txt = ("" if _c is None else
-                 f" VGGT's own depth confidence drops from a median of {_c[~_c.dark].depth_conf_mean.median():.1f} in lit"
-                 f" frames to {_c[_c.dark].depth_conf_mean.median():.2f} in dark frames (95th percentile"
-                 f" {_c[_c.dark].depth_conf_mean.quantile(0.95):.2f}). The confidence is 1 + e^x, so 1.0 is the lowest"
-                 " value the model can output: it flags the dark input. VGGT-Long only drops points below 10 % of the"
-                 " lower of the two chunk medians, a relative threshold that a pair of dark chunks passes. In lit frames"
-                 f" after the blackouts the confidence is back at {checks.loc[_s, 'conf_lit_median']:.1f}"
-                 f" (Dynamic01: {checks.loc['Dynamic01', 'conf_lit_median']:.1f}) while the pose is wrong: nothing flags"
-                 " the wrong trajectory.")
+    _after = _c[(~_c.dark) & (_c.t_rel > dark_phases(_s)[0][1])]
+    conf_after_first_blackout = float(_after.depth_conf_mean.median())
     mo.md(f"""
-    **RQ2.** VGGT-Long outputs a pose for every frame and ends at an ATE of {_v['ATE RMSE [m]']:.2f} m, no better than a
-    robot that never moves ({checks.loc[_s, 'const_baseline_m']:.2f} m). Dark chunks are still joined to their
-    neighbours; the chained chunk scale ends at {links[_s].cumulative_scale.iloc[-1]:.3f} (lit sequences:
-    {links['Dynamic01'].cumulative_scale.iloc[-1]:.2f}, {links['Sha-turn01'].cumulative_scale.iloc[-1]:.2f}), and the
-    trajectory shrinks towards the room centre. The error is larger in lit frames
-    ({darklit.loc[('vggt_long', _s), 'rmse_lit_m']:.2f} m) than in dark ones
-    ({darklit.loc[('vggt_long', _s), 'rmse_dark_m']:.2f} m). Its log contains {vggt_msgs[_s]} failure messages.
-    MASt3R-SLAM stops adding keyframes in the dark and relocalises without success during
-    {lost_pct[('mast3r_slam', _s)]:.0f} % of the run ({int(relocs[_s].failed.sum())} attempts, from the second dark
-    phase on; in the first one it neither adds keyframes nor relocalises). Its last keyframe is at
-    {darklit.loc[('mast3r_slam', _s), 'last_pose_s']:.0f} s. On its keyframes its ATE is {_m['ATE RMSE [m]']:.2f} m,
-    VGGT-Long's on the same timestamps {checks.loc[_s, 'vggt_on_mast3r_kf_m']:.2f} m.{_conf_txt}
+    **RQ2.** VGGT-Long outputs a pose for every 10 Hz input frame and ends at an ATE of {_v['ATE RMSE [m]']:.2f} m. That
+    is close to the ceiling a Sim(3) alignment allows ({checks.loc[_s, 'const_baseline_m']:.2f} m: scale 0 puts every
+    pose on the ground-truth centroid), i.e. the global alignment explains almost nothing; {diag['vggt_far_pct']:.0f} %
+    of its poses are more than 1 m off. The global alignment spreads this inconsistency over every frame (median
+    error {diag['vggt_err_before_first_blackout_m']:.2f} m already before the first blackout). Aligned per lit segment,
+    the error is only {min(diag['vggt_lit_segment_ate_m']):.2f}-{max(diag['vggt_lit_segment_ate_m']):.2f} m: VGGT-Long
+    tracks correctly between blackouts and fails at joining the segments across them, while the robot moves
+    {min(diag['gt_shift_across_dark_m']):.1f}-{max(diag['gt_shift_across_dark_m']):.1f} m during each dark phase.
+    The chained scale of the sequential chunk links (before loop closure) ends at
+    {links[_s].cumulative_scale.iloc[-1]:.3f} (lit sequences: {links['Dynamic01'].cumulative_scale.iloc[-1]:.2f},
+    {links['Sha-turn01'].cumulative_scale.iloc[-1]:.2f}); {diag['vggt_loop_pairs_dark_dark']} of
+    {diag['vggt_loop_pairs']} loop pairs join two dark frames. Its log contains {vggt_msgs[_s]} failure messages.
+
+    MASt3R-SLAM adds no keyframe in the first dark phase and its first relocalisation attempt comes only at
+    {diag['first_reloc_s']:.1f} s, after that phase. At the start of the second dark phase it adds a burst of
+    {diag['mast3r_kf_per_dark_phase'][1]} keyframes on near-black images, then stops (gaps
+    {', '.join(f'{a}-{b} s' for a, b in diag['mast3r_kf_gaps_s'])}); {diag['dark_blocks_with_reloc_pct']:.0f} % of the
+    dark seconds contain a failed relocalisation attempt, {diag['reloc_blocks_lit_pct']:.0f} % of those seconds are lit,
+    and it relocalises successfully {diag['mast3r_reloc_success']} times. Its last keyframe is at
+    {darklit.loc[('mast3r_slam', _s), 'last_pose_s']:.0f} s. On its {diag['lit_kf_n']} lit keyframes its error is
+    {diag['lit_kf_mast3r_m']:.2f} m, VGGT-Long's at the same timestamps {diag['lit_kf_vggt_m']:.2f} m.
+
+    VGGT's depth confidence drops from a median of {_c[~_c.dark].depth_conf_mean.median():.1f} in lit frames to
+    {_c[_c.dark].depth_conf_mean.median():.2f} in dark frames (95th percentile {_c[_c.dark].depth_conf_mean.quantile(0.95):.2f});
+    it is 1 + e^x, so 1.0 is the floor: it flags the dark input. In lit frames after the first blackout it is
+    {conf_after_first_blackout:.1f} (Dynamic01: {checks.loc['Dynamic01', 'conf_lit_median']:.1f}), consistent with the
+    locally correct geometry; nothing reports the wrong join.
     """)
-    return
+    return (conf_after_first_blackout,)
 
 
 @app.cell
@@ -534,29 +640,33 @@ def _(CORE, SEQS, conf, lost_pct, metrics, pd, relocs, vggt_msgs):
 def _(mo):
     mo.md(r"""
     **RQ3.** A run counts as visibly failed when the system itself reports it (log message, relocalisation state).
-    VGGT-Long reports nothing on any sequence; MASt3R-SLAM reports being lost for 0 % of the lit sequences and for
-    most of the dark time of `Varying-illu01`. The "time span" column (first to last matched pose) is not
-    gap-aware and is shown for transparency only; it cannot show tracking loss inside a run. VGGT's confidence flags
-    the dark input but not the wrong trajectory that follows. Related work: learned trackers trade explicit tracking
-    loss for silent drift (Thomas et al. 2026); VGGT's pose errors are only partly predicted by its confidence
-    (Srinivasan and Nordström 2026); 3D foundation models produce dense geometry even for noise (Paul et al. 2026).
+    VGGT-Long reports nothing on any sequence; MASt3R-SLAM reports being lost in none of the lit sequences and in
+    most of the dark seconds of `Varying-illu01`, though late for the first blackout. The "time span" column (first
+    to last matched pose) is not gap-aware and is shown for transparency only. VGGT's confidence flags the dark input
+    but not the wrong join that follows. The correct rate of MASt3R-SLAM is bounded by its keyframe output rate
+    (`CR_cap` in the diagnostics), so on the lit sequences it mostly measures that rate, not accuracy.
     """)
     return
 
 
 @app.cell
 def _(darklit, mo, np, traj):
-    _d = traj[("vggt_long_lit_only", "Varying-illu01")]
-    lit_only_ate = float(np.sqrt(np.mean(_d.error_m ** 2)))
+    def diag_ate(slug, seq="Varying-illu01"):
+        d = traj.get((slug, seq))
+        return None if d is None else float(np.sqrt(np.mean(d.error_m ** 2)))
+
+    diag_runs = {k: diag_ate(k) for k in ("vggt_long_lit_only", "vggt_long_noloop", "vggt_long_lit_noloop")}
+    _f = lambda x: "pending" if x is None else f"{x:.2f} m"
     mo.md(f"""
-    **Diagnostic: VGGT-Long without the dark frames.** Same defaults, near-black frames removed from the input
-    (`cluster/run_vggt_long_lit_only.sh`). ATE {lit_only_ate:.2f} m on the remaining lit frames, compared with
-    {darklit.loc[('vggt_long', 'Varying-illu01'), 'rmse_lit_m']:.2f} m of the default run on the lit frames. Dropping
-    the dark input does not help: across each 12-16 s gap the robot moves several metres, and VGGT-Long joins chunks
-    that hardly overlap, again without any warning. The dark chunk links are therefore not the only cause; VGGT-Long
-    has no check that two chunks actually fit together.
+    **Diagnostics: VGGT-Long without the dark frames and without loop closure** on `Varying-illu01`, otherwise the
+    authors' defaults (`cluster/run_vggt_long_lit_only.sh`, `cluster/run_vggt_long_noloop.sh`). ATE without dark
+    frames {_f(diag_runs['vggt_long_lit_only'])} (default run on the lit frames:
+    {darklit.loc[('vggt_long', 'Varying-illu01'), 'rmse_lit_m']:.2f} m); without loop closure
+    {_f(diag_runs['vggt_long_noloop'])}; without both {_f(diag_runs['vggt_long_lit_noloop'])}. Removing the dark
+    frames also removes time gaps inside chunks and loop candidates, so each run rules a cause out rather than
+    isolating one.
     """)
-    return (lit_only_ate,)
+    return (diag_runs,)
 
 
 @app.cell
@@ -569,8 +679,9 @@ def _(metrics, mo, pd):
         mo.md(r"""
         ## 5. Repeatability and side results
 
-        **Repeatability.** Five runs per sequence agree within 0.1 mm except MASt3R-SLAM on `Varying-illu01`, which
-        alternates between two outcomes while it relocalises. Repetitions therefore show determinism, not robustness.
+        **Repeatability.** The five runs of the two visual systems agree within 0.1 mm (FAST-LIO2 within 0.13 mm),
+        except MASt3R-SLAM on `Varying-illu01`, which ends at one of two values. Repetitions show low run-to-run
+        spread under identical conditions, not robustness.
         """),
         _det,
         mo.md(r"""
@@ -578,9 +689,8 @@ def _(metrics, mo, pd):
         value on Dynamic01 (0.14 m vs. 0.13 m) and serves as a pipeline check; its error is mostly the unknown
         offset between the mocap body and the LiDAR; on `Varying-illu01` it stays at 0.14 m, so scene and ground truth
         are fine there. Map-Long (VGGT-Long with the "metric" MapAnything, `map_long`) gets the scale wrong by a factor
-        of 4 to 14 indoors (`scale_sim3`). The 16 GB variant of VGGT-Long (chunks of 30) loses accuracy on the sharp
-        turns of Sha-turn01 and fails on `Varying-illu01` just like the default, so the failure does not hinge on the
-        chunk length.
+        of 4 to 14 indoors (`scale_sim3`). The 16 GB variant of VGGT-Long (chunk size, overlap and loop chunk size
+        halved, one run) loses accuracy on Sha-turn01 and fails on `Varying-illu01` like the default.
         """),
         _side,
     ])

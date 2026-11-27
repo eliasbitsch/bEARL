@@ -77,11 +77,19 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _send_file(self, f: Path) -> None:
         size = f.stat().st_size
-        m = re.match(r"bytes=(\d*)-(\d*)", self.headers.get("Range", ""))
+        m = re.match(r"bytes=(\d*)-(\d*)$", self.headers.get("Range", ""))
         a, b = 0, size - 1
-        if m:
-            a = int(m[1]) if m[1] else size - int(m[2])
-            b = int(m[2]) if m[1] and m[2] else size - 1
+        if m and (m[1] or m[2]):
+            if m[1]:
+                a, b = int(m[1]), min(int(m[2]), size - 1) if m[2] else size - 1
+            else:
+                a = max(size - int(m[2]), 0)
+            if a > b or a >= size:
+                self.send_response(416)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
             self.send_response(206)
             self.send_header("Content-Range", f"bytes {a}-{b}/{size}")
         else:

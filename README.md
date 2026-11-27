@@ -10,7 +10,7 @@ Each member evaluates **one SLAM system of their own choice**. Everything else i
 
 | Member | SLAM system | Sensors | Status |
 |---|---|---|---|
-| Elias Bitsch | VGGT-Long | monocular RGB | done (3 sequences x 5 runs) |
+| Elias Bitsch | VGGT-Long, MASt3R-SLAM (FAST-LIO2 as pipeline check) | monocular RGB | done (3 sequences x 5 runs) |
 | Philip Stix | GLIM | 3D LiDAR (Livox MID-360) + IMU | system chosen, runner to do |
 | Viktoriia Ovdiienko | *to be chosen* | | |
 | Jiayi Zhou | ORB-SLAM3 | RGB-D (D435i) + IMU (D435i | system chosen |
@@ -123,14 +123,30 @@ docs/                     plan and literature review
 results/                  raw outputs of all runs: results/<slug>/<sequence>/run_<k>/
 ```
 
-## Reproducing everything
-```bash
-make install && make run && make eval && make figures && make paper
-```
+## Reproducing the paper
+
+From the committed results (no dataset, no GPU): `make install && make figures && make paper`.
+`notebooks/story.py` reads only `results/` and `results/cache/` and writes every figure and `paper/tables/results.tex`.
+
+From scratch (dataset in `data/M3DGR`, see "Data"; SLAM runs need a GPU, we used the ADA cluster):
+
+| Step | Command | Output |
+|---|---|---|
+| 1. extract images, GT, LiDAR | `python -m pipeline.prepare_data --bag data/M3DGR/<seq>.bag --sequence <seq>` | `data/M3DGR/<seq>/` |
+| 2. pseudo-GT map | `make refmaps` | `data/M3DGR/<seq>/reference_map.ply` |
+| 3. SLAM runs | `make run` (or `cluster/run_vggt_long.sh`, `SLUG=mast3r_slam ...`) | `results/<slug>/<seq>/run_NN/` |
+| 4. diagnostics on V | `sbatch cluster/run_vggt_long_lit_only.sh`, `sbatch cluster/run_vggt_long_noloop.sh`, `MODE=lit sbatch --export=ALL cluster/run_vggt_long_noloop.sh`, then `python tools/import_diagnostic.py ...` | `results/vggt_long_{lit_only,noloop,lit_noloop}/` |
+| 5. trajectory metrics | `make eval` | `results/metrics.csv` |
+| 6. map metrics | `make mapeval` | `results/map_metrics.csv` |
+| 7. notebook cache | `make cache` | `results/cache/` |
+| 8. figures, table, paper | `make figures && make paper` | `paper/main.pdf` |
+
+VGGT's per-frame depth confidence (`frame_confidence.csv`) comes from a small output-only patch applied by
+`docker/vggt_long/run.sh` (`SAVE_CONF`); the algorithm is unchanged.
 
 ## Rules we agreed on
 - **Defaults only:** use the authors' default parameters. Only calibration and topic names may be adapted, and every deviation is documented in `config/systems/<slug>.yaml`.
 - **Standard metrics only:** ATE (Sturm et al. 2012), Umeyama alignment, SE(3) for metric systems and Sim(3) for monocular ones (Zhang & Scaramuzza 2018).
-- **Repeated runs:** N runs per system and sequence; we report the median and IQR.
+- **Repeated runs:** N runs per system and sequence; we report the median (IQR in the notebook).
 - **Report failures:** failed runs are reported, never removed.
 - **Resources are context only:** CPU, RAM and GPU numbers are always reported together with the hardware and never used for ranking.

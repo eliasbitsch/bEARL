@@ -96,7 +96,8 @@ def build(seq: str) -> Path:
 
     conf = run_dir("vggt_long", seq) / "frame_confidence.csv"
     if conf.exists():
-        c = pd.read_csv(conf).drop_duplicates("image", keep="last")   # overlapping chunks: keep the later estimate
+        # mean over the overlapping chunks that contain a frame, as in the paper figure
+        c = pd.read_csv(conf).groupby("image", as_index=False).depth_conf_mean.mean()
         msgs += scalar("/vggt_long/confidence", c.image.str[:-4].astype(float).to_numpy(), c.depth_conf_mean.to_numpy())
 
     ref = data / seq / "reference_map.ply"

@@ -23,7 +23,8 @@ DATA = ROOT / CFG["data_root"]
 SEQS = [s["name"] for s in CFG["sequences"]]
 OUT = ROOT / "results" / "cache"
 SYSTEMS = {"vggt_long": True, "mast3r_slam": True, "fast_lio2": False,   # slug -> Sim(3) alignment
-           "vggt_long_lit_only": True}   # diagnostic, Varying-illu01 only
+           "vggt_long_lit_only": True, "vggt_long_noloop": True,   # diagnostics, Varying-illu01 only
+           "vggt_long_lit_noloop": True}
 BLACK = 20            # grey value below which a pixel counts as near-black (same as 00_story)
 THUMB_STEP = 15       # every 15th frame = 2 Hz
 SLICE_Z = (0.9, 1.3)  # wall slice above furniture, same as the paper's map overlay
@@ -35,6 +36,8 @@ METRICS = pd.read_csv(ROOT / "results" / "metrics.csv")
 
 def rep_run(slug: str, seq: str) -> str:
     """Representative run = ATE closest to the median (MASt3R-SLAM is not deterministic on Varying-illu01)."""
+    if slug.startswith("vggt_long"):   # deterministic; run_00 is the one with map.ply and frame_confidence.csv
+        return "run_00"
     m = METRICS[(METRICS.slug == slug) & (METRICS.sequence == seq)]
     return m.loc[(m.ate_rmse_m - m.ate_rmse_m.median()).abs().idxmin(), "run"] if len(m) else "run_00"
 
