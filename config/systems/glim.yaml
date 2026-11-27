@@ -33,6 +33,10 @@ execution:
 # Runs in Docker: run_all.py names the container, pipeline/resources.py measures it with docker stats
 docker: true
 
+# Map for map_eval / build_cache: all scans on GLIM's trajectory (tools/glim_dense_map.py), comparable to
+# FAST-LIO2's map. map.ply is GLIM's own thinned submap export (~1 % of the points), kept for reference.
+map_file: map.dense.ply
+
 # Used by pipeline/runners/glim.py
 glim:
   image: koide3/glim_ros2:jazzy_cuda13.1@sha256:8e00163cd989faf845134500237cfdcc0ed3b14fb3b33ce45b4952ba29b9c8cc   # CPU fallback: koide3/glim_ros2:jazzy + *_cpu.json in config.json (document it!)

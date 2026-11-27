@@ -51,7 +51,7 @@ Robustness is often tested with synthetic perturbations, but a synthetic illumin
 \section{Materials and Methods}
 \textbf{Dataset.} M3DGR~\cite{zhang2025m3dgr} is recorded with a wheeled robot carrying an RGB-D camera (RealSense D435i, $640\times480$, 30\,Hz), a Livox MID-360 LiDAR, IMUs and wheel odometry; ground truth comes from motion capture at about 300\,Hz. We use three sequences in one $6.5\times3$\,m room: \emph{Dynamic01} (D; 175\,s, 71\,m, people walking), \emph{Sha-turn01} (S; 139\,s, 98\,m, sharp turns) and \emph{Varying-illu01} (V; 154\,s, 72\,m, light off five times for 12 to 16\,s; 46\,\% of its frames have more than 80\,\% of their pixels below grey value 20 of 255).
 
-\textbf{Systems.} Both systems use the authors' default parameters on the RGB images and ran on an NVIDIA RTX PRO 6000 Blackwell GPU. VGGT-Long (chunks of 60 frames, overlap 30, loop closure) gets every third frame (10\,Hz), as its authors advise for dense input; MASt3R-SLAM gets all frames and exports keyframes only. \stixMethods\ \zhouMethods\ \ovdiienkoMethods
+\textbf{Systems.} VGGT-Long and MASt3R-SLAM use the authors' default parameters on the RGB images and ran on an NVIDIA RTX PRO 6000 Blackwell GPU. VGGT-Long (chunks of 60 frames, overlap 30, loop closure) gets every third frame (10\,Hz), as its authors advise for dense input; MASt3R-SLAM gets all frames and exports keyframes only. \stixMethods\ \zhouMethods\ \ovdiienkoMethods
 
 \textbf{Metrics.} The absolute trajectory error (ATE) is the root mean square (RMS) of the position error~\cite{sturm2012benchmark}, computed with evo~\cite{grupp2017evo} on poses matched within 10\,ms after Umeyama alignment~\cite{umeyama1991least}, Sim(3) for monocular systems~\cite{zhang2018tutorial}; we report the median over five runs. Maps are compared with a pseudo-ground truth built by stacking MID-360 scans along the motion-capture poses, with the marker-to-LiDAR offset chosen to make the cloud as sharp as possible~\cite{levinson2010unsupervised}; after trajectory alignment and iterative closest point (ICP) refinement we report the F-score at 10\,cm~\cite{knapitsch2017tanks} up to 2.5\,m above the floor. For RQ3 we use the correct rate of OpenLORIS-Scene~\cite{shi2020openloris}: the share of the sequence time covered by a correct pose (position error $\le$ 1\,m, orientation error $\le 30^\circ$, each pose valid for at most 1\,s, the values suggested there for room-size scenes); the constant body-to-camera rotation is estimated per system on D. A failure counts as visible if the system reports it itself in its log or by relocalising; for VGGT-Long we also write out the mean depth confidence per frame without changing the algorithm.
 
@@ -60,7 +60,7 @@ Robustness is often tested with synthetic perturbations, but a synthetic illumin
     \centering
     \includegraphics[width=\textwidth]{figures/trajectories.pdf}\\[-1mm]
     \includegraphics[width=\textwidth]{figures/maps_dynamic01.pdf}
-    \caption{Top: trajectories after Sim(3) alignment (median-ATE run); on V VGGT-Long collapses near the room centre. Bottom: map slices ($z$ = 0.9--1.3\,m) of each system (black) on D over the LiDAR pseudo-ground truth (grey), in metres.}
+    \caption{Top: trajectories after Sim(3) alignment, GLIM SE(3) (median-ATE run); on V VGGT-Long collapses near the room centre. Bottom: map slices ($z$ = 0.9--1.3\,m) of each system (black) on D over the LiDAR pseudo-ground truth (grey), in metres.}
     \label{fig:traj}
 \end{figure*}
 
@@ -71,7 +71,7 @@ Robustness is often tested with synthetic perturbations, but a synthetic illumin
     \input{tables/results.tex}
 \end{table}
 
-\textbf{RQ1, accuracy.} In normal light both systems follow the ground truth (Fig.~\ref{fig:traj}). VGGT-Long has a 1.5 to 2.3 times lower ATE than MASt3R-SLAM (Tab.~\ref{tab:results}), but a lower ATE does not imply a better map: on S MASt3R-SLAM's map scores higher. The five runs of each system agree within 0.1\,mm, so their spread says nothing about robustness; only MASt3R-SLAM on V ends at 0.63 or 0.69\,m.
+\textbf{RQ1, accuracy.} In normal light both foundation models follow the ground truth (Fig.~\ref{fig:traj}). VGGT-Long has a 1.5 to 2.3 times lower ATE than MASt3R-SLAM (Tab.~\ref{tab:results}), but a lower ATE does not imply a better map: on S MASt3R-SLAM's map scores higher. The five runs of each foundation model agree within 0.1\,mm, so their spread says nothing about robustness; only MASt3R-SLAM on V ends at 0.63 or 0.69\,m.
 \stixResults\ \zhouResults\ \ovdiienkoResults
 
 \begin{figure*}[!t]

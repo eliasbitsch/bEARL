@@ -1,9 +1,12 @@
 """Small, git-tracked derivatives of the dataset and the maps, so notebooks/story.py runs without data/ or a GPU.
 
-Needs data/M3DGR (images, GT, reference maps) and the map.ply files of the runs. Run once after new results:
+Needs data/M3DGR (images, GT, reference maps) and the map files of the runs (map.ply, or the system config's
+`map_file`). Run once after new results:
     python tools/build_cache.py
+    python tools/build_cache.py --only glim      # add/refresh single systems; needs GT + reference maps, no images
 Writes results/cache/: light_<seq>.csv, gt_<seq>.csv, traj_<slug>_<seq>.csv, thumbs/<seq>/*.jpg, slices_<seq>.npz
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -16,13 +19,14 @@ from evo.tools import file_interface
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from pipeline.common import load_sequences  # noqa: E402
+from pipeline.map_eval import map_file  # noqa: E402
 from pipeline.visualize import _read_ply_xyzrgb, align_full  # noqa: E402
 
 CFG = load_sequences()
 DATA = ROOT / CFG["data_root"]
 SEQS = [s["name"] for s in CFG["sequences"]]
 OUT = ROOT / "results" / "cache"
-SYSTEMS = {"vggt_long": True, "mast3r_slam": True, "fast_lio2": False,   # slug -> Sim(3) alignment
+SYSTEMS = {"vggt_long": True, "mast3r_slam": True, "fast_lio2": False, "glim": False,   # slug -> Sim(3) alignment
            "vggt_long_lit_only": True, "vggt_long_noloop": True,   # diagnostics, Varying-illu01 only
            "vggt_long_lit_noloop": True}
 BLACK = 20            # grey value below which a pixel counts as near-black (same as 00_story)
@@ -58,12 +62,12 @@ def light(seq: str) -> pd.DataFrame:
     return pd.DataFrame(out, columns=["frame", "t", "t_rel", "brightness", "black_fraction"])
 
 
-def trajectories(seq: str, gt) -> None:
+def trajectories(seq: str, gt, systems: dict = SYSTEMS) -> None:
     t0 = gt.timestamps[0]
     keep = np.arange(0, gt.num_poses, 10)                   # 300 Hz -> 30 Hz is enough for plots
     pd.DataFrame({"t_rel": gt.timestamps[keep] - t0, **dict(zip("xyz", gt.positions_xyz[keep].T))}).round(4) \
         .to_csv(OUT / f"gt_{seq}.csv", index=False)
-    for slug, sim3 in SYSTEMS.items():
+    for slug, sim3 in systems.items():
         f = ROOT / "results" / slug / seq / rep_run(slug, seq) / "trajectory_tum.txt"
         if not f.exists():
             continue
@@ -105,24 +109,50 @@ def voxel(p: np.ndarray) -> np.ndarray:
     return p[i]
 
 
-def slices(seq: str, gt) -> None:
+def slices(seq: str, gt, systems: dict = SYSTEMS) -> None:
+    """Map slices; with a subset of systems, the other entries of an existing slices file are kept."""
     cut = lambda p: voxel(p[(p[:, 2] > SLICE_Z[0]) & (p[:, 2] < SLICE_Z[1])][:, :2].astype(np.float32))
-    out = {"reference": cut(_read_ply_xyzrgb(DATA / seq / "reference_map.ply")[0])}
-    for slug, sim3 in SYSTEMS.items():
+    f_out = OUT / f"slices_{seq}.npz"
+    out = dict(np.load(f_out)) if systems is not SYSTEMS and f_out.exists() else {}
+    out["reference"] = cut(_read_ply_xyzrgb(DATA / seq / "reference_map.ply")[0])
+    for slug, sim3 in systems.items():
+        name = map_file(slug)
         cands = [ROOT / "results" / slug / seq / rep_run(slug, seq)]
         cands += sorted((ROOT / "results" / slug / seq).glob("run_*"))   # deterministic runs: any run with a map
-        run = next((c for c in cands if (c / "map.ply").exists()), None)
+        run = next((c for c in cands if (c / name).exists()), None)
         if run is None:
             continue
         est = file_interface.read_tum_trajectory_file(str(run / "trajectory_tum.txt"))
         _, (s, R, t) = align_full(gt, est, sim3, CFG["evaluation"]["t_max_diff"])
-        p = _read_ply_xyzrgb(run / "map.ply")[0][::2]
+        p = _read_ply_xyzrgb(run / name)[0][::2]
         out[slug] = cut((s * p) @ R.T + t)
-    np.savez_compressed(OUT / f"slices_{seq}.npz", **out)
+    np.savez_compressed(f_out, **out)
+
+
+def update_only(slugs: list[str]) -> None:
+    """Add or refresh some systems (trajectories, map slices, runs.csv) without the images: the light curves,
+    thumbnails and comparisons of the existing cache are left as they are."""
+    systems = {s: SYSTEMS[s] for s in slugs}
+    for seq in SEQS:
+        gt = file_interface.read_tum_trajectory_file(str(DATA / seq / "gt_tum.txt"))
+        trajectories(seq, gt, systems)
+        slices(seq, gt, systems)
+        print(seq, "done:", ", ".join(slugs))
+    runs = pd.read_csv(OUT / "runs.csv")
+    runs = pd.concat([runs[~runs.slug.isin(slugs)],
+                      pd.DataFrame([(s, q, rep_run(s, q)) for s in slugs for q in SEQS], columns=runs.columns)])
+    runs.to_csv(OUT / "runs.csv", index=False)
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--only", nargs="+", choices=list(SYSTEMS),
+                    help="only refresh these systems (needs GT and reference maps, not the images)")
+    a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
+    if a.only:
+        update_only(a.only)
+        return
     comp = []
     for seq in SEQS:
         gt = file_interface.read_tum_trajectory_file(str(DATA / seq / "gt_tum.txt"))

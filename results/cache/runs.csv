@@ -11,3 +11,6 @@ fast_lio2,Varying-illu01,run_00
 vggt_long_lit_only,Dynamic01,run_00
 vggt_long_lit_only,Sha-turn01,run_00
 vggt_long_lit_only,Varying-illu01,run_00
+glim,Dynamic01,run_02
+glim,Sha-turn01,run_00
+glim,Varying-illu01,run_01

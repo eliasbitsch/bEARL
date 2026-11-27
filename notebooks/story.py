@@ -27,10 +27,12 @@ def _():
         linestyle=["-", "--", "-.", ":"])
     SEQS = ["Dynamic01", "Sha-turn01", "Varying-illu01"]
     CORE = {"vggt_long": "VGGT-Long", "mast3r_slam": "MASt3R-SLAM"}
+    # systems in the paper's table and trajectory figure; CORE stays the two foundation models analysed in depth
+    PAPER = {**CORE, "glim": "GLIM"}
     STYLE = {"vggt_long": dict(color="#D55E00", ls="-"), "mast3r_slam": dict(color="#0072B2", ls="--"),
-             "gt": dict(color="0.65", ls="-")}
+             "glim": dict(color="#009E73", ls="-."), "gt": dict(color="0.65", ls="-")}
     DARK = 0.8   # frame counts as dark when more than 80 % of its pixels are near-black
-    return CACHE, CORE, DARK, FIG, Path, RES, SEQS, STYLE, mo, np, pd, plt, re
+    return CACHE, CORE, DARK, FIG, PAPER, Path, RES, SEQS, STYLE, mo, np, pd, plt, re
 
 
 @app.cell
@@ -57,7 +59,7 @@ def _(mo):
 @app.cell
 def _(RES, mo, pd):
     _m = pd.read_csv(RES / "metrics.csv")
-    _runs = _m[_m.slug.isin(["vggt_long", "mast3r_slam", "fast_lio2"])].groupby(["slug", "sequence"]).size() \
+    _runs = _m[_m.slug.isin(["vggt_long", "mast3r_slam", "fast_lio2", "glim"])].groupby(["slug", "sequence"]).size() \
         .unstack().fillna(0).astype(int)
     mo.vstack([
         mo.md("## 0. Pipeline\nWhere every number and figure in this notebook comes from. The SLAM runs (grey) "
@@ -96,7 +98,7 @@ def _(CACHE, RES, SEQS, pd):
     light = {s: pd.read_csv(CACHE / f"light_{s}.csv") for s in SEQS}
     gt = {s: pd.read_csv(CACHE / f"gt_{s}.csv") for s in SEQS}
     traj = {(slug, s): pd.read_csv(CACHE / f"traj_{slug}_{s}.csv")
-            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "vggt_long_lit_only", "vggt_long_noloop",
+            for slug in ("vggt_long", "mast3r_slam", "fast_lio2", "glim", "vggt_long_lit_only", "vggt_long_noloop",
                          "vggt_long_lit_noloop") for s in SEQS
             if (CACHE / f"traj_{slug}_{s}.csv").exists()}
     comp = pd.read_csv(CACHE / "comparisons.csv").set_index("sequence")
@@ -221,11 +223,11 @@ def _(mo):
 
 
 @app.cell
-def _(CORE, SEQS, lost_pct, maps, metrics, pd):
+def _(PAPER, SEQS, lost_pct, maps, metrics, pd):
     def results_table():
         """Long format; maps come from run_00 (only run with a stored map for every system)."""
         rows = []
-        for slug, name in CORE.items():
+        for slug, name in PAPER.items():
             for s in SEQS:
                 m = metrics[(metrics.slug == slug) & (metrics.sequence == s)]
                 mm = maps[(maps.slug == slug) & (maps.sequence == s) & (maps.stage == "icp_refined")
@@ -235,7 +237,7 @@ def _(CORE, SEQS, lost_pct, maps, metrics, pd):
                              "ATE RMSE [m]": q[0.5], "IQR [m]": q[0.75] - q[0.25],
                              "success": f"{int(m.success.sum())}/{len(m)}",
                              "time span [%]": 100 * m.tracked_fraction.median(),
-                             "reported lost [%]": lost_pct[(slug, s)],
+                             "reported lost [%]": lost_pct.get((slug, s), float("nan")),   # not parsed for GLIM
                              "map accuracy [m]": mm.accuracy_median_m.median(),
                              "F-score @10 cm": mm.fscore_10cm.median(),
                              "ICP accepted": bool(mm.icp_accepted.all())})
@@ -247,12 +249,12 @@ def _(CORE, SEQS, lost_pct, maps, metrics, pd):
 
 
 @app.cell
-def _(CORE, SEQS, STYLE, gt, plt, traj):
+def _(PAPER, SEQS, STYLE, gt, plt, traj):
     def fig_trajectories():
         fig, axes = plt.subplots(1, 3, figsize=(7.16, 1.5), sharex=True, sharey=True)
         for ax, s in zip(axes, SEQS):
             ax.plot(gt[s].x, gt[s].y, lw=1.2, label="ground truth", **STYLE["gt"])
-            for slug, name in CORE.items():
+            for slug, name in PAPER.items():
                 d = traj[(slug, s)]
                 ax.plot(d.est_x, d.est_y, lw=0.7, label=name, **STYLE[slug])
             ax.set_aspect("equal")
@@ -263,7 +265,7 @@ def _(CORE, SEQS, STYLE, gt, plt, traj):
         axes[0].set_ylabel("y [m]")
         axes[1].set_xlabel("x [m]")
         h, l = axes[0].get_legend_handles_labels()
-        fig.legend(h, l, loc="upper center", ncol=3, fontsize=6, frameon=False)
+        fig.legend(h, l, loc="upper center", ncol=4, fontsize=6, frameon=False)
         fig.tight_layout(rect=(0, 0, 1, 0.88), w_pad=0.3)
         return fig
 
@@ -426,7 +428,7 @@ def _(SEQS, light, np, pd, traj):
         return {"slug": slug, "sequence": seq, "CR": float((dt * ok).sum() / t_max),
                 "median_AOE_deg": float(np.median(aoe))}
 
-    cr = pd.DataFrame([correct_rate(slug, s) for slug in ("vggt_long", "mast3r_slam") for s in SEQS]) \
+    cr = pd.DataFrame([correct_rate(slug, s) for slug in ("vggt_long", "mast3r_slam", "glim") for s in SEQS]) \
         .set_index(["slug", "sequence"])
     return EPS, SIGMA, cr
 
@@ -757,7 +759,7 @@ def _(FIG, SEQS, cr, fig_maps, fig_timeline, fig_trajectories, plt, table):
             f.savefig(FIG / f"{name}.pdf")
             plt.close(f)
         # one row per system, so the table stays short once all members' systems are in
-        slugs = {"VGGT-Long": "vggt_long", "MASt3R-SLAM": "mast3r_slam"}
+        slugs = {"VGGT-Long": "vggt_long", "MASt3R-SLAM": "mast3r_slam", "GLIM": "glim"}
         lines = [r"\setlength{\tabcolsep}{2.6pt}", r"\begin{tabular}{@{}lccccccccc@{}}", r"\toprule",
                  r" & \multicolumn{3}{c}{ATE RMSE [m]} & \multicolumn{3}{c}{F-score @10\,cm}"
                  r" & \multicolumn{3}{c}{Correct rate} \\",
